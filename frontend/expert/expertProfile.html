@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>PlantDoc Expert Profile</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://unpkg.com/typescript@5.4.5/lib/typescript.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#eceeef",
+                        "surface-variant": "#e1e3e4",
+                        "on-background": "#191c1d",
+                        "background": "#f8fafb",
+                        "primary": "#006a39",
+                        "on-tertiary-fixed": "#40000f",
+                        "outline-variant": "#bdcabc",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f2f4f5",
+                        "secondary-container": "#c6e4f4",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#00210e",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdadb",
+                        "on-surface-variant": "#3e4a3f",
+                        "primary-fixed-dim": "#64dd91",
+                        "outline": "#6d7a6f",
+                        "inverse-on-surface": "#eff1f2",
+                        "secondary-fixed-dim": "#adcbda",
+                        "inverse-surface": "#2e3132",
+                        "surface-tint": "#006d3a",
+                        "tertiary": "#a23546",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8fafb",
+                        "secondary": "#466270",
+                        "primary-fixed": "#82faab",
+                        "tertiary-container": "#c24d5e",
+                        "surface-dim": "#d8dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#851f33",
+                        "on-secondary-container": "#4a6774",
+                        "surface-bright": "#f8fafb",
+                        "on-secondary-fixed": "#001f2a",
+                        "surface-container-high": "#e6e8e9",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b8",
+                        "on-primary-fixed-variant": "#00522b",
+                        "on-surface": "#191c1d",
+                        "secondary-fixed": "#c9e7f7",
+                        "on-secondary-fixed-variant": "#2e4b57",
+                        "on-primary-container": "#f6fff4",
+                        "primary-container": "#008649",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#64dd91"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-field {
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid #bdcabc;
+            background: #f8fafb;
+            padding: 0.625rem 1rem;
+            color: #191c1d;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+        }
+
+        .input-field:focus {
+            border-color: #006a39;
+            box-shadow: 0 0 0 1px #006a39;
+        }
+
+        .input-field:hover {
+            border-color: #006a39;
+        }
+
+        .input-field:read-only {
+            background: #f2f4f5;
+            color: #6d7a6f;
+            cursor: not-allowed;
+        }
+
+        select.input-field {
+            appearance: none;
+        }
+
+        textarea.input-field {
+            resize: vertical;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex font-body">
+
+    <!-- SideNavBar -->
+    <nav
+        class="bg-slate-50 dark:bg-slate-950 text-green-600 dark:text-green-400 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 dark:border-slate-800 flex flex-col gap-2 h-full hidden md:flex z-50">
+        <div class="flex items-center gap-1">
+            <div class="flex items-center">
+                <img src="logo dark.png" alt="" class="w-26 h-28">
+            </div>
+            <span class="text-lg font-bold text-green-700 dark:text-green-500">PlantDoc</span>
+        </div>
+        <div class="flex-1 flex flex-col gap-2 px-4">
+            <!-- Dashboard -->
+            <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
+                href="#">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <!-- Pending Cases -->
+            <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
+                href="#">
+                <span class="material-symbols-outlined"
+                    style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+                <span>Pending Cases</span>
+            </a>
+            <!-- Chat with badge -->
+            <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform justify-between w-full"
+                href="#">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined">chat_bubble</span>
+                    <span>Chat</span>
+                </div>
+                <span
+                    class="bg-error text-on-error text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">3</span>
+            </a>
+            <!-- Profile (ACTIVE) -->
+            <a class="bg-green-700 dark:bg-green-900/30 text-white dark:text-green-300 rounded-lg p-3 flex rounded-xl items-center gap-3 scale-100 active:scale-[0.98] transition-transform"
+                href="#">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                <span>Profile</span>
+            </a>
+        </div>
+        <!-- Bottom profile section -->
+        <div class="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800 px-4">
+            <div class="flex items-center gap-3 px-2">
+                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
+                <div class="flex flex-col">
+                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
+                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col md:ml-64 w-full">
+
+        <!-- Profile Content -->
+        <div class="p-6 md:p-8 flex-1 overflow-y-auto">
+            <div class="max-w-[1200px] mx-auto space-y-6 pb-10">
+
+                <!-- Section 1: Profile Header Card -->
+                <div
+                    class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant relative overflow-hidden">
+                    <!-- Decorative green banner -->
+                    <div
+                        class="absolute top-0 left-0 w-full h-28 bg-gradient-to-r from-primary-container to-primary-fixed opacity-20">
+                    </div>
+
+                    <div class="p-6 pt-10 flex flex-col md:flex-row items-center md:items-end gap-5 relative z-10">
+                        <!-- Avatar -->
+                        <div class="relative inline-block shrink-0 mb-6">
+                            <img alt="Dr. Sarah Jenkins"
+                                class="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-surface-container-lowest shadow-md"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-MJfvGmmJiux7LTp0ZrmXpYwDF_fsEvfYmcBC7c2gGGAZMXN91fvuXVlTRCl6gOQbpyZ8aLH3RuVoVOa8fiUfwIXX2qxSlhSw4yFlHOpvcqPM8YYmzsJXxoVb9U4j7dLIDayGm2fcsv1xrsNLxx2RFukPZvvmb2JfPBjYd-5GbJk7EfIzleQL7KKU9Dec-1FAY3TeIKZDjJ9d7qHMTQKznferezZ2Q60A7GNLwNnL-a55Zr1aJKI-OsZJiAknq-MCTteIA_x34bY" />
+                            <button aria-label="Edit Profile Picture"
+                                class="absolute bottom-0.5 right-0.5 bg-primary text-on-primary rounded-full px-3 py-1 shadow-md hover:scale-105 transition-transform">
+                                <span class="material-symbols-outlined text-sm leading-none">photo_camera</span>
+                            </button>
+                        </div>
+                        <!-- Name & role -->
+                        <div class="text-center md:text-left flex-1 pt-22">
+                            <h2 class="text-2xl font-bold text-on-surface">Dr. Sarah Jenkins</h2>
+                            <div
+                                class="inline-flex items-center gap-1.5 mb-4 mt-4 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium mb-2">
+                                <span class="material-symbols-outlined text-[15px]"
+                                    style="font-variation-settings: 'FILL' 1;">verified</span>
+                                Agricultural Expert
+                            </div>
+                            <p class="text-on-surface-variant text-sm max-w-md">Senior Agronomist specialising in
+                                sustainable soil management and precise crop disease diagnostics.</p>
+                        </div>
+                        <!-- Quick stats -->
+                        <div class="flex gap-5 shrink-0 pt-12">
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-on-surface font-headline" data-stat="cases-reviewed">--</p>
+                                <p class="text-xs text-on-surface-variant mt-0.5">Cases Reviewed</p>
+                            </div>
+                            <div class="w-px bg-outline-variant"></div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-on-surface font-headline" data-stat="accuracy-rate">--</p>
+                                <p class="text-xs text-on-surface-variant mt-0.5">Accuracy Rate</p>
+                            </div>
+                            <div class="w-px bg-outline-variant"></div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-on-surface font-headline" data-stat="years-experience">--</p>
+                                <p class="text-xs text-on-surface-variant mt-0.5">Yrs Experience</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Personal Information -->
+                <div
+                    class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant overflow-hidden">
+                    <div class="border-b border-outline-variant px-6 py-4 flex items-center justify-between">
+                        <h3 class="text-base font-semibold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[20px]">person</span>
+                            Personal Information
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Full Name -->
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-on-surface-variant pl-1"
+                                    for="fullName">Full Name</label>
+                                <input
+                                    class="input-field rounded-xl bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors"
+                                    id="fullName" type="text" value="Dr. Sarah Jenkins" />
+                            </div>
+                            <!-- Email -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between">
+                                    <label class="block text-sm font-medium text-on-surface-variant pl-1"
+                                        for="email">Email Address</label>
+                                    <p class="text-xs text-outline mr-1">Email cannot be changed.</p>
+                                </div>
+                                <div class="relative">
+                                    <span
+                                        class="absolute inset-y-0 left-0 flex items-center pl-3 text-outline pointer-events-none">
+                                        <span class="material-symbols-outlined text-[18px]">mail</span>
+                                    </span>
+                                    <input
+                                        class="input-field pl-10 border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors"
+                                        id="email" type="email" value="sarah.jenkins@plantdoc.ai" readonly />
+                                </div>
+                            </div>
+                            <!-- Phone -->
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-on-surface-variant pl-1" for="phone">Phone
+                                    Number</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute inset-y-0 left-0 flex items-center pl-3 text-outline pointer-events-none">
+                                        <span class="material-symbols-outlined text-[18px]">phone</span>
+                                    </span>
+                                    <input
+                                        class="input-field border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors pl-10"
+                                        id="phone" type="tel" value="+1 555-019-8372" />
+                                </div>
+                            </div>
+                            <!-- Location -->
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-on-surface-variant pl-1"
+                                    for="location">Location</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute inset-y-0 left-0 flex items-center pl-3 text-outline pointer-events-none">
+                                        <span class="material-symbols-outlined text-[18px]">location_on</span>
+                                    </span>
+                                    <input
+                                        class="input-field border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors pl-10"
+                                        id="location" type="text" value="Austin, Texas, USA" />
+                                </div>
+                            </div>
+                            <!-- Specialization -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between">
+                                    <label class="block text-md font-medium text-on-surface-variant pl-1"
+                                        for="specialization">Specialization</label>
+                                    <p class="text-xs text-outline pr-1">Specialization cannot be changed.</p>
+                                </div>
+                                <input
+                                    class="input-field border border-outline-variant rounded-xl bg-gray-100 focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors"
+                                    id="specialization" type="text" value="Pharma" />
+                            </div>
+                            <!-- Years of Experience -->
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-on-surface-variant pl-1"
+                                    for="experience">Years of Experience</label>
+                                <input
+                                    class="input-field border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors"
+                                    id="experience" type="number" value="12" />
+                            </div>
+                            <!-- Bio -->
+                            <div class="space-y-1 md:col-span-2">
+                                <label class="block text-sm font-medium text-on-surface-variant pl-1"
+                                    for="bio">Professional Bio</label>
+                                <textarea class="input-field" id="bio"
+                                    rows="4">Passionate agronomist dedicated to improving crop yields through sustainable practices. Expertise in diagnosing complex soil deficiencies and recommending organic interventions.</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Expertise Tags -->
+                <div
+                    class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant overflow-hidden">
+                    <div class="border-b border-outline-variant px-6 py-4">
+                        <h3 class="text-base font-semibold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[20px]">local_florist</span>
+                            Areas of Expertise
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex flex-wrap gap-2 mb-4" id="tags-container">
+                            <span
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-container/10 text-primary border border-primary/20 text-sm font-medium">
+                                Soil Management
+                                <button onclick="this.parentElement.remove()"
+                                    class="hover:text-error transition-colors"><span
+                                        class="material-symbols-outlined text-[14px]">close</span></button>
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-container/10 text-primary border border-primary/20 text-sm font-medium">
+                                Crop Disease Diagnostics
+                                <button onclick="this.parentElement.remove()"
+                                    class="hover:text-error transition-colors"><span
+                                        class="material-symbols-outlined text-[14px]">close</span></button>
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-container/10 text-primary border border-primary/20 text-sm font-medium">
+                                Organic Interventions
+                                <button onclick="this.parentElement.remove()"
+                                    class="hover:text-error transition-colors"><span
+                                        class="material-symbols-outlined text-[14px]">close</span></button>
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-container/10 text-primary border border-primary/20 text-sm font-medium">
+                                Precision Agriculture
+                                <button onclick="this.parentElement.remove()"
+                                    class="hover:text-error transition-colors"><span
+                                        class="material-symbols-outlined text-[14px]">close</span></button>
+                            </span>
+                            <span
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-container/10 text-primary border border-primary/20 text-sm font-medium">
+                                Irrigation Systems
+                                <button onclick="this.parentElement.remove()"
+                                    class="hover:text-error transition-colors"><span
+                                        class="material-symbols-outlined text-[14px]">close</span></button>
+                            </span>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <div class="relative flex-1 max-w-xs">
+                                <input id="new-tag" type="text" placeholder="Add a new expertise tag..."
+                                    class="input-field rounded-xl pr-10 text-sm"
+                                    onkeydown="if(event.key==='Enter'){addTag()}" />
+                            </div>
+                            <button onclick="addTag()"
+                                class="px-4 py-2 rounded-xl text-sm font-medium text-white border border-primary bg-primary hover:bg-white hover:shadow-md hover:translate-y-[-1px] hover:text-primary hover:border-primary transition-colors flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">add</span> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Security & Password -->
+                <div
+                    class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant overflow-hidden">
+                    <div class="border-b border-outline-variant px-6 py-4">
+                        <h3 class="text-base font-semibold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[20px]">security</span>
+                            Security &amp; Password
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-5 max-w-md">
+                            <!-- Current Password -->
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-on-surface-variant"
+                                    for="currentPassword">Current Password</label>
+                                <div class="relative">
+                                    <input class="input-field pr-10 border border-outline-variant rounded-xl bg-white focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors" id="currentPassword" type="password"
+                                        placeholder="Enter current password" />
+                                    <button
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-outline hover:text-on-surface transition-colors"
+                                        type="button" onclick="togglePassword(this, 'currentPassword')">
+                                        <span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- New Password -->
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-on-surface-variant" for="newPassword">New
+                                    Password</label>
+                                <div class="relative">
+                                    <input class="input-field pr-10 border border-outline-variant rounded-xl bg-white focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors" id="newPassword" type="password"
+                                        placeholder="Enter new password" oninput="checkStrength(this.value)" />
+                                    <button
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-outline hover:text-on-surface transition-colors"
+                                        type="button" onclick="togglePassword(this, 'newPassword')">
+                                        <span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                                    </button>
+                                </div>
+                                <!-- Password strength -->
+                                <div class="flex gap-1.5 mt-2" id="strength-bars">
+                                    <div class="h-1 flex-1 rounded-full bg-outline-variant transition-colors" id="bar1">
+                                    </div>
+                                    <div class="h-1 flex-1 rounded-full bg-outline-variant transition-colors" id="bar2">
+                                    </div>
+                                    <div class="h-1 flex-1 rounded-full bg-outline-variant transition-colors" id="bar3">
+                                    </div>
+                                    <div class="h-1 flex-1 rounded-full bg-outline-variant transition-colors" id="bar4">
+                                    </div>
+                                </div>
+                                <p class="text-xs text-outline mt-1" id="strength-label">Use 8+ characters, a mix of
+                                    letters, numbers &amp; symbols.</p>
+                            </div>
+                            <!-- Confirm Password -->
+                            <div class="space-y-1">
+                                <label class="block text-sm font-medium text-on-surface-variant"
+                                    for="confirmPassword">Confirm New Password</label>
+                                <div class="relative">
+                                    <input class="input-field pr-10 border border-outline-variant rounded-xl bg-white focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors" id="confirmPassword" type="password"
+                                        placeholder="Confirm new password" />
+                                    <button
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-outline hover:text-on-surface transition-colors"
+                                        type="button" onclick="togglePassword(this, 'confirmPassword')">
+                                        <span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Notification Preferences -->
+                <div
+                    class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant overflow-hidden">
+                    <div class="border-b border-outline-variant px-6 py-4">
+                        <h3 class="text-base font-semibold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[20px]">notifications</span>
+                            Notification Preferences
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <!-- Toggle rows -->
+                        <div class="flex items-center justify-between py-1">
+                            <div>
+                                <p class="text-sm font-medium text-on-surface">New case assigned</p>
+                                <p class="text-xs text-on-surface-variant">Get notified when a new case is assigned to
+                                    you</p>
+                            </div>
+                            <button role="switch" aria-checked="true" onclick="toggleSwitch(this)"
+                                class="toggle-btn relative inline-flex w-11 h-6 rounded-full bg-primary transition-colors focus:outline-none">
+                                <span
+                                    class="inline-block w-4 h-4 bg-white rounded-full shadow mt-1 translate-x-6 transition-transform"></span>
+                            </button>
+                        </div>
+                        <div class="h-px bg-outline-variant"></div>
+                        <div class="flex items-center justify-between py-1">
+                            <div>
+                                <p class="text-sm font-medium text-on-surface">Chat messages</p>
+                                <p class="text-xs text-on-surface-variant">Receive alerts for new messages from farmers
+                                </p>
+                            </div>
+                            <button role="switch" aria-checked="true" onclick="toggleSwitch(this)"
+                                class="toggle-btn relative inline-flex w-11 h-6 rounded-full bg-primary transition-colors focus:outline-none">
+                                <span
+                                    class="inline-block w-4 h-4 bg-white rounded-full shadow mt-1 translate-x-6 transition-transform"></span>
+                            </button>
+                        </div>
+                        <div class="h-px bg-outline-variant"></div>
+                        <div class="flex items-center justify-between py-1">
+                            <div>
+                                <p class="text-sm font-medium text-on-surface">Weekly summary report</p>
+                                <p class="text-xs text-on-surface-variant">Receive a weekly digest of your activity</p>
+                            </div>
+                            <button role="switch" aria-checked="false" onclick="toggleSwitch(this)"
+                                class="toggle-btn relative inline-flex w-11 h-6 rounded-full bg-outline-variant transition-colors focus:outline-none">
+                                <span
+                                    class="inline-block w-4 h-4 bg-white rounded-full shadow mt-1 translate-x-1 transition-transform"></span>
+                            </button>
+                        </div>
+                        <div class="h-px bg-outline-variant"></div>
+                        <div class="flex items-center justify-between py-1">
+                            <div>
+                                <p class="text-sm font-medium text-on-surface">System announcements</p>
+                                <p class="text-xs text-on-surface-variant">Platform updates and maintenance alerts</p>
+                            </div>
+                            <button role="switch" aria-checked="true" onclick="toggleSwitch(this)"
+                                class="toggle-btn relative inline-flex w-11 h-6 rounded-full bg-primary transition-colors focus:outline-none">
+                                <span
+                                    class="inline-block w-4 h-4 bg-white rounded-full shadow mt-1 translate-x-6 transition-transform"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 6: Action Buttons -->
+                <div class="flex items-center justify-between gap-4 pt-2">
+                    <button
+                        class="px-5 py-2.5 rounded-lg text-sm font-medium text-error hover:bg-error-container/40 transition-colors flex items-center gap-2"
+                        type="button">
+                        <span class="material-symbols-outlined text-[18px]">delete_forever</span>
+                        Delete Account
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <button
+                            class="px-6 py-2.5 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                            type="button">
+                            Cancel
+                        </button>
+                        <button id="save-btn"
+                            class="px-6 py-2.5 rounded-lg text-sm font-medium bg-primary text-on-primary hover:bg-surface-tint shadow-sm hover:shadow transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+                            type="button" onclick="saveChanges()">
+                            <span class="material-symbols-outlined text-[18px]">save</span>
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script type="text/typescript">
+        type PasswordField = HTMLInputElement;
+        type ToggleButton = HTMLButtonElement;
+
+        function togglePassword(btn: ToggleButton, fieldId: string): void {
+            const field = document.getElementById(fieldId) as PasswordField | null;
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (!field || !icon) return;
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                field.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        }
+
+        function checkStrength(val: string): void {
+            const barIds: string[] = ['bar1', 'bar2', 'bar3', 'bar4'];
+            const label = document.getElementById('strength-label') as HTMLElement | null;
+            let score: number = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const colors: string[] = ['', '#ba1a1a', '#e67e00', '#f5c518', '#006a39'];
+            const labels: string[] = ['', 'Weak — add length & variety', 'Fair — try adding numbers', 'Good — almost there!', 'Strong password ✓'];
+
+            barIds.forEach((id: string, i: number): void => {
+                const el = document.getElementById(id) as HTMLElement | null;
+                if (el) el.style.backgroundColor = i < score ? colors[score] : '#bdcabc';
+            });
+
+            if (label) {
+                label.textContent = val.length ? labels[score] : 'Use 8+ characters, a mix of letters, numbers & symbols.';
+                label.style.color = val.length ? colors[score] : '';
+            }
+        }
+
+        function toggleSwitch(btn: ToggleButton): void {
+            const isOn: boolean = btn.getAttribute('aria-checked') === 'true';
+            btn.setAttribute('aria-checked', String(!isOn));
+            const thumb = btn.querySelector('span') as HTMLElement | null;
+            if (!thumb) return;
+            if (isOn) {
+                btn.classList.remove('bg-primary');
+                btn.classList.add('bg-outline-variant');
+                thumb.classList.remove('translate-x-6');
+                thumb.classList.add('translate-x-1');
+            } else {
+                btn.classList.add('bg-primary');
+                btn.classList.remove('bg-outline-variant');
+                thumb.classList.add('translate-x-6');
+                thumb.classList.remove('translate-x-1');
+            }
+        }
+
+        function addTag(): void {
+            const input = document.getElementById('new-tag') as HTMLInputElement | null;
+            if (!input) return;
+            const val: string = input.value.trim();
+            if (!val) return;
+            const container = document.getElementById('tags-container');
+            if (!container) return;
+            const span: HTMLSpanElement = document.createElement('span');
+            span.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-container/10 text-primary border border-primary/20 text-sm font-medium';
+            span.innerHTML = `${val} <button onclick="this.parentElement.remove()" class="hover:text-error transition-colors"><span class="material-symbols-outlined text-[14px]">close</span></button>`;
+            container.appendChild(span);
+            input.value = '';
+        }
+
+        function saveChanges(): void {
+            const btn = document.getElementById('save-btn') as HTMLButtonElement | null;
+            if (!btn) return;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">autorenew</span> Saving...';
+            btn.disabled = true;
+            setTimeout((): void => {
+                btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Saved!';
+                btn.classList.remove('bg-primary', 'hover:bg-surface-tint');
+                btn.classList.add('bg-primary-container');
+                setTimeout((): void => {
+                    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">save</span> Save Changes';
+                    btn.classList.add('bg-primary', 'hover:bg-surface-tint');
+                    btn.classList.remove('bg-primary-container');
+                    btn.disabled = false;
+                }, 2000);
+            }, 1200);
+        }
+
+        // Expose functions to global scope so inline onclick handlers can reach them
+        (window as any).togglePassword = togglePassword;
+        (window as any).checkStrength   = checkStrength;
+        (window as any).toggleSwitch    = toggleSwitch;
+        (window as any).addTag          = addTag;
+        (window as any).saveChanges     = saveChanges;
+    </script>
+
+    <!-- In-browser TypeScript transpiler -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('script[type="text/typescript"]').forEach(script => {
+                const js = ts.transpile(script.textContent, {
+                    target: ts.ScriptTarget.ES2017,
+                    strict: false,
+                });
+                const el = document.createElement('script');
+                el.textContent = js;
+                document.body.appendChild(el);
+            });
+        });
+    </script>
+
+    <script src="../api.js"></script>
+    <script src="./expertprofile.js"></script>
+</body>
+
+</html>

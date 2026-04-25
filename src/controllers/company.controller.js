@@ -1,0 +1,20 @@
+'use strict';
+
+const companyService = require('../services/company.service');
+const { success } = require('../utils/apiResponse');
+
+async function getProfile(req, res, next) {
+  try {
+    const profile = await companyService.getProfile(req.user.userId);
+    return success(res, 200, 'Profile fetched', profile);
+  } catch (err) { next(err); }
+}
+
+async function updateProfile(req, res, next) {
+  try {
+    const profile = await companyService.updateProfile(req.user.userId, req.body, req.file);
+    return success(res, 200, 'Profile updated', profile);
+  } catch (err) { next(err); }
+}
+
+module.exports = { getProfile, updateProfile };

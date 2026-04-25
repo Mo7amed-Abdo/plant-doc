@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Notifications - PlantDoc</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#eceeef",
+                        "surface-variant": "#e1e3e4",
+                        "on-background": "#191c1d",
+                        "background": "#f8fafb",
+                        "primary": "#006a39",
+                        "on-tertiary-fixed": "#40000f",
+                        "outline-variant": "#bdcabc",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f2f4f5",
+                        "secondary-container": "#c6e4f4",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#00210e",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdadb",
+                        "on-surface-variant": "#3e4a3f",
+                        "primary-fixed-dim": "#64dd91",
+                        "outline": "#6d7a6f",
+                        "inverse-on-surface": "#eff1f2",
+                        "secondary-fixed-dim": "#adcbda",
+                        "inverse-surface": "#2e3132",
+                        "surface-tint": "#006d3a",
+                        "tertiary": "#a23546",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8fafb",
+                        "secondary": "#466270",
+                        "primary-fixed": "#82faab",
+                        "tertiary-container": "#c24d5e",
+                        "surface-dim": "#d8dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#851f33",
+                        "on-secondary-container": "#4a6774",
+                        "surface-bright": "#f8fafb",
+                        "on-secondary-fixed": "#001f2a",
+                        "surface-container-high": "#e6e8e9",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b8",
+                        "on-primary-fixed-variant": "#00522b",
+                        "on-surface": "#191c1d",
+                        "secondary-fixed": "#c9e7f7",
+                        "on-secondary-fixed-variant": "#2e4b57",
+                        "on-primary-container": "#f6fff4",
+                        "primary-container": "#008649",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#64dd91"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Unread → read transition */
+        .notif-item {
+            transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+        }
+        .notif-item .unread-bar {
+            transition: opacity 0.3s ease, width 0.3s ease;
+        }
+        .notif-item .unread-dot {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .notif-item.marking-read .unread-dot {
+            opacity: 0;
+            transform: scale(0);
+        }
+        .notif-item.is-read .unread-bar {
+            opacity: 0;
+            width: 0;
+        }
+        .notif-item.is-read .unread-dot {
+            opacity: 0;
+            transform: scale(0);
+        }
+        .notif-item.is-read .notif-icon-wrap {
+            opacity: 0.6;
+        }
+        .notif-item.is-read .notif-content {
+            opacity: 0.75;
+        }
+        .notif-icon-wrap { transition: opacity 0.3s ease; }
+        .notif-content   { transition: opacity 0.3s ease; }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex font-body">
+
+    <!-- SideNavBar -->
+    <nav class="bg-slate-50 text-green-600 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
+
+        <!-- Logo -->
+        <div class="flex items-center gap-1">
+            <div class="flex items-center">
+                <img src="logo dark.png" alt="" class="w-26 h-28">
+            </div>
+            <span class="text-lg font-bold text-green-700">PlantDoc</span>
+        </div>
+
+        <!-- Nav Links -->
+        <div class="flex-1 flex flex-col gap-1 px-4 pt-3">
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="deliverydashboard.html">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="activedelivery.html">
+                <span class="material-symbols-outlined">local_shipping</span>
+                <span>Active Orders</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="deliveryCompletedorders.html">
+                <span class="material-symbols-outlined">task_alt</span>
+                <span>Completed Orders</span>
+            </a>
+            <!-- Notifications (ACTIVE) -->
+            <a class="bg-green-700 text-white rounded-xl p-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="#">
+                <span class="material-symbols-outlined fill">notifications</span>
+                <span>Notifications</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="deliveryprofile.html">
+                <span class="material-symbols-outlined">person</span>
+                <span>Profile</span>
+            </a>
+        </div>
+
+        <!-- Profile -->
+        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
+            <div class="flex items-center gap-3 px-2">
+                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
+                <div class="flex flex-col">
+                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
+                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col md:ml-64 w-full">
+
+        <!-- Mobile Header -->
+        <header class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-gray-50 border-b border-slate-200 shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined fill text-primary text-2xl">spa</span>
+                <h1 class="text-xl font-bold text-green-700">PlantDoc</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest relative">
+                    <span class="material-symbols-outlined fill">notifications</span>
+                    <span id="mobile-unread-dot" class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border-2 border-background"></span>
+                </button>
+                <button class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-6 md:p-8 flex-1 overflow-y-auto w-full mx-auto">
+
+            <!-- Page heading row -->
+            <div class="flex items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-on-surface">Notifications</h2>
+                </div>
+                <button id="mark-all-btn" onclick="markAllRead()" class="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-on-primary-fixed-variant bg-primary-fixed/30 hover:bg-primary-fixed/50 px-3 py-2 rounded-lg transition-all active:scale-[0.98]">
+                    <span class="material-symbols-outlined text-[18px]">done_all</span>
+                    Mark all as read
+                </button>
+            </div>
+
+            <!-- Unread section label -->
+            <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-3 flex items-center gap-2">
+                <span id="unread-label">Unread</span>
+                <span id="unread-count" class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-on-primary text-[10px] font-bold">2</span>
+            </p>
+
+            <div class="flex flex-col gap-3 mb-8  border-t-2 border-primary rounded-xl pt-2" id="notifications-list">
+
+                <!-- Notif 1 — Unread: New Order -->
+                <div class="notif-item unread bg-surface-container-lowest border border-surface-variant rounded-[16px] flex items-start gap-4 overflow-hidden cursor-pointer hover:shadow-sm transition-all relative"
+                     onclick="markRead(this)">
+                    <div class="unread-bar absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-[16px]"></div>
+                    <div class="pl-5 py-5 notif-icon-wrap shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-primary-container/20 text-primary flex items-center justify-center">
+                            <span class="material-symbols-outlined fill">local_shipping</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0 py-5 pr-5 notif-content">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <h3 class="text-sm font-bold text-on-surface">New Order Received</h3>
+                            <span class="text-xs font-semibold text-primary whitespace-nowrap shrink-0">Just now</span>
+                        </div>
+                        <p class="text-sm text-on-surface-variant leading-relaxed">Order #PD-8492 for 'Monstera Deliciosa' needs to be picked up from the greenhouse in 30 minutes.</p>
+                    </div>
+                    <div class="py-5 pr-5 flex items-center shrink-0">
+                        <div class="unread-dot w-2.5 h-2.5 rounded-full bg-primary"></div>
+                    </div>
+                </div>
+
+                <!-- Notif 2 — Unread: Order Canceled -->
+                <div class="notif-item unread bg-surface-container-lowest border border-surface-variant rounded-[16px] flex items-start gap-4 overflow-hidden cursor-pointer hover:shadow-sm transition-all relative"
+                     onclick="markRead(this)">
+                    <div class="unread-bar absolute left-0 top-0 bottom-0 w-1 bg-error rounded-l-[16px]"></div>
+                    <div class="pl-5 py-5 notif-icon-wrap shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-error-container text-on-error-container flex items-center justify-center">
+                            <span class="material-symbols-outlined">warning</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0 py-5 pr-5 notif-content">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <h3 class="text-sm font-bold text-on-surface">Order Canceled</h3>
+                            <span class="text-xs font-semibold text-error whitespace-nowrap shrink-0">10m ago</span>
+                        </div>
+                        <p class="text-sm text-on-surface-variant leading-relaxed">Customer canceled Order #PD-8488. Please return the items to the main depot.</p>
+                    </div>
+                    <div class="py-5 pr-5 flex items-center shrink-0">
+                        <div class="unread-dot w-2.5 h-2.5 rounded-full bg-error"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Read section label -->
+            <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-3">Earlier</p>
+
+            <div class="flex flex-col gap-3 border-t-2 border-primary rounded-xl pt-2">
+
+                <!-- Notif 3 — Read: Delivery Successful -->
+                <div class="notif-item is-read bg-surface-container-lowest border border-surface-variant rounded-[16px] flex items-start gap-4 overflow-hidden cursor-pointer hover:bg-surface-container-low transition-all relative"
+                     onclick="markRead(this)">
+                    <div class="unread-bar absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-[16px]" style="opacity:0;width:0;"></div>
+                    <div class="pl-5 py-5 notif-icon-wrap shrink-0" style="opacity:0.6;">
+                        <div class="w-10 h-10 rounded-full bg-primary-fixed/40 text-primary flex items-center justify-center">
+                            <span class="material-symbols-outlined fill">check_circle</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0 py-5 pr-5 notif-content" style="opacity:0.75;">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <h3 class="text-sm font-medium text-on-surface">Delivery Successful</h3>
+                            <span class="text-xs text-on-surface-variant whitespace-nowrap shrink-0">2h ago</span>
+                        </div>
+                        <p class="text-sm text-on-surface-variant leading-relaxed">Order #PD-8450 was successfully delivered to 123 Green Ave. Signature collected.</p>
+                    </div>
+                    <div class="py-5 pr-5 flex items-center shrink-0">
+                        <div class="unread-dot w-2.5 h-2.5 rounded-full bg-primary" style="opacity:0;transform:scale(0);"></div>
+                    </div>
+                </div>
+
+                <!-- Notif 4 — Read: Shift Reminder -->
+                <div class="notif-item is-read bg-surface-container-lowest border border-surface-variant rounded-[16px] flex items-start gap-4 overflow-hidden cursor-pointer hover:bg-surface-container-low transition-all relative"
+                     onclick="markRead(this)">
+                    <div class="unread-bar absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-[16px]" style="opacity:0;width:0;"></div>
+                    <div class="pl-5 py-5 notif-icon-wrap shrink-0" style="opacity:0.6;">
+                        <div class="w-10 h-10 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center justify-center">
+                            <span class="material-symbols-outlined">schedule</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0 py-5 pr-5 notif-content" style="opacity:0.75;">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <h3 class="text-sm font-medium text-on-surface">Shift Reminder</h3>
+                            <span class="text-xs text-on-surface-variant whitespace-nowrap shrink-0">Yesterday</span>
+                        </div>
+                        <p class="text-sm text-on-surface-variant leading-relaxed">Your upcoming delivery shift starts tomorrow at 08:00 AM. Please ensure your vehicle is ready.</p>
+                    </div>
+                    <div class="py-5 pr-5 flex items-center shrink-0">
+                        <div class="unread-dot w-2.5 h-2.5 rounded-full bg-primary" style="opacity:0;transform:scale(0);"></div>
+                    </div>
+                </div>
+
+                <!-- Notif 5 — Read: Order Assigned -->
+                <div class="notif-item is-read bg-surface-container-lowest border border-surface-variant rounded-[16px] flex items-start gap-4 overflow-hidden cursor-pointer hover:bg-surface-container-low transition-all relative"
+                     onclick="markRead(this)">
+                    <div class="unread-bar absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-[16px]" style="opacity:0;width:0;"></div>
+                    <div class="pl-5 py-5 notif-icon-wrap shrink-0" style="opacity:0.6;">
+                        <div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                            <span class="material-symbols-outlined">assignment_ind</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0 py-5 pr-5 notif-content" style="opacity:0.75;">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <h3 class="text-sm font-medium text-on-surface">Order Assigned</h3>
+                            <span class="text-xs text-on-surface-variant whitespace-nowrap shrink-0">Yesterday</span>
+                        </div>
+                        <p class="text-sm text-on-surface-variant leading-relaxed">You have been assigned to route 'North Sector A'. Review your manifest in the Active Orders tab.</p>
+                    </div>
+                    <div class="py-5 pr-5 flex items-center shrink-0">
+                        <div class="unread-dot w-2.5 h-2.5 rounded-full bg-primary" style="opacity:0;transform:scale(0);"></div>
+                    </div>
+                </div>
+
+                <!-- Notif 6 — Read: Route Updated -->
+                <div class="notif-item is-read bg-surface-container-lowest border border-surface-variant rounded-[16px] flex items-start gap-4 overflow-hidden cursor-pointer hover:bg-surface-container-low transition-all relative"
+                     onclick="markRead(this)">
+                    <div class="unread-bar absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-[16px]" style="opacity:0;width:0;"></div>
+                    <div class="pl-5 py-5 notif-icon-wrap shrink-0" style="opacity:0.6;">
+                        <div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center">
+                            <span class="material-symbols-outlined">route</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0 py-5 pr-5 notif-content" style="opacity:0.75;">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <h3 class="text-sm font-medium text-on-surface">Route Updated</h3>
+                            <span class="text-xs text-on-surface-variant whitespace-nowrap shrink-0">2 days ago</span>
+                        </div>
+                        <p class="text-sm text-on-surface-variant leading-relaxed">Route 7 has been updated due to road closures. New ETA for all stops added to your manifest.</p>
+                    </div>
+                    <div class="py-5 pr-5 flex items-center shrink-0">
+                        <div class="unread-dot w-2.5 h-2.5 rounded-full bg-primary" style="opacity:0;transform:scale(0);"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Load More -->
+            <div class="flex justify-center mt-8">
+                <button class="flex items-center gap-2 px-6 py-2.5 border border-outline-variant rounded-full text-sm font-medium text-on-surface hover:bg-surface-container transition-colors active:scale-[0.98]">
+                    <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                    Load Older Notifications
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let unreadCount = 2;
+
+        function updateUnreadBadge() {
+            const countEl = document.getElementById('unread-count');
+            const labelEl = document.getElementById('unread-label');
+            const mobileEl = document.getElementById('mobile-unread-dot');
+
+            if (unreadCount <= 0) {
+                countEl.classList.add('hidden');
+                labelEl.textContent = 'Unread (none)';
+                if (mobileEl) mobileEl.style.display = 'none';
+            } else {
+                countEl.classList.remove('hidden');
+                countEl.textContent = unreadCount;
+                labelEl.textContent = 'Unread';
+                if (mobileEl) mobileEl.style.display = '';
+            }
+        }
+
+        function markRead(el) {
+            if (el.classList.contains('is-read')) return;
+
+            el.classList.add('is-read');
+            el.classList.remove('unread');
+
+            // Switch title from bold to medium
+            const title = el.querySelector('h3');
+            if (title) {
+                title.classList.remove('font-bold');
+                title.classList.add('font-medium');
+            }
+
+            // Switch timestamp color
+            const ts = el.querySelector('.notif-content span');
+            if (ts) {
+                ts.classList.remove('text-primary', 'text-error', 'font-semibold');
+                ts.classList.add('text-on-surface-variant');
+            }
+
+            // Change hover from shadow to bg
+            el.classList.remove('hover:shadow-sm');
+            el.classList.add('hover:bg-surface-container-low');
+
+            unreadCount = Math.max(0, unreadCount - 1);
+            updateUnreadBadge();
+        }
+
+        function markAllRead() {
+            document.querySelectorAll('.notif-item.unread').forEach(el => markRead(el));
+        }
+    </script>
+
+
+    <script src="../api.js"></script>
+    <script src="./deliverynotifications.js"></script>
+</body>
+</html>

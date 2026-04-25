@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Pending Cases - PlantDoc</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#eceeef",
+                        "surface-variant": "#e1e3e4",
+                        "on-background": "#191c1d",
+                        "background": "#f8fafb",
+                        "primary": "#006a39",
+                        "on-tertiary-fixed": "#40000f",
+                        "outline-variant": "#bdcabc",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f2f4f5",
+                        "secondary-container": "#c6e4f4",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#00210e",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdadb",
+                        "on-surface-variant": "#3e4a3f",
+                        "primary-fixed-dim": "#64dd91",
+                        "outline": "#6d7a6f",
+                        "inverse-on-surface": "#eff1f2",
+                        "secondary-fixed-dim": "#adcbda",
+                        "inverse-surface": "#2e3132",
+                        "surface-tint": "#006d3a",
+                        "tertiary": "#a23546",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8fafb",
+                        "secondary": "#466270",
+                        "primary-fixed": "#82faab",
+                        "tertiary-container": "#c24d5e",
+                        "surface-dim": "#d8dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#851f33",
+                        "on-secondary-container": "#4a6774",
+                        "surface-bright": "#f8fafb",
+                        "on-secondary-fixed": "#001f2a",
+                        "surface-container-high": "#e6e8e9",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b8",
+                        "on-primary-fixed-variant": "#00522b",
+                        "on-surface": "#191c1d",
+                        "secondary-fixed": "#c9e7f7",
+                        "on-secondary-fixed-variant": "#2e4b57",
+                        "on-primary-container": "#f6fff4",
+                        "primary-container": "#008649",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#64dd91"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex font-body">
+
+    <!-- SideNavBar — matches dashboard exactly, with Pending Cases as active -->
+    <nav class="bg-slate-50 dark:bg-slate-950 text-green-600 dark:text-green-400 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 dark:border-slate-800 flex flex-col gap-2 h-full hidden md:flex z-50">
+        <div class="flex items-center gap-1">
+            <div class="flex items-center">
+                <img src="logo dark.png" alt="" class="w-26 h-28">
+            </div>
+            <span class="text-lg font-bold text-green-700 dark:text-green-500">PlantDoc</span>
+        </div>
+        <div class="flex-1 flex flex-col gap-2 px-4">
+            <!-- Dashboard (inactive) -->
+            <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
+                href="#">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <!-- Pending Cases (ACTIVE) -->
+            <a class="bg-green-700 dark:bg-green-900/30 text-white dark:text-green-300 rounded-lg p-3 flex rounded-xl items-center gap-3 scale-100 active:scale-[0.98] transition-transform"
+                href="#">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+                <span>Pending Cases</span>
+            </a>
+            <!-- Chat with badge -->
+            <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform justify-between w-full"
+                href="#">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined">chat_bubble</span>
+                    <span>Chat</span>
+                </div>
+                <span class="bg-error text-on-error text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">3</span>
+            </a>
+            <!-- Profile (inactive) -->
+            <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
+                href="#">
+                <span class="material-symbols-outlined">account_circle</span>
+                <span>Profile</span>
+            </a>
+        </div>
+        <!-- Bottom profile section -->
+<div class="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800 px-4">
+            <div class="flex items-center gap-3 px-2">
+                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
+                <div class="flex flex-col">
+                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
+                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </div>
+        </div>
+                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-h-screen md:ml-64 w-full">
+
+        <!-- Page Content -->
+        <main class="flex-1 p-6 md:p-8 max-w-9xl w-full">
+
+            <div class="mb-8">
+                <h1 class="text-3xl font-headline font-bold text-on-background mb-2">Pending Cases</h1>
+                <p class="text-on-surface-variant font-body">Review and validate AI diagnoses</p>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="bg-gray-50 p-4 rounded-2xl shadow-sm border-b border-primary mb-8 flex flex-col lg:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full lg:w-1/3">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                    <input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-lg border border-primary/70 focus:ring-1 focus:ring-primary text-sm font-body placeholder:text-on-surface-variant" placeholder="Search cases..." type="text" />
+                </div>
+                <div class="flex flex-wrap gap-3 w-full lg:w-auto items-center">
+                    <select class="bg-surface-container-low border-none rounded-lg text-sm font-label focus:ring-2 focus:ring-primary py-2 pl-3 pr-8 text-on-surface">
+                        <option value="">Crop: All</option>
+                        <option value="tomato">Tomato</option>
+                        <option value="corn">Corn</option>
+                        <option value="wheat">Wheat</option>
+                        <option value="potato">Potato</option>
+                    </select>
+                    <select class="bg-surface-container-low border-none rounded-lg text-sm font-label focus:ring-2 focus:ring-primary py-2 pl-3 pr-8 text-on-surface">
+                        <option value="">Severity: All</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <select class="bg-surface-container-low border-none rounded-lg text-sm font-label focus:ring-2 focus:ring-primary py-2 pl-3 pr-8 text-on-surface">
+                        <option value="">Sort by: Newest</option>
+                        <option value="high-severity">Highest Severity</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Case Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+                <!-- Urgent Card 1 -->
+                <article class="bg-surface-container-lowest rounded-[16px] border-2 border-error shadow-sm overflow-hidden flex flex-col relative ring-4 ring-error/10">
+                    <div class="absolute top-3 right-3 bg-error text-on-error text-xs font-bold px-3 py-1 rounded-full z-10 flex items-center gap-1 shadow-sm font-label">
+                        <span class="material-symbols-outlined text-sm">warning</span> URGENT
+                    </div>
+                    <div class="h-48 relative overflow-hidden bg-surface-container">
+                        <img alt="Diseased tomato leaf" class="w-full h-full object-cover"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuChEvD2pXIP8CeUPROgAC7hIfOUsHiUmsnmNKqv8KIgQHemk4GMU_GlT0mqkmOxQEmUaQbfR9K2CH36koVdbTGqOPNtDvJhYyG4U-Xd7ReoYcwQscT1ubSQ-rj5RrKSDuMZlo-kom06_HOFZm4COx3waxT3ZX-c6xa6hvIhszvvMmDO6lCYFcJFPjYpGU5iL0OKRXcw5Jh1Fdk1YI3UugDXYu0-MQa3EbKA8G4dCONv-MeadM7VNQrpPpp_JAIX9LqVBYhNLe45QeE" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-3 left-3">
+                            <span class="bg-surface-container-lowest/90 backdrop-blur text-error font-bold text-xs px-2 py-1 rounded-md font-label border border-error/20">High Severity</span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="mb-2">
+                            <h3 class="font-headline font-bold text-on-background text-lg">Tomato • Early Blight</h3>
+                            <p class="text-on-surface-variant text-sm font-body flex items-center gap-1 mt-1">
+                                <span class="material-symbols-outlined text-sm">precision_manufacturing</span>
+                                92% AI Conf.
+                            </p>
+                        </div>
+                        <p class="text-sm text-on-surface-variant font-body mb-6 flex-1 line-clamp-2">Extensive foliar damage observed. Immediate fungicidal intervention recommended to prevent crop loss.</p>
+                        <div class="flex flex-col gap-2 mt-auto">
+                            <div class="flex gap-2">
+                                <button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-label font-medium hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-2 active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[20px]">check_circle</span> Approve
+                                </button>
+                                <button class="w-12 bg-surface-container-low text-on-surface hover:bg-surface-container-high py-2.5 rounded-lg transition-colors flex items-center justify-center border border-outline-variant active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </button>
+                                <button class="w-12 bg-error-container text-on-error-container hover:bg-error hover:text-on-error py-2.5 rounded-lg transition-colors flex items-center justify-center border border-error/20 active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[20px]">close</span>
+                                </button>
+                            </div>
+                            <a class="text-center text-sm text-primary font-medium hover:underline py-2 font-label" href="#">View Details</a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Normal Card 2 -->
+                <article class="bg-surface-container-lowest rounded-[16px] border border-outline-variant shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                    <div class="h-48 relative overflow-hidden bg-surface-container">
+                        <img alt="Diseased corn leaf" class="w-full h-full object-cover"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNs0-T-MsJnecB7cJT9biKuw6SJiKnytbsB1KQPeNlXAE86hMukHIyAvzAMKkVvy1JiZYM1coPwoNm-NOo5f-kcEjeGb0y_QewyevpWg_zmGqynbLXBUpW9xm5gEx-lEAWaEwHxKRnmq5J6-y2IEBxrRdhuF3djtUWKIZ2QyGxxNNp-zuAt-8-kaCNKX3FMrc_2BWqhX8FuSp-fxsWkxN6wRDMHZI-E2fKoupXdJtlYU3lBnuMw2CrSBzFvSakvQHj0AHB6lQuJxE" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-3 left-3">
+                            <span class="bg-surface-container-lowest/90 backdrop-blur text-orange-600 font-bold text-xs px-2 py-1 rounded-md font-label border border-orange-200">Medium Severity</span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="mb-2">
+                            <h3 class="font-headline font-bold text-on-background text-lg">Corn • Gray Leaf Spot</h3>
+                            <p class="text-on-surface-variant text-sm font-body flex items-center gap-1 mt-1">
+                                <span class="material-symbols-outlined text-sm">precision_manufacturing</span>
+                                78% AI Conf.
+                            </p>
+                        </div>
+                        <p class="text-sm text-on-surface-variant font-body mb-6 flex-1 line-clamp-2">Moderate lesion progression on lower canopy. Monitor closely if humid conditions persist.</p>
+                        <div class="flex flex-col gap-2 mt-auto">
+                            <div class="flex gap-2">
+                                <button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-label font-medium hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-2 active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[20px]">check_circle</span> Approve
+                                </button>
+                                <button class="w-12 bg-surface-container-low text-on-surface hover:bg-surface-container-high py-2.5 rounded-lg transition-colors flex items-center justify-center border border-outline-variant active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </button>
+                                <button class="w-12 bg-error-container text-on-error-container hover:bg-error hover:text-on-error py-2.5 rounded-lg transition-colors flex items-center justify-center border border-error/20 active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[20px]">close</span>
+                                </button>
+                            </div>
+                            <a class="text-center text-sm text-primary font-medium hover:underline py-2 font-label" href="#">View Details</a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Normal Card 3 -->
+                <article class="bg-surface-container-lowest rounded-[16px] border border-outline-variant shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                    <div class="h-48 relative overflow-hidden bg-surface-container">
+                        <img alt="Diseased potato leaf" class="w-full h-full object-cover grayscale opacity-80"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp14fP_gbJLH97s-YUvx7VQQh1gH9CqR_11kSZCVuj-yCCfpav-v7N-Fn5arnNvND24l_m9lNXDU0f343n_tSlOuqp27idZ0G_3LEGOQf3IGm8JDgvxkkxp2xdJ3NyPuPLzI11K2sLqfCBfGLuKFaV_kVQrWMslf_dhhB9a0sHQuGst0sOxMbRE2MwMWiB6lp6IYQ56FHpMC-ePc5dSgO2hnt1EHW9rr0tAniW0uYnrSc1nAVoqOfeEltTswWphVEbayOaTsmskvc" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-3 left-3">
+                            <span class="bg-surface-container-lowest/90 backdrop-blur text-primary font-bold text-xs px-2 py-1 rounded-md font-label border border-primary/20">Low Severity</span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <div class="mb-2">
+                            <h3 class="font-headline font-bold text-on-background text-lg">Potato • Nutrient Def.</h3>
+                            <p class="text-on-surface-variant text-sm font-body flex items-center gap-1 mt-1">
+                                <span class="material-symbols-outlined text-sm">precision_manufacturing</span>
+                                95% AI Conf.
+                            </p>
+                        </div>
+                        <p class="text-sm text-on-surface-variant font-body mb-6 flex-1 line-clamp-2">Mild yellowing consistent with early nitrogen deficiency. Recommend standard foliar feed.</p>
+                        <div class="flex flex-col gap-2 mt-auto">
+                            <div class="flex gap-2">
+                                <button class="flex-1 bg-primary text-on-primary py-2.5 rounded-lg font-label font-medium hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-2 active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[20px]">check_circle</span> Approve
+                                </button>
+                                <button class="w-12 bg-surface-container-low text-on-surface hover:bg-surface-container-high py-2.5 rounded-lg transition-colors flex items-center justify-center border border-outline-variant active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </button>
+                                <button class="w-12 bg-error-container text-on-error-container hover:bg-error hover:text-on-error py-2.5 rounded-lg transition-colors flex items-center justify-center border border-error/20 active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[20px]">close</span>
+                                </button>
+                            </div>
+                            <a class="text-center text-sm text-primary font-medium hover:underline py-2 font-label" href="#">View Details</a>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-8 flex justify-center items-center gap-2 pb-12">
+                <button class="px-3 py-1 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50 transition-colors active:scale-[0.98]" disabled>Previous</button>
+                <button class="w-8 h-8 rounded-lg bg-green-700 text-white flex items-center justify-center font-medium active:scale-[0.98]">1</button>
+                <button class="w-8 h-8 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-low flex items-center justify-center font-medium transition-colors active:scale-[0.98]">2</button>
+                <span class="text-on-surface-variant">...</span>
+                <button class="px-3 py-1 rounded-lg bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-low transition-colors active:scale-[0.98]">Next</button>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="../api.js"></script>
+    <script src="./expertpendingcases.js"></script>
+</body>
+</html>

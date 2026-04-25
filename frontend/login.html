@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Login - PlantDoc</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#006a39",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#466270",
+                        "surface": "#f8fafb",
+                        "on-tertiary-fixed": "#40000f",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e1e3e4",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-surface-variant": "#3e4a3f",
+                        "on-primary-fixed-variant": "#00522b",
+                        "on-surface": "#191c1d",
+                        "outline": "#6d7a6f",
+                        "secondary-fixed-dim": "#adcbda",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb2b8",
+                        "surface-container": "#eceeef",
+                        "on-primary-fixed": "#00210e",
+                        "tertiary": "#a23546",
+                        "on-secondary-container": "#4a6774",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#c9e7f7",
+                        "surface-container-low": "#f2f4f5",
+                        "surface-dim": "#d8dadb",
+                        "primary-fixed": "#82faab",
+                        "on-background": "#191c1d",
+                        "surface-tint": "#006d3a",
+                        "inverse-on-surface": "#eff1f2",
+                        "surface-bright": "#f8fafb",
+                        "background": "#f8fafb",
+                        "surface-container-high": "#e6e8e9",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#c6e4f4",
+                        "on-tertiary-fixed-variant": "#851f33",
+                        "on-primary-container": "#f6fff4",
+                        "on-tertiary-container": "#fffbff",
+                        "inverse-primary": "#64dd91",
+                        "primary-container": "#008649",
+                        "on-secondary-fixed-variant": "#2e4b57",
+                        "outline-variant": "#bdcabc",
+                        "tertiary-fixed": "#ffdadb",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#c24d5e",
+                        "on-secondary-fixed": "#001f2a",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#64dd91"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row antialiased">
+    <!-- Left Split: Image & Branding -->
+    <div class="hidden md:flex md:w-1/2 lg:w-3/5 relative bg-surface-variant overflow-hidden">
+        <img alt="High-tech modern greenhouse interior with lush green plants under automated lighting systems"
+            class="absolute inset-0 w-full h-full object-cover"
+            data-alt="Interior of a massive modern greenhouse filled with vibrant green crops stretching to the horizon, bathed in natural sunlight mixed with high-tech LED grow lights, showcasing sustainable agriculture"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBs1DJzgY68WlwW7huRTCOLRvycsVpojJ5X2Ap11aTs-GZZD8c7tD6y5aZWksxPJbRsCxpY8-paac5bbfHi5EFZXhkRDIda0d6qGfPApSTbhbTvPaHelX4HW26j-joH1K1-I7HBPZYQXE86Ez8c-Ywuy60SDlovAOhV7qRnrmBClEVp6pnOZKRqcBGFS0piXIBkwmUVO0CDx4Nl1Q-ICPXwAk1_lNDIpZveGW4ZAeX_MbPjatI33gh00OChVPMnEOCe5nyevs-Z4Ho" />
+        <div class="absolute inset-0 bg-inverse-surface/60 backdrop-blur-[2px]"></div>
+        <div class="relative z-10 flex flex-col justify-between p-12 w-full h-full text-on-primary">
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="" class="w-26 h-28 ml-12">
+            </div>
+            <div class="max-w-xl pb-12 ml-8">
+                <h1 class="font-headline text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                    Smart AI for Healthier Crops
+                </h1>
+                <p class="font-body text-xl text-surface-container-lowest/80 leading-relaxed max-w-md">
+                    Detect plant diseases and get expert-backed solutions instantly to maximize your yield and protect
+                    your harvest.
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Right Split: Login Form -->
+    <div class="w-full md:w-1/2 lg:w-2/5 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-16 bg-surface">
+        <!-- Mobile Branding -->
+        <div class="md:hidden flex items-center gap-3 mb-10 w-full max-w-md">
+            <span class="material-symbols-outlined text-3xl text-primary" data-icon="eco"
+                style="font-variation-settings: 'FILL' 1;">eco</span>
+            <span class="font-headline font-black text-xl tracking-tight text-primary">PlantDoc</span>
+        </div>
+        <div class="w-full max-w-md">
+            <div class="mb-10">
+                <h2 class="font-headline text-3xl font-bold text-on-surface mb-2">Welcome Back</h2>
+                <p class="font-body text-on-surface-variant">Log in to manage your crops and analysis.</p>
+            </div>
+            <form action="#" class="space-y-5" method="POST">
+                <!-- Email Input -->
+                <div>
+                    <label class="block font-label text-sm font-medium text-on-surface mb-1.5" for="email">Email
+                        address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-on-surface-variant/60 text-primary/80"
+                                data-icon="mail">mail</span>
+                        </div>
+                        <input
+                            class="block w-full pl-11 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl text-on-surface placeholder-on-surface-variant/50 focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors font-body sm:text-sm"
+                            id="email" name="email" placeholder="farmer@example.com" required="" type="email" />
+                    </div>
+                </div>
+                <!-- Password Input -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block font-label text-sm font-medium text-on-surface"
+                            for="password">Password</label>
+                        <a class="font-label text-sm font-medium text-primary hover:text-primary-container transition-colors"
+                            href="#">Forgot Password?</a>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-on-surface-variant/60 text-primary/80"
+                                data-icon="lock">lock</span>
+                        </div>
+                        <input
+                            class="block w-full pl-11 pr-11 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl text-on-surface placeholder-on-surface-variant/50 focus:ring-1 hover:border-primary focus:ring-primary focus:border-primary transition-colors font-body sm:text-sm"
+                            id="password" name="password" placeholder="••••••••" required="" type="password" />
+                        <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center cursor-pointer">
+                            <span
+                                class="material-symbols-outlined text-on-surface-variant/60 hover:text-primary transition-colors text-primary/80"
+                                data-icon="visibility">visibility</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Remember Me -->
+                <div class="flex items-center mt-4">
+                    <input
+                        class="h-4 w-4 text-primary focus:ring-0 border-outline-variant rounded bg-surface-container-lowest cursor-pointer"
+                        id="remember-me" name="remember-me" type="checkbox" />
+                    <label class="ml-2 block font-body text-sm text-on-surface-variant cursor-pointer"
+                        for="remember-me">
+                        Remember me
+                    </label>
+                </div>
+                <!-- Primary Action -->
+                <a
+                    class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm font-label text-sm font-semibold text-on-primary bg-primary hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all active:scale-[0.98] mt-6"
+                    type="submit" href="landing.html">
+                    Login
+                </a>
+            </form>
+            <!-- Divider -->
+            <div class="mt-8 mb-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-outline-variant/60"></div>
+                    </div>
+                    <div class="relative flex justify-center font-label text-sm">
+                        <span class="px-3 bg-surface text-on-surface-variant">or</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Secondary Action -->
+            <a
+                class="w-full flex justify-center items-center py-3.5 px-4 border border-outline rounded-xl bg-surface-container-lowest font-label text-sm font-medium text-on-surface hover:bg-surface-container-low focus:outline-none focus:ring-primary transition-all active:scale-[0.98] gap-2"
+                type="button" href="landing.html">
+                <span class="material-symbols-outlined text-lg text-on-surface-variant" data-icon="person">person</span>
+                Continue as Guest
+            </a>
+            <!-- Footer Link -->
+            <div class="mt-10 text-center">
+                <p class="font-body text-sm text-on-surface-variant">
+                    Don’t have an account?
+                    <a class="font-medium text-primary hover:text-primary-container transition-colors ml-1"
+                        href="register.html">Register</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="./login.js"></script>
+</body>
+
+</html>
