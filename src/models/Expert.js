@@ -10,12 +10,11 @@ const expertSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    specialization: {
+      specialization: {
       type: String,
-      required: [true, 'Specialization is required'],
       trim: true,
-      // Locked after creation — enforced at service layer
-    },
+      default: null
+      },
     years_experience: { type: Number, min: 0, default: 0 },
     bio: { type: String, trim: true, default: null },
     location: { type: String, trim: true, default: null },

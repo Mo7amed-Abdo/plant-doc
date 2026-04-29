@@ -37,7 +37,13 @@ function orderCard(o) {
 async function openOrderModal(id) {
   try {
     const [oRes, dRes] = await Promise.allSettled([api.get(`/orders/${id}`), api.get(`/orders/${id}/delivery`)]);
-    const { order, items } = oRes.value?.data||{};
+    //////////console.log('Order:', oRes); console.log('Delivery:', dRes);
+    const data = oRes.value?.data || {};
+const order = data.order || data;
+let items = data.items || order.items || [];
+console.log("FULL RESPONSE:", oRes.value?.data);
+console.log("ORDER DATA:", data);
+console.log("ITEMS:", items);
     const delivery = dRes.status==='fulfilled'?dRes.value?.data:null;
     if (!order) { showToast('Failed to load order','error'); return; }
     const co=order.company_id||{}, addr=order.shipping_address||{};
@@ -51,8 +57,43 @@ async function openOrderModal(id) {
       <div class="p-5 space-y-5 max-h-[75vh] overflow-y-auto">
         ${delivery?deliveryTimeline(delivery):`<div class="bg-surface-container rounded-xl p-4 text-center"><p class="text-sm text-on-surface-variant">Delivery tracking not yet available</p></div>`}
         <div><p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-3">Items</p>
-          <div class="space-y-2">${(items||[]).map(i=>`<div class="flex items-center gap-3 bg-surface-container rounded-xl p-3"><div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-surface-variant text-[20px]">science</span></div><div class="flex-1"><p class="text-sm font-semibold text-on-surface">${i.product_name_snapshot}</p><p class="text-xs text-on-surface-variant">Qty: ${i.quantity} × $${(i.unit_price||0).toFixed(2)}</p></div><span class="font-bold text-sm text-on-surface">$${(i.subtotal||0).toFixed(2)}</span></div>`).join('')}</div>
-        </div>
+        
+<div class="space-y-2">
+  ${items && items.length ? items.map(i => {
+    
+    const price = i.unit_price || i.price || 0;
+    const qty = i.quantity || 1;
+    const total = i.subtotal || (price * qty);
+
+    return `
+    <div class="flex items-center gap-3 bg-surface-container rounded-xl p-3">
+
+      <div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-on-surface-variant text-[20px]">science</span>
+      </div>
+
+      <div class="flex-1">
+        <p class="text-sm font-semibold text-on-surface">
+          ${i.product_name_snapshot || i.name || 'Product'}
+        </p>
+        <p class="text-xs text-on-surface-variant">
+          Qty: ${qty} × $${price.toFixed(2)}
+        </p>
+      </div>
+
+      <span class="font-bold text-sm text-on-surface">
+        $${total.toFixed(2)}
+      </span>
+
+    </div>
+    `;
+    
+  }).join('') : `
+    <div class="text-center py-6 text-slate-400">
+      No item details available
+    </div>
+  `}
+</div>        </div>
         <div class="bg-surface-container rounded-xl p-4 space-y-1"><p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Shipping</p><p class="text-sm text-on-surface">${addr.street||'—'}</p><p class="text-sm text-on-surface-variant">${[addr.city,addr.state,addr.country].filter(Boolean).join(', ')}</p>${order.contact_phone?`<p class="text-sm text-on-surface-variant">${order.contact_phone}</p>`:''}</div>
         <div class="bg-surface-container rounded-xl p-4 space-y-2"><div class="flex justify-between"><span class="text-sm text-on-surface-variant">Subtotal</span><span class="text-sm font-semibold text-on-surface">$${(order.subtotal||0).toFixed(2)}</span></div><div class="flex justify-between border-t border-surface-variant pt-2"><span class="text-sm font-bold text-on-surface">Total</span><span class="text-sm font-bold text-on-surface">$${(order.total||0).toFixed(2)}</span></div></div>
         ${order.status==='delivered'?`<button onclick="openRating('${order._id}','${order.company_id?._id||order.company_id}');this.closest('.fixed').remove();" class="w-full py-2.5 border border-outline-variant rounded-xl text-sm font-medium text-on-surface hover:bg-surface-container flex items-center justify-center gap-2"><span class="material-symbols-outlined text-[18px]">star</span>Rate this order</button>`:''}

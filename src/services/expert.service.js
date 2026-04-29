@@ -52,7 +52,7 @@ function _formatProfile(user, expert) {
     phone: user.phone,
     role: user.role,
     avatar: toDataUri(user.avatar),
-    specialization: expert.specialization,
+    //: expert.specialization,
     years_experience: expert.years_experience,
     bio: expert.bio,
     location: expert.location,

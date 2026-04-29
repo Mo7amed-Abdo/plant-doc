@@ -34,6 +34,8 @@ app.use(
 // ─── Body Parsing ─────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 
 // ─── HTTP Logging ─────────────────────────────────────────────────────────────
 if (env.isDev()) {
@@ -41,6 +43,14 @@ if (env.isDev()) {
 } else {
   app.use(morgan('combined'));
 }
+
+// Simple request logger for debugging (prints method, url and whether Authorization header exists)
+app.use((req, res, next) => {
+  try {
+    console.log(`[REQ] ${req.method} ${req.originalUrl} Auth:${req.headers.authorization ? 'yes' : 'no'}`);
+  } catch (e) { /* ignore logging errors */ }
+  next();
+});
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
@@ -61,6 +71,8 @@ app.use('/api/company',            require('./routes/companyOps.routes'));
 app.use('/api/diagnoses',          require('./routes/diagnosis.routes'));
 app.use('/api/treatment-requests', require('./routes/treatmentRequest.routes'));
 app.use('/api/chats',              require('./routes/chat.routes'));
+app.use('/api/messages',           require('./routes/message.routes'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/products',           require('./routes/product.routes'));
 app.use('/api/product-listings',   require('./routes/productListing.routes'));
 app.use('/api/cart',               require('./routes/cart.routes'));

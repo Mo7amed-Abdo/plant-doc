@@ -6,66 +6,141 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Treatments - PlantDoc</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
-            theme: { extend: { colors: { "surface-container": "#eceeef", "surface-variant": "#e1e3e4", "on-background": "#191c1d", "background": "#f8fafb", "primary": "#006a39", "on-tertiary-fixed": "#40000f", "outline-variant": "#bdcabc", "on-error-container": "#93000a", "surface-container-low": "#f2f4f5", "secondary-container": "#c6e4f4", "on-error": "#ffffff", "on-primary-fixed": "#00210e", "surface-container-lowest": "#ffffff", "error": "#ba1a1a", "tertiary-fixed": "#ffdadb", "on-surface-variant": "#3e4a3f", "primary-fixed-dim": "#64dd91", "outline": "#6d7a6f", "inverse-on-surface": "#eff1f2", "secondary-fixed-dim": "#adcbda", "inverse-surface": "#2e3132", "surface-tint": "#006d3a", "tertiary": "#a23546", "on-secondary": "#ffffff", "surface": "#f8fafb", "secondary": "#466270", "primary-fixed": "#82faab", "tertiary-container": "#c24d5e", "surface-dim": "#d8dadb", "surface-container-highest": "#e1e3e4", "on-tertiary-fixed-variant": "#851f33", "on-secondary-container": "#4a6774", "surface-bright": "#f8fafb", "on-secondary-fixed": "#001f2a", "surface-container-high": "#e6e8e9", "error-container": "#ffdad6", "on-primary": "#ffffff", "tertiary-fixed-dim": "#ffb2b8", "on-primary-fixed-variant": "#00522b", "on-surface": "#191c1d", "secondary-fixed": "#c9e7f7", "on-secondary-fixed-variant": "#2e4b57", "on-primary-container": "#f6fff4", "primary-container": "#008649", "on-tertiary-container": "#fffbff", "on-tertiary": "#ffffff", "inverse-primary": "#64dd91" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] } } }
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#eceeef", "surface-variant": "#e1e3e4", "on-background": "#191c1d",
+                        "background": "#f8fafb", "primary": "#006a39", "on-tertiary-fixed": "#40000f",
+                        "outline-variant": "#bdcabc", "on-error-container": "#93000a", "surface-container-low": "#f2f4f5",
+                        "secondary-container": "#c6e4f4", "on-error": "#ffffff", "on-primary-fixed": "#00210e",
+                        "surface-container-lowest": "#ffffff", "error": "#ba1a1a", "tertiary-fixed": "#ffdadb",
+                        "on-surface-variant": "#3e4a3f", "primary-fixed-dim": "#64dd91", "outline": "#6d7a6f",
+                        "inverse-on-surface": "#eff1f2", "secondary-fixed-dim": "#adcbda", "inverse-surface": "#2e3132",
+                        "surface-tint": "#006d3a", "tertiary": "#a23546", "on-secondary": "#ffffff", "surface": "#f8fafb",
+                        "secondary": "#466270", "primary-fixed": "#82faab", "tertiary-container": "#c24d5e",
+                        "surface-dim": "#d8dadb", "surface-container-highest": "#e1e3e4", "on-tertiary-fixed-variant": "#851f33",
+                        "on-secondary-container": "#4a6774", "surface-bright": "#f8fafb", "on-secondary-fixed": "#001f2a",
+                        "surface-container-high": "#e6e8e9", "error-container": "#ffdad6", "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b8", "on-primary-fixed-variant": "#00522b", "on-surface": "#191c1d",
+                        "secondary-fixed": "#c9e7f7", "on-secondary-fixed-variant": "#2e4b57", "on-primary-container": "#f6fff4",
+                        "primary-container": "#008649", "on-tertiary-container": "#fffbff", "on-tertiary": "#ffffff",
+                        "inverse-primary": "#64dd91"
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] }
+                }
+            }
         }
     </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
 
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-
         .material-symbols-outlined.fill {
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
 
-        #filter-modal {
-            transition: opacity 0.2s ease, transform 0.2s ease;
+        /* ── Filter Modal ── */
+        #filter-modal { transition: opacity 0.2s ease, transform 0.2s ease; }
+        #filter-modal.hidden { opacity: 0; pointer-events: none; transform: scale(0.97) translateY(-6px); }
+        #filter-modal:not(.hidden) { opacity: 1; transform: scale(1) translateY(0); }
+        .filter-chip input:checked ~ .chip-label {
+            background-color: #006a39; color: #fff; border-color: #006a39;
         }
 
-        #filter-modal.hidden {
+        /* ── Product Card image zoom ── */
+        .img-zoom { transition: transform 0.5s ease; }
+        .product-card:hover .img-zoom { transform: scale(1.06); }
+
+        /* ── Cart Drawer ── */
+        #cart-drawer {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(100%);
+        }
+        #cart-drawer.open { transform: translateX(0); }
+
+        #cart-overlay {
+            transition: opacity 0.35s ease;
             opacity: 0;
             pointer-events: none;
-            transform: scale(0.97) translateY(-6px);
+        }
+        #cart-overlay.open { opacity: 1; pointer-events: all; }
+
+        /* ── Cart badge bounce ── */
+        @keyframes badge-pop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.4); }
+            70%  { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+        .badge-pop { animation: badge-pop 0.35s ease; }
+
+        /* ── Add to cart button flash ── */
+        @keyframes btn-flash {
+            0%   { background-color: #006a39; }
+            40%  { background-color: #008649; }
+            100% { background-color: #006a39; }
+        }
+        .btn-flash { animation: btn-flash 0.4s ease; }
+
+        /* ── Checkout section (hidden → visible) ── */
+        #checkout-section {
+            transition: opacity 0.45s ease, max-height 0.5s cubic-bezier(0.4,0,0.2,1);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        #checkout-section.visible { max-height: 700px; opacity: 1; }
+
+        /* ── Success screen overlay inside drawer ── */
+        #success-screen {
+            transition: opacity 0.4s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #success-screen.visible { opacity: 1; pointer-events: all; }
+
+        /* ── Success checkmark animation ── */
+        @keyframes check-draw {
+            from { stroke-dashoffset: 60; }
+            to   { stroke-dashoffset: 0; }
+        }
+        @keyframes circle-draw {
+            from { stroke-dashoffset: 200; }
+            to   { stroke-dashoffset: 0; }
+        }
+        .check-circle { stroke-dasharray: 200; animation: circle-draw 0.6s ease forwards 0.1s; }
+        .check-mark   { stroke-dasharray: 60;  animation: check-draw 0.4s ease forwards 0.55s; }
+
+        /* ── Subtle card hover shadow ── */
+        .product-card {
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
+        }
+        .product-card:hover {
+            box-shadow: 0 8px 30px -6px rgba(0,106,57,0.18);
+            transform: translateY(-2px);
         }
 
-        #filter-modal:not(.hidden) {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-
-        .filter-chip input:checked~.chip-label {
-            background-color: #006a39;
-            color: #fff;
-            border-color: #006a39;
-        }
-
-        .img-zoom {
-            transition: transform 0.5s ease;
-        }
-
-        .group:hover .img-zoom {
-            transform: scale(1.05);
-        }
+        /* ── Drawer scrollbar ── */
+        #cart-drawer::-webkit-scrollbar { width: 4px; }
+        #cart-drawer::-webkit-scrollbar-track { background: transparent; }
+        #cart-drawer::-webkit-scrollbar-thumb { background: #bdcabc; border-radius: 9999px; }
     </style>
 </head>
 
 <body class="bg-background text-on-background min-h-screen flex font-body">
 
-    <!-- SideNavBar -->
-    <nav
-        class="bg-slate-50 text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
-        <!-- Logo -->
+    <!-- ══════════════════════════════════════════
+         SideNavBar
+    ══════════════════════════════════════════ -->
+    <nav class="bg-slate-50 text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
         <div class="flex items-center gap-1">
             <div class="flex items-center">
                 <img src="logo dark.png" alt="" class="w-26 h-28">
@@ -73,46 +148,61 @@
             <span class="text-lg font-bold text-green-700">PlantDoc</span>
         </div>
         <div class="flex-1 flex flex-col gap-1 px-4">
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="farmerdashboard.html"><span
-                    class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="recendiagnoses.html"><span
-                    class="material-symbols-outlined">biotech</span><span>Diagnoses</span></a>
-            <a class="bg-green-700 text-white rounded-xl px-4 py-3 flex items-center gap-3 active:scale-[0.98] transition-transform"
-                href="#"><span class="material-symbols-outlined fill">medication</span><span>Treatments</span></a>
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="ordertracking.html"><span
-                    class="material-symbols-outlined">shopping_basket</span><span>Orders</span></a>
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="expertschat.html"><span class="material-symbols-outlined">forum</span><span>Chat with
-                    Expert</span></a>
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="farmernotifications.html"><span
-                    class="material-symbols-outlined">notifications</span><span>Notifications</span></a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="farmerdashboard.html">
+                <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="recendiagnoses.html">
+                <span class="material-symbols-outlined">biotech</span><span>Diagnoses</span>
+            </a>
+            <a class="bg-green-700 text-white rounded-xl px-4 py-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="#">
+                <span class="material-symbols-outlined fill">medication</span><span>Treatments</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="ordertracking.html">
+                <span class="material-symbols-outlined">shopping_basket</span><span>Orders</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="expertschat.html">
+                <span class="material-symbols-outlined">forum</span><span>Chat with Expert</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="farmernotifications.html">
+                <span class="material-symbols-outlined">notifications</span><span>Notifications</span>
+            </a>
         </div>
         <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all"
-                href="farmerprofile.html">
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all" href="farmerprofile.html">
                 <img src="" class="w-8 h-8 rounded-full object-cover border border-outline-variant shrink-0" alt="Profile" data-user-avatar />
-                <div class="flex flex-col"><span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span><span class="text-xs text-on-surface-variant" data-user-role>Loading...</span></div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-lg">logout</span></button>
+                <div class="flex flex-col">
+                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
+                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
             </a>
         </div>
     </nav>
 
-    <!-- Mobile Header -->
-    <header
-        class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-slate-50 border-b border-slate-200 shadow-sm">
+    <!-- ══════════════════════════════════════════
+         Mobile Header
+    ══════════════════════════════════════════ -->
+    <header class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-slate-50 border-b border-slate-200 shadow-sm">
         <span class="text-xl font-black text-green-700">PlantDoc</span>
         <div class="flex items-center gap-2">
-            <button class="p-2 text-slate-500 hover:text-green-600 rounded-full relative"><span
-                    class="material-symbols-outlined">notifications</span><span
-                    class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border-2 border-white"></span></button>
+            <button class="p-2 text-slate-500 hover:text-green-600 rounded-full relative">
+                <span class="material-symbols-outlined">notifications</span>
+                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+            </button>
+            <!-- Mobile Cart Button -->
+            <button id="mobile-cart-btn" class="relative p-2 text-slate-500 hover:text-green-600 rounded-full">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span id="mobile-cart-badge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-error text-on-error text-[9px] font-bold rounded-full flex items-center justify-center px-1">0</span>
+            </button>
             <img src="" class="w-8 h-8 rounded-full object-cover border-2 border-green-600" alt="Profile" />
         </div>
     </header>
 
+    <!-- ══════════════════════════════════════════
+         Main Content
+    ══════════════════════════════════════════ -->
     <main class="flex-1 md:ml-64 w-full">
         <div class="p-6 md:p-8 flex flex-col gap-8 mx-auto w-full">
 
@@ -120,119 +210,969 @@
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h1 class="text-2xl font-bold text-on-surface font-headline">Treatment Solutions</h1>
+                    <p class="text-sm text-on-surface-variant mt-0.5">Browse and order products recommended for your diagnosed plants</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button data-filter
-                        class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
+                    <!-- Filter Button -->
+                    <button data-filter class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
                         <span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
                     </button>
-                    <button
-                        class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
-                        <span class="material-symbols-outlined text-[18px]">history</span> Order History
+
+                    <!-- Cart Icon Button -->
+                    <button id="cart-btn" class="relative flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
+                        <span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+                        Cart
+                        <span id="cart-badge" class="hidden absolute -top-2 -right-2 min-w-[20px] h-5 bg-error text-on-error text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-sm">0</span>
                     </button>
+
+                    <a href="ordertracking.html" class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
+                        <span class="material-symbols-outlined text-[18px]">history</span> Order History
+                    </a>
                 </div>
             </div>
 
-            <!-- Product Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 border-t-2 border-primary rounded-xl pt-2" data-products-grid>
-                <div class="col-span-full py-16 text-center"><span class="material-symbols-outlined text-5xl text-on-surface-variant/40 block mb-3">inventory_2</span><p class="text-on-surface-variant font-medium">Loading...</p></div>
-            </div>
+            <!-- ── Product Grid ── -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 border-t-2 border-primary rounded-xl pt-4" data-products-grid>
+
+                <!-- ─ Card 1 ─ -->
+                <div class="product-card bg-surface-container-lowest rounded-2xl border border-surface-variant shadow-sm overflow-hidden flex flex-col group">
+                    <div class="relative h-44 overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100">
+                        <div class="img-zoom w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[72px] text-green-600/40">science</span>
+                        </div>
+                        <div class="absolute bottom-3 left-3 flex gap-1.5 flex-wrap">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary/90 text-white backdrop-blur-sm shadow-sm">
+                                <span class="material-symbols-outlined text-[12px]">bug_report</span> Early Blight
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-lowest/90 text-primary border border-primary/20 shadow-sm">
+                                <span class="material-symbols-outlined text-[11px] fill">eco</span> Organic
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 p-4 gap-3">
+                        <div>
+                            <h3 class="font-semibold text-on-surface text-sm leading-tight">Mancozeb 80% WP Fungicide</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">AgroShield · 500g</p>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Fast Acting</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Tomato · Corn</span>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between pt-2 border-t border-surface-variant">
+                            <span class="text-lg font-bold text-primary">EGP 185</span>
+                            <button onclick="addToCart(1, 'Mancozeb 80% WP Fungicide', 185, 'Treats: Early Blight')" class="add-to-cart-btn flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all shadow-sm">
+                                <span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─ Card 2 ─ -->
+                <div class="product-card bg-surface-container-lowest rounded-2xl border border-surface-variant shadow-sm overflow-hidden flex flex-col group">
+                    <div class="relative h-44 overflow-hidden bg-gradient-to-br from-amber-50 to-yellow-100">
+                        <div class="img-zoom w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[72px] text-amber-500/40">local_florist</span>
+                        </div>
+                        <div class="absolute bottom-3 left-3 flex gap-1.5 flex-wrap">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary/90 text-white backdrop-blur-sm shadow-sm">
+                                <span class="material-symbols-outlined text-[12px]">bug_report</span> Downy Mildew
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-lowest/90 text-primary border border-primary/20 shadow-sm">
+                                <span class="material-symbols-outlined text-[11px] fill">eco</span> Organic
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 p-4 gap-3">
+                        <div>
+                            <h3 class="font-semibold text-on-surface text-sm leading-tight">Cold-Pressed Neem Oil Spray</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">NaturaCure · 1L</p>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Organic Certified</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Preventative</span>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between pt-2 border-t border-surface-variant">
+                            <span class="text-lg font-bold text-primary">EGP 245</span>
+                            <button onclick="addToCart(2, 'Cold-Pressed Neem Oil Spray', 245, 'Treats: Downy Mildew')" class="add-to-cart-btn flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all shadow-sm">
+                                <span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─ Card 3 ─ -->
+                <div class="product-card bg-surface-container-lowest rounded-2xl border border-surface-variant shadow-sm overflow-hidden flex flex-col group">
+                    <div class="relative h-44 overflow-hidden bg-gradient-to-br from-blue-50 to-cyan-100">
+                        <div class="img-zoom w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[72px] text-blue-500/40">water_drop</span>
+                        </div>
+                        <div class="absolute bottom-3 left-3 flex gap-1.5 flex-wrap">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary/90 text-white backdrop-blur-sm shadow-sm">
+                                <span class="material-symbols-outlined text-[12px]">bug_report</span> Early Blight
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-lowest/90 text-secondary border border-secondary/20 shadow-sm">Fast Acting</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 p-4 gap-3">
+                        <div>
+                            <h3 class="font-semibold text-on-surface text-sm leading-tight">Copper-Based Fungicide Wettable</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">CopperShield Pro · 250g</p>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Fast Acting</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Wheat · Apple</span>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between pt-2 border-t border-surface-variant">
+                            <span class="text-lg font-bold text-primary">EGP 320</span>
+                            <button onclick="addToCart(3, 'Copper-Based Fungicide Wettable', 320, 'Treats: Early Blight')" class="add-to-cart-btn flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all shadow-sm">
+                                <span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─ Card 4 ─ -->
+                <div class="product-card bg-surface-container-lowest rounded-2xl border border-surface-variant shadow-sm overflow-hidden flex flex-col group">
+                    <div class="relative h-44 overflow-hidden bg-gradient-to-br from-lime-50 to-green-100">
+                        <div class="img-zoom w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[72px] text-lime-600/40">compost</span>
+                        </div>
+                        <div class="absolute bottom-3 left-3 flex gap-1.5 flex-wrap">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary/90 text-white backdrop-blur-sm shadow-sm">
+                                <span class="material-symbols-outlined text-[12px]">grass</span> N Deficiency
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-lowest/90 text-primary border border-primary/20 shadow-sm">
+                                <span class="material-symbols-outlined text-[11px] fill">eco</span> Organic
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 p-4 gap-3">
+                        <div>
+                            <h3 class="font-semibold text-on-surface text-sm leading-tight">Nitrogen Booster Liquid Fertilizer</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">GreenGrow · 2L</p>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Organic Certified</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Corn · Spinach</span>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between pt-2 border-t border-surface-variant">
+                            <span class="text-lg font-bold text-primary">EGP 150</span>
+                            <button onclick="addToCart(4, 'Nitrogen Booster Liquid Fertilizer', 150, 'Treats: N Deficiency')" class="add-to-cart-btn flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all shadow-sm">
+                                <span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─ Card 5 ─ -->
+                <div class="product-card bg-surface-container-lowest rounded-2xl border border-surface-variant shadow-sm overflow-hidden flex flex-col group">
+                    <div class="relative h-44 overflow-hidden bg-gradient-to-br from-purple-50 to-violet-100">
+                        <div class="img-zoom w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[72px] text-violet-500/40">labs</span>
+                        </div>
+                        <div class="absolute bottom-3 left-3 flex gap-1.5 flex-wrap">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary/90 text-white backdrop-blur-sm shadow-sm">
+                                <span class="material-symbols-outlined text-[12px]">bug_report</span> Downy Mildew
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-lowest/90 text-secondary border border-secondary/20 shadow-sm">Fast Acting</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 p-4 gap-3">
+                        <div>
+                            <h3 class="font-semibold text-on-surface text-sm leading-tight">Azoxystrobin SC Systemic Spray</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">AgriMax · 200ml</p>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Systemic</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Fast Acting</span>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between pt-2 border-t border-surface-variant">
+                            <span class="text-lg font-bold text-primary">EGP 410</span>
+                            <button onclick="addToCart(5, 'Azoxystrobin SC Systemic Spray', 410, 'Treats: Downy Mildew')" class="add-to-cart-btn flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all shadow-sm">
+                                <span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─ Card 6 ─ -->
+                <div class="product-card bg-surface-container-lowest rounded-2xl border border-surface-variant shadow-sm overflow-hidden flex flex-col group">
+                    <div class="relative h-44 overflow-hidden bg-gradient-to-br from-teal-50 to-emerald-100">
+                        <div class="img-zoom w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[72px] text-teal-600/40">microbiology</span>
+                        </div>
+                        <div class="absolute bottom-3 left-3 flex gap-1.5 flex-wrap">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary/90 text-white backdrop-blur-sm shadow-sm">
+                                <span class="material-symbols-outlined text-[12px]">bug_report</span> Early Blight
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-lowest/90 text-primary border border-primary/20 shadow-sm">
+                                <span class="material-symbols-outlined text-[11px] fill">eco</span> Organic
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 p-4 gap-3">
+                        <div>
+                            <h3 class="font-semibold text-on-surface text-sm leading-tight">Trichoderma Bio-Fungicide Granules</h3>
+                            <p class="text-xs text-on-surface-variant mt-0.5">BioGuard · 1kg</p>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Organic Certified</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border border-outline-variant bg-surface-container text-on-surface-variant">Preventative</span>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between pt-2 border-t border-surface-variant">
+                            <span class="text-lg font-bold text-primary">EGP 280</span>
+                            <button onclick="addToCart(6, 'Trichoderma Bio-Fungicide Granules', 280, 'Treats: Early Blight')" class="add-to-cart-btn flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all shadow-sm">
+                                <span class="material-symbols-outlined text-[14px]">add_shopping_cart</span> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /data-products-grid -->
         </div>
     </main>
 
-    <!-- Filter Modal -->
+    <!-- ══════════════════════════════════════════
+         Cart Overlay (backdrop)
+    ══════════════════════════════════════════ -->
+    <div id="cart-overlay" class="fixed inset-0 bg-black/25 backdrop-blur-[2px] z-[60]"></div>
+
+    <!-- ══════════════════════════════════════════
+         Cart Drawer
+    ══════════════════════════════════════════ -->
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-surface-container-lowest shadow-2xl z-[70] flex flex-col overflow-hidden">
+
+        <!-- Success Screen (absolute overlay) -->
+        <div id="success-screen" class="absolute inset-0 bg-surface-container-lowest z-10 flex flex-col items-center justify-center gap-5 px-8 text-center">
+            <div class="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                    <circle class="check-circle" cx="28" cy="28" r="26" stroke="#006a39" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path class="check-mark" d="M16 28.5l9 9 15-16" stroke="#006a39" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-on-surface font-headline">Order Placed!</h2>
+                <p class="text-sm text-on-surface-variant mt-1.5 leading-relaxed">Your order has been confirmed and is being prepared for delivery. You'll receive a call shortly to confirm.</p>
+            </div>
+            <div class="w-full bg-surface-container rounded-xl px-5 py-4 text-left border border-surface-variant">
+                <p class="text-xs text-on-surface-variant font-medium uppercase tracking-wider mb-2">Order Summary</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Order ID</span>
+                    <span id="order-id" class="text-sm font-semibold text-on-surface font-mono">#PD-00000</span>
+                </div>
+                <div class="flex justify-between items-center mt-1.5">
+                    <span class="text-sm text-on-surface-variant">Payment</span>
+                    <span class="text-sm font-semibold text-on-surface">Pay on Delivery</span>
+                </div>
+                <div class="flex justify-between items-center mt-1.5">
+                    <span class="text-sm text-on-surface-variant">Total</span>
+                    <span id="success-total" class="text-sm font-bold text-primary">EGP 0</span>
+                </div>
+            </div>
+            <div class="flex gap-3 w-full mt-1">
+                <button id="track-order-btn" onclick="closeSuccessScreen(true)" class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all active:scale-[0.98] shadow-sm">
+                    Track Order
+                </button>
+                <button onclick="closeSuccessScreen(false)" class="flex-1 py-2.5 border border-outline-variant text-on-surface rounded-xl text-sm font-medium hover:bg-surface-container transition-all active:scale-[0.98]">
+                    Continue Shopping
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Drawer Header ── -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-surface-variant shrink-0">
+            <div class="flex items-center gap-2.5">
+                <span class="material-symbols-outlined text-primary text-[22px]">shopping_cart</span>
+                <h2 class="text-lg font-bold text-on-surface font-headline">Your Cart</h2>
+                <span id="drawer-badge" class="hidden px-2 py-0.5 bg-primary/10 text-primary text-xs font-bold rounded-full">0 items</span>
+            </div>
+            <button id="close-cart" class="p-1.5 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors active:scale-[0.95]">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+        </div>
+
+        <!-- ── Scrollable Content ── -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="flex flex-col gap-0 px-6 pt-4 pb-6">
+
+                <!-- Empty State -->
+                <div id="cart-empty" class="flex flex-col items-center justify-center py-16 text-center gap-3">
+                    <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[32px] text-on-surface-variant/40">shopping_cart</span>
+                    </div>
+                    <p class="font-semibold text-on-surface-variant text-sm">Your cart is empty</p>
+                    <p class="text-xs text-on-surface-variant/70">Add products to get started</p>
+                </div>
+
+                <!-- Cart Items List -->
+                <div id="cart-items-list" class="flex flex-col gap-0"></div>
+
+                <!-- ── Order Form ── -->
+                <div id="order-form-section" class="hidden flex flex-col gap-5 mt-5">
+                    <div>
+                        <h3 class="text-sm font-bold text-on-surface mb-1 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px] text-primary">local_shipping</span>
+                            Delivery Details
+                        </h3>
+                        <p class="text-xs text-on-surface-variant">Please fill in your details for delivery</p>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <!-- Full Name -->
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Full Name</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant/60">person</span>
+                                <input id="field-name" type="text" placeholder="e.g. Ahmed Hassan"
+                                    class="w-full pl-9 pr-3 py-2.5 border border-outline-variant rounded-xl text-sm text-on-surface bg-surface-container-lowest placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Phone Number</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant/60">phone</span>
+                                <input id="field-phone" type="tel" placeholder="01x xxxx xxxx"
+                                    class="w-full pl-9 pr-3 py-2.5 border border-outline-variant rounded-xl text-sm text-on-surface bg-surface-container-lowest placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Street Address</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant/60">home</span>
+                                <input id="field-address" type="text" placeholder="Street, Building, Floor..."
+                                    class="w-full pl-9 pr-3 py-2.5 border border-outline-variant rounded-xl text-sm text-on-surface bg-surface-container-lowest placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- City -->
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">City / Governorate</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant/60">location_city</span>
+                                <input id="field-city" type="text" placeholder="e.g. Cairo, Giza, Alexandria..."
+                                    class="w-full pl-9 pr-3 py-2.5 border border-outline-variant rounded-xl text-sm text-on-surface bg-surface-container-lowest placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Delivery Notes <span class="normal-case font-normal text-on-surface-variant/60">(optional)</span></label>
+                            <textarea id="field-notes" rows="2" placeholder="Any special instructions for the delivery..."
+                                class="w-full px-3 py-2.5 border border-outline-variant rounded-xl text-sm text-on-surface bg-surface-container-lowest placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="bg-surface-container rounded-xl px-4 py-3 border border-surface-variant">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-on-surface-variant">Subtotal</span>
+                            <span id="subtotal-display" class="font-semibold text-on-surface">EGP 0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm mt-1.5">
+                            <span class="text-on-surface-variant">Delivery</span>
+                            <span class="font-semibold text-primary text-xs">Free</span>
+                        </div>
+                        <div class="w-full h-px bg-surface-variant my-2.5"></div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-on-surface text-sm">Total</span>
+                            <span id="total-display" class="font-bold text-primary text-base">EGP 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Proceed to Checkout Button -->
+                    <button id="proceed-checkout-btn" class="w-full py-3 bg-primary text-on-primary rounded-xl text-sm font-bold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">lock</span>
+                        Proceed to Checkout
+                    </button>
+
+                    <!-- ── Checkout Section (hidden, fades in) ── -->
+                    <div id="checkout-section">
+                        <div class="flex flex-col gap-4 pt-1">
+                            <div>
+                                <h3 class="text-sm font-bold text-on-surface mb-1 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[16px] text-primary">payment</span>
+                                    Payment Method
+                                </h3>
+                                <p class="text-xs text-on-surface-variant">Select how you'd like to pay</p>
+                            </div>
+
+                            <!-- Pay on Delivery Card -->
+                            <div class="flex items-center gap-4 p-4 rounded-xl border-2 border-primary bg-primary/5 cursor-pointer">
+                                <div class="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-primary text-[20px]">payments</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-on-surface text-sm">Pay on Delivery</p>
+                                    <p class="text-xs text-on-surface-variant mt-0.5">Pay cash when your order arrives at your door</p>
+                                </div>
+                                <div class="w-5 h-5 rounded-full border-2 border-primary bg-primary flex items-center justify-center shrink-0">
+                                    <div class="w-2 h-2 rounded-full bg-white"></div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-2 px-1">
+                                <span class="material-symbols-outlined text-[15px] text-on-surface-variant/60 mt-0.5">info</span>
+                                <p class="text-xs text-on-surface-variant/70 leading-relaxed">Our delivery agent will contact you before arrival. Please have the exact amount ready. Delivery is typically within 2–5 business days.</p>
+                            </div>
+
+                            <!-- Place Order Button -->
+                            <button id="place-order-btn" class="w-full py-3.5 bg-primary text-on-primary rounded-xl text-sm font-bold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                                Place Order
+                            </button>
+                        </div>
+                    </div>
+
+                </div><!-- /order-form-section -->
+            </div>
+        </div><!-- /scrollable -->
+    </div><!-- /cart-drawer -->
+
+    <!-- ══════════════════════════════════════════
+         Filter Modal (unchanged)
+    ══════════════════════════════════════════ -->
     <div id="filter-modal"
         class="hidden fixed z-50 bg-surface-container-lowest rounded-[16px] shadow-xl border border-surface-variant w-96 p-6 flex flex-col gap-5"
         style="top:0;left:0;">
         <div class="flex items-center justify-between">
-            <h3 class="font-semibold text-on-surface font-headline flex items-center gap-2"><span
-                    class="material-symbols-outlined text-[20px] text-primary">tune</span> Filter Treatments</h3>
-            <button id="close-filter"
-                class="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors active:scale-[0.95]"><span
-                    class="material-symbols-outlined text-[20px]">close</span></button>
+            <h3 class="font-semibold text-on-surface font-headline flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px] text-primary">tune</span> Filter Treatments
+            </h3>
+            <button id="close-filter" class="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors active:scale-[0.95]">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
         </div>
         <div class="w-full h-px bg-surface-variant"></div>
         <div class="flex flex-col gap-3">
             <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Crop</p>
             <div class="flex flex-wrap gap-2">
-                <label class="filter-chip cursor-pointer"><input type="checkbox" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Tomato</span></label>
-                <label class="filter-chip cursor-pointer"><input type="checkbox" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Corn</span></label>
-                <label class="filter-chip cursor-pointer"><input type="checkbox" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Wheat</span></label>
+                <label class="filter-chip cursor-pointer"><input type="checkbox" value="tomato" data-filter-type="crop" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Tomato</span></label>
+                <label class="filter-chip cursor-pointer"><input type="checkbox" value="corn" data-filter-type="crop" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Corn</span></label>
+                <label class="filter-chip cursor-pointer"><input type="checkbox" value="wheat" data-filter-type="crop" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Wheat</span></label>
             </div>
         </div>
         <div class="w-full h-px bg-surface-variant"></div>
         <div class="flex flex-col gap-3">
             <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Disease</p>
             <div class="flex flex-wrap gap-2">
-                <label class="filter-chip cursor-pointer"><input type="checkbox" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Early
-                        Blight</span></label>
-                <label class="filter-chip cursor-pointer"><input type="checkbox" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Downy
-                        Mildew</span></label>
-                <label class="filter-chip cursor-pointer"><input type="checkbox" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Nitrogen
-                        Deficiency</span></label>
+                <label class="filter-chip cursor-pointer"><input type="checkbox" value="early blight" data-filter-type="disease" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Early Blight</span></label>
+                <label class="filter-chip cursor-pointer"><input type="checkbox" value="downy mildew" data-filter-type="disease" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Downy Mildew</span></label>
+                <label class="filter-chip cursor-pointer"><input type="checkbox" value="nitrogen deficiency" data-filter-type="disease" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Nitrogen Deficiency</span></label>
             </div>
         </div>
         <div class="w-full h-px bg-surface-variant"></div>
         <div class="flex flex-col gap-3">
             <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Type</p>
             <div class="flex flex-wrap gap-2">
-                <label class="filter-chip cursor-pointer"><input type="checkbox" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Organic
-                        Certified</span></label>
-                <label class="filter-chip cursor-pointer"><input type="checkbox" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Fast
-                        Acting</span></label>
-                <label class="filter-chip cursor-pointer"><input type="checkbox" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Preventative</span></label>
+                <label class="filter-chip cursor-pointer"><input type="checkbox" value="organic" data-filter-type="type" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Organic Certified</span></label>
+                <label class="filter-chip cursor-pointer"><input type="checkbox" value="fast-acting" data-filter-type="type" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Fast Acting</span></label>
+                <label class="filter-chip cursor-pointer"><input type="checkbox" value="preventative" data-filter-type="type" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Preventative</span></label>
             </div>
         </div>
         <div class="w-full h-px bg-surface-variant"></div>
         <div class="flex flex-col gap-3">
             <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Sort By</p>
             <div class="flex flex-wrap gap-2">
-                <label class="filter-chip cursor-pointer"><input type="radio" name="sort" class="sr-only"
-                        checked /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Recommended</span></label>
-                <label class="filter-chip cursor-pointer"><input type="radio" name="sort" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Price:
-                        Low–High</span></label>
-                <label class="filter-chip cursor-pointer"><input type="radio" name="sort" class="sr-only" /><span
-                        class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Price:
-                        High–Low</span></label>
+                <label class="filter-chip cursor-pointer"><input type="radio" name="sort" value="recommended" class="sr-only" checked /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Recommended</span></label>
+                <label class="filter-chip cursor-pointer"><input type="radio" name="sort" value="price-asc" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Price: Low–High</span></label>
+                <label class="filter-chip cursor-pointer"><input type="radio" name="sort" value="price-desc" class="sr-only" /><span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">Price: High–Low</span></label>
             </div>
         </div>
         <div class="w-full h-px bg-surface-variant"></div>
         <div class="flex items-center gap-3">
-            <button id="clear-filters"
-                class="flex-1 py-2 border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors active:scale-[0.98]">Clear
-                All</button>
-            <button id="apply-filters"
-                class="flex-1 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:translate-y-[-1px] hover:shadow-md transition-all duration-200 active:scale-[0.98]">Apply
-                Filters</button>
+            <button id="clear-filters" class="flex-1 py-2 border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors active:scale-[0.98]">Clear All</button>
+            <button id="apply-filters" class="flex-1 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:translate-y-[-1px] hover:shadow-md transition-all duration-200 active:scale-[0.98]">Apply Filters</button>
         </div>
     </div>
 
+    <script src="../api.js"></script>
+    <script src="./treatmentsolutions.js"></script>
+
+    <!-- ══════════════════════════════════════════
+         Cart Logic  (must load AFTER treatmentsolutions.js
+         so our addToCart overrides theirs)
+    ══════════════════════════════════════════ -->
     <script>
+        /* ─────────────────────────────────────
+           Neutralise treatmentsolutions.js cart
+           Must run BEFORE DOMContentLoaded so our
+           no-op is in place when the external JS calls it.
+        ───────────────────────────────────── */
+        window.setupCartPanel = function() { /* disabled – we use #cart-drawer */ };
+        window.toggleCart     = function() { openCart(); };
+
+        /* ─────────────────────────────────────
+           Cart State
+        ───────────────────────────────────── */
+        let cart = [];
+
+        /* ─────────────────────────────────────
+           Add to Cart
+        ───────────────────────────────────── */
+        function addToCart(id, name, price, badge) {
+            const cleanPrice = parseFloat(price) || 0;
+            // Detect real API product (24-char MongoDB ObjectId)
+            const isApi = typeof id === 'string' && /^[0-9a-f]{24}$/i.test(id);
+
+            const existing = cart.find(i => i.id === id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ id, name, price: cleanPrice, badge: badge || '', qty: 1, isApi });
+            }
+            updateCartUI();
+
+            // Flash badge
+            const badgeEl = document.getElementById('cart-badge');
+            badgeEl.classList.remove('badge-pop');
+            void badgeEl.offsetWidth;
+            badgeEl.classList.add('badge-pop');
+
+            // Sync to backend only for real API products
+            if (isApi && typeof api !== 'undefined') {
+                const currentItem = cart.find(i => i.id === id);
+                api.post('/cart/items', {
+                    product_listing_id: id,
+                    quantity:       currentItem ? currentItem.qty : 1,
+                    price_snapshot: cleanPrice      // required by CartItem schema
+                }).catch(() => {});
+            }
+        }
+
+        /* ─────────────────────────────────────
+           Change Quantity
+        ───────────────────────────────────── */
+        function changeQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== id);
+                if (item.isApi && typeof api !== 'undefined')
+                    api.delete(`/cart/items/${id}`).catch(() => {});
+            } else {
+                if (item.isApi && typeof api !== 'undefined')
+                    api.put(`/cart/items/${id}`, { quantity: item.qty }).catch(() => {});
+            }
+            updateCartUI();
+        }
+
+        function removeItem(id) {
+            const item = cart.find(i => i.id === id);
+            cart = cart.filter(i => i.id !== id);
+            if (item?.isApi && typeof api !== 'undefined')
+                api.delete(`/cart/items/${id}`).catch(() => {});
+            updateCartUI();
+        }
+
+        /* ─────────────────────────────────────
+           Update All Cart UI
+        ───────────────────────────────────── */
+        function updateCartUI() {
+            const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+            const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+            // Badges
+            const badge = document.getElementById('cart-badge');
+            const mobileBadge = document.getElementById('mobile-cart-badge');
+            const drawerBadge = document.getElementById('drawer-badge');
+
+            if (totalQty > 0) {
+                badge.textContent = totalQty;
+                badge.classList.remove('hidden');
+                mobileBadge.textContent = totalQty;
+                mobileBadge.classList.remove('hidden');
+                drawerBadge.textContent = totalQty + ' item' + (totalQty > 1 ? 's' : '');
+                drawerBadge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+                mobileBadge.classList.add('hidden');
+                drawerBadge.classList.add('hidden');
+            }
+
+            // Subtotal / Total displays
+            document.getElementById('subtotal-display').textContent = 'EGP ' + subtotal.toLocaleString();
+            document.getElementById('total-display').textContent = 'EGP ' + subtotal.toLocaleString();
+
+            renderCartItems(subtotal);
+        }
+
+        /* ─────────────────────────────────────
+           Render Cart Items
+        ───────────────────────────────────── */
+        function renderCartItems(subtotal) {
+            const list = document.getElementById('cart-items-list');
+            const empty = document.getElementById('cart-empty');
+            const formSection = document.getElementById('order-form-section');
+
+            if (cart.length === 0) {
+                list.innerHTML = '';
+                empty.classList.remove('hidden');
+                formSection.classList.add('hidden');
+                // Reset checkout
+                document.getElementById('checkout-section').classList.remove('visible');
+                document.getElementById('proceed-checkout-btn').classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            formSection.classList.remove('hidden');
+
+            const icons = ['medication','science','local_florist','compost','labs','microbiology','water_drop','eco'];
+
+            list.innerHTML = cart.map((item, idx) => {
+                // Safe icon index for both numeric and string IDs
+                const iconIdx = typeof item.id === 'number'
+                    ? (item.id - 1) % icons.length
+                    : idx % icons.length;
+                // Safely pass ID into onclick (string IDs need quotes)
+                const idRef = JSON.stringify(String(item.id));
+                return `
+                <div class="flex items-center gap-3 py-3.5 border-b border-surface-variant last:border-b-0">
+                    <div class="w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center shrink-0 border border-primary/15">
+                        <span class="material-symbols-outlined text-primary text-xl">${icons[iconIdx]}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-on-surface text-sm leading-tight truncate">${item.name}</p>
+                        <p class="text-[11px] text-on-surface-variant mt-0.5">${item.badge || ''}</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="changeQty(${idRef}, -1)"
+                            class="w-6 h-6 rounded-full bg-surface-container text-on-surface flex items-center justify-center hover:bg-surface-variant transition-colors text-sm font-bold leading-none">−</button>
+                        <span class="w-5 text-center text-sm font-bold text-on-surface tabular-nums">${item.qty}</span>
+                        <button onclick="changeQty(${idRef}, 1)"
+                            class="w-6 h-6 rounded-full bg-surface-container text-on-surface flex items-center justify-center hover:bg-surface-variant transition-colors text-sm font-bold leading-none">+</button>
+                    </div>
+                    <div class="shrink-0 text-right min-w-[64px]">
+                        <p class="text-sm font-bold text-primary">EGP ${(item.price * item.qty).toLocaleString()}</p>
+                        <button onclick="removeItem(${idRef})" class="text-[10px] text-error hover:underline mt-0.5 block ml-auto">Remove</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        /* ─────────────────────────────────────
+           Open / Close Cart Drawer
+        ───────────────────────────────────── */
+        function openCart() {
+            document.getElementById('cart-drawer').classList.add('open');
+            document.getElementById('cart-overlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCart() {
+            document.getElementById('cart-drawer').classList.remove('open');
+            document.getElementById('cart-overlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // setupCartPanel is now a no-op so no competing listeners are added.
+        // Wire our buttons directly.
+        document.getElementById('cart-btn').addEventListener('click', openCart);
+        document.getElementById('mobile-cart-btn').addEventListener('click', openCart);
+        document.getElementById('close-cart').addEventListener('click', closeCart);
+        document.getElementById('cart-overlay').addEventListener('click', closeCart);
+
+        /* ─────────────────────────────────────
+           Proceed to Checkout
+        ───────────────────────────────────── */
+        document.getElementById('proceed-checkout-btn').addEventListener('click', function () {
+            // Basic validation
+            const name    = document.getElementById('field-name').value.trim();
+            const phone   = document.getElementById('field-phone').value.trim();
+            const address = document.getElementById('field-address').value.trim();
+            const city    = document.getElementById('field-city').value.trim();
+
+            if (!name || !phone || !address || !city) {
+                // Highlight empty fields
+                [
+                    { id: 'field-name',    val: name },
+                    { id: 'field-phone',   val: phone },
+                    { id: 'field-address', val: address },
+                    { id: 'field-city',    val: city },
+                ].forEach(f => {
+                    const el = document.getElementById(f.id);
+                    if (!f.val) {
+                        el.classList.add('border-error', 'ring-1', 'ring-error/30');
+                        el.addEventListener('input', () => el.classList.remove('border-error', 'ring-1', 'ring-error/30'), { once: true });
+                    }
+                });
+                // Scroll to first empty
+                document.getElementById('field-name').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            // Show checkout section
+            document.getElementById('checkout-section').classList.add('visible');
+            this.classList.add('hidden');
+
+            // Scroll to checkout
+            setTimeout(() => {
+                document.getElementById('checkout-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 150);
+        });
+
+        /* ─────────────────────────────────────
+           Place Order  (calls real API)
+        ───────────────────────────────────── */
+        document.getElementById('place-order-btn').addEventListener('click', async function () {
+            const btn = this;
+            const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+            const address = document.getElementById('field-address').value.trim();
+            const city    = document.getElementById('field-city').value.trim();
+            const phone   = document.getElementById('field-phone').value.trim();
+            const notes   = document.getElementById('field-notes').value.trim();
+
+            // Loading state
+            btn.disabled = true;
+            btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Placing Order…`;
+
+            const apiItems  = cart.filter(i => i.isApi);
+            const demoItems = cart.filter(i => !i.isApi);
+
+            try {
+                let displayId;
+
+                if (apiItems.length > 0 && typeof api !== 'undefined') {
+                    // ── Real API products: sync then checkout ──
+
+                    // Step 1: push every item to server cart (await all)
+                    await Promise.all(apiItems.map(item =>
+                        api.post('/cart/items', {
+                            product_listing_id: item.id,
+                            quantity:           item.qty,
+                            price_snapshot:     item.price
+                        }).catch(() => {})
+                    ));
+
+                    // Step 2: checkout
+                    const res = await api.post('/cart/checkout', {
+                        shipping_address: {
+                            street:  address,
+                            city:    city,
+                            country: 'Egypt',
+                            state:   '',
+                            zip:     ''
+                        },
+                        contact_phone: phone || null,
+                        notes:         notes || null
+                    });
+
+                    const orders = res.data || [];
+                    const rawId  = orders[0]?._id || orders[0]?.order_id || orders[0]?.id || '';
+                    displayId = rawId
+                        ? '#' + String(rawId).slice(-6).toUpperCase()
+                        : '#PD-' + Math.floor(10000 + Math.random() * 90000);
+
+                } else {
+                    // ── Demo-only items: show success without hitting backend ──
+                    displayId = '#PD-' + Math.floor(10000 + Math.random() * 90000);
+                }
+
+                // ── Show success screen ──
+                document.getElementById('order-id').textContent     = displayId;
+                document.getElementById('success-total').textContent = 'EGP ' + subtotal.toLocaleString();
+                document.getElementById('success-screen').classList.add('visible');
+
+                cart = [];
+                updateCartUI();
+
+            } catch (err) {
+                const msg = err?.message || 'Order failed. Please try again.';
+                if (typeof showToast === 'function') showToast(msg, 'error');
+                else alert(msg);
+
+                btn.disabled = false;
+                btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">check_circle</span> Place Order`;
+            }
+        });
+
+        /* ─────────────────────────────────────
+           Close Success Screen
+        ───────────────────────────────────── */
+        function closeSuccessScreen(goToOrders) {
+            document.getElementById('success-screen').classList.remove('visible');
+            document.getElementById('checkout-section').classList.remove('visible');
+            document.getElementById('proceed-checkout-btn').classList.remove('hidden');
+            // Reset form fields
+            ['field-name','field-phone','field-address','field-city','field-notes']
+                .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            closeCart();
+            if (goToOrders) window.location.href = 'ordertracking.html';
+        }
+
+        /* ─────────────────────────────────────
+           Filter Modal (original logic)
+        ───────────────────────────────────── */
         const filterBtn = document.querySelector('button[data-filter]');
         const modal = document.getElementById('filter-modal');
-        function pos() { const r = filterBtn.getBoundingClientRect(), w = 384; let l = r.left; if (l + w > window.innerWidth - 16) l = r.right - w; modal.style.top = (r.bottom + 8) + 'px'; modal.style.left = l + 'px'; }
+
+        function pos() {
+            const r = filterBtn.getBoundingClientRect(), w = 384;
+            let l = r.left;
+            if (l + w > window.innerWidth - 16) l = r.right - w;
+            modal.style.top = (r.bottom + 8) + 'px';
+            modal.style.left = l + 'px';
+        }
+
         filterBtn.addEventListener('click', e => { e.stopPropagation(); pos(); modal.classList.toggle('hidden'); });
         document.getElementById('close-filter').addEventListener('click', () => modal.classList.add('hidden'));
         document.addEventListener('click', e => { if (!modal.contains(e.target) && e.target !== filterBtn) modal.classList.add('hidden'); });
-        document.getElementById('clear-filters').addEventListener('click', () => { modal.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false); const rs = modal.querySelectorAll('input[type="radio"]'); if (rs.length) rs[0].checked = true; sync(); });
-        document.getElementById('apply-filters').addEventListener('click', () => modal.classList.add('hidden'));
-        function sync() { modal.querySelectorAll('input[type="radio"]').forEach(r => { const l = r.nextElementSibling; l.style.backgroundColor = r.checked ? '#006a39' : ''; l.style.color = r.checked ? '#ffffff' : ''; l.style.borderColor = r.checked ? '#006a39' : ''; }); }
-        modal.querySelectorAll('input[type="radio"]').forEach(r => r.addEventListener('change', sync)); sync();
+        document.getElementById('clear-filters').addEventListener('click', () => {
+            modal.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+            const rs = modal.querySelectorAll('input[type="radio"]');
+            if (rs.length) rs[0].checked = true;
+            sync();
+            clearFilters();
+        });
+
+        document.getElementById('apply-filters').addEventListener('click', () => {
+            modal.classList.add('hidden');
+            applyFilters();
+        });
+
+        /* ─────────────────────────────────────
+           Client-side Filter & Sort
+        ───────────────────────────────────── */
+
+        // Crop → diseases it commonly affects (best-effort mapping)
+        const CROP_DISEASE_MAP = {
+            tomato: ['early blight', 'late blight', 'downy mildew'],
+            corn:   ['nitrogen deficiency', 'leaf blight', 'rust'],
+            wheat:  ['early blight', 'powdery mildew', 'rust'],
+        };
+
+        // Type filter → matching logic against card data attributes
+        const TYPE_MATCH = {
+            'organic':      card => card.dataset.organic === 'true',
+            'fast-acting':  card => ['fungicide','pesticide','insecticide'].includes(card.dataset.category),
+            'preventative': card => ['fertilizer','bio-fungicide'].includes(card.dataset.category)
+                                 || (card.dataset.diseases || '').includes('deficiency'),
+        };
+
+        function applyFilters() {
+            const grid = document.querySelector('[data-products-grid]');
+            if (!grid) return;
+
+            const cards = Array.from(grid.querySelectorAll('.product-card'));
+            if (!cards.length) return;
+
+            // ── Read selections ──
+            const selDiseases = [];
+            const selCrops    = [];
+            const selTypes    = [];
+            let   sortVal     = 'recommended';
+
+            modal.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                if (!cb.checked) return;
+                const ft = cb.dataset.filterType;
+                if (ft === 'disease') selDiseases.push(cb.value.toLowerCase());
+                else if (ft === 'crop') selCrops.push(cb.value.toLowerCase());
+                else if (ft === 'type') selTypes.push(cb.value.toLowerCase());
+            });
+
+            const sortRadio = modal.querySelector('input[name="sort"]:checked');
+            if (sortRadio) sortVal = sortRadio.value;
+
+            // ── Show / hide cards ──
+            cards.forEach(card => {
+                let show = true;
+
+                // Disease filter
+                if (selDiseases.length) {
+                    const cardDiseases = (card.dataset.diseases || '').toLowerCase();
+                    show = selDiseases.some(d => cardDiseases.includes(d));
+                }
+
+                // Crop filter (map crop → disease keywords)
+                if (show && selCrops.length) {
+                    const cardDiseases = (card.dataset.diseases || '').toLowerCase();
+                    show = selCrops.some(crop => {
+                        const related = CROP_DISEASE_MAP[crop] || [];
+                        return related.some(d => cardDiseases.includes(d));
+                    });
+                }
+
+                // Type filter
+                if (show && selTypes.length) {
+                    show = selTypes.some(t => TYPE_MATCH[t] ? TYPE_MATCH[t](card) : false);
+                }
+
+                card.style.display = show ? '' : 'none';
+            });
+
+            // ── Sort visible cards ──
+            if (sortVal !== 'recommended') {
+                const visible = cards.filter(c => c.style.display !== 'none');
+                visible.sort((a, b) => {
+                    const pa = parseFloat(a.dataset.price) || 0;
+                    const pb = parseFloat(b.dataset.price) || 0;
+                    return sortVal === 'price-asc' ? pa - pb : pb - pa;
+                });
+                // Re-append in sorted order (hidden cards stay at end)
+                const hidden = cards.filter(c => c.style.display === 'none');
+                [...visible, ...hidden].forEach(c => grid.appendChild(c));
+            }
+
+            // ── Show "no results" message if all hidden ──
+            const anyVisible = cards.some(c => c.style.display !== 'none');
+            let noResults = grid.querySelector('[data-no-results]');
+            if (!anyVisible) {
+                if (!noResults) {
+                    noResults = document.createElement('div');
+                    noResults.dataset.noResults = '1';
+                    noResults.className = 'col-span-full py-16 text-center';
+                    noResults.innerHTML = `<span class="material-symbols-outlined text-5xl text-on-surface-variant/40 block mb-3">filter_list_off</span><p class="text-on-surface-variant font-medium">No products match your filters</p>`;
+                    grid.appendChild(noResults);
+                }
+            } else if (noResults) {
+                noResults.remove();
+            }
+        }
+
+        function clearFilters() {
+            const grid = document.querySelector('[data-products-grid]');
+            if (!grid) return;
+
+            // Show all cards
+            grid.querySelectorAll('.product-card').forEach(c => c.style.display = '');
+
+            // Remove no-results message if present
+            grid.querySelector('[data-no-results]')?.remove();
+
+            // Reset sort to original DOM order (reload from API resets order too)
+            // Cards stay in their current DOM order which is "recommended"
+        }
+
+        function sync() {
+            modal.querySelectorAll('input[type="radio"]').forEach(r => {
+                const l = r.nextElementSibling;
+                l.style.backgroundColor = r.checked ? '#006a39' : '';
+                l.style.color = r.checked ? '#ffffff' : '';
+                l.style.borderColor = r.checked ? '#006a39' : '';
+            });
+        }
+        modal.querySelectorAll('input[type="radio"]').forEach(r => r.addEventListener('change', sync));
+        sync();
     </script>
 
-    <script src="../api.js"></script>
-    <script src="./treatmentsolutions.js"></script>
 </body>
 
 </html>

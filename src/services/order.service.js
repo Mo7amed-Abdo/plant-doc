@@ -19,7 +19,6 @@ async function getCart(farmerId) {
       populate: { path: 'product_id', select: 'name category unit default_image' },
     });
 
-  // Auto-create empty cart if none exists
   if (!cart) {
     cart = await Cart.create({ farmer_id: farmerId, items: [] });
   }
@@ -47,7 +46,7 @@ async function addToCart(farmerId, body) {
 
   if (existingItem) {
     existingItem.quantity = Number(quantity);
-    existingItem.price_snapshot = listing.price; // Refresh price snapshot
+    existingItem.price_snapshot = listing.price;
   } else {
     cart.items.push({
       product_listing_id,
@@ -86,18 +85,9 @@ async function removeFromCart(farmerId, listingId) {
 }
 
 // ─── Checkout ─────────────────────────────────────────────────────────────────
+// NOTE: Transactions removed — local MongoDB runs as standalone (no replica set).
+// For production, restore the session/transaction wrapper.
 
-/**
- * Checkout flow:
- * 1. Validate every cart item (stock, listing still active)
- * 2. Group items by company_id
- * 3. For each company group → create one Order + N OrderItems in a transaction
- * 4. Decrement stock_quantity on each listing
- * 5. Clear the cart
- * 6. Fire company notifications
- *
- * Returns array of created orders (one per company).
- */
 async function checkout(farmerId, farmerUserId, body, io) {
   const { shipping_address, contact_phone, notes, related_treatment_request_id } = body;
 
@@ -127,7 +117,7 @@ async function checkout(farmerId, farmerUserId, body, io) {
   }
 
   // ── 2. Group cart items by company ───────────────────────────────────────────
-  const groups = new Map(); // companyId → [{ listing, item }]
+  const groups = new Map();
   for (const item of cart.items) {
     const listing = listingMap.get(item.product_listing_id.toString());
     const companyKey = listing.company_id.toString();
@@ -135,9 +125,7 @@ async function checkout(farmerId, farmerUserId, body, io) {
     groups.get(companyKey).push({ listing, item });
   }
 
-  // ── 3. Create one Order per company group (single transaction) ───────────────
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  // ── 3. Create one Order per company group (no transaction — standalone DB) ───
   const createdOrders = [];
 
   try {
@@ -146,34 +134,33 @@ async function checkout(farmerId, farmerUserId, body, io) {
         (sum, { listing, item }) => sum + listing.price * item.quantity,
         0
       );
-      const total = subtotal; // Extend here for shipping/tax later
+      const total = subtotal;
 
+      // Generate unique order code
       let orderCode;
       let attempts = 0;
-      // Retry on rare order_code collision (unique index on order_code)
       while (attempts < 5) {
         orderCode = generateOrderCode();
-        const exists = await Order.findOne({ order_code: orderCode }).session(session);
+        const exists = await Order.findOne({ order_code: orderCode });
         if (!exists) break;
         attempts++;
       }
 
-      const [order] = await Order.create(
-        [{
-          order_code: orderCode,
-          farmer_id: farmerId,
-          company_id: companyId,
-          related_treatment_request_id: related_treatment_request_id || null,
-          subtotal: parseFloat(subtotal.toFixed(2)),
-          total: parseFloat(total.toFixed(2)),
-          shipping_address,
-          contact_phone: contact_phone || null,
-          notes: notes || null,
-          placed_at: new Date(),
-        }],
-        { session }
-      );
+      // Create order
+      const order = await Order.create({
+        order_code: orderCode,
+        farmer_id: farmerId,
+        company_id: companyId,
+        related_treatment_request_id: related_treatment_request_id || null,
+        subtotal: parseFloat(subtotal.toFixed(2)),
+        total: parseFloat(total.toFixed(2)),
+        shipping_address,
+        contact_phone: contact_phone || null,
+        notes: notes || null,
+        placed_at: new Date(),
+      });
 
+      // Create order items
       const orderItems = groupItems.map(({ listing, item }) => ({
         order_id: order._id,
         product_listing_id: listing._id,
@@ -185,62 +172,59 @@ async function checkout(farmerId, farmerUserId, body, io) {
         subtotal: parseFloat((listing.price * item.quantity).toFixed(2)),
       }));
 
-      await OrderItem.insertMany(orderItems, { session });
+      await OrderItem.insertMany(orderItems);
 
       // Decrement stock
       for (const { listing, item } of groupItems) {
-        await ProductListing.findByIdAndUpdate(
+        const updated = await ProductListing.findByIdAndUpdate(
           listing._id,
           { $inc: { stock_quantity: -item.quantity } },
-          { session, new: true }
-        ).then(async (updated) => {
-          // Re-derive stock_status after decrement
+          { new: true }
+        );
+
+        // Update stock_status after decrement
+        if (updated) {
           let newStatus = 'in_stock';
           if (updated.stock_quantity <= 0) newStatus = 'out_of_stock';
           else if (updated.stock_quantity <= 20) newStatus = 'low_stock';
+
           if (updated.stock_status !== newStatus) {
-            await ProductListing.findByIdAndUpdate(
-              listing._id,
-              { stock_status: newStatus },
-              { session }
-            );
+            await ProductListing.findByIdAndUpdate(listing._id, { stock_status: newStatus });
           }
-        });
+        }
       }
 
       createdOrders.push(order);
     }
 
-    // Clear the cart
-    await Cart.findOneAndUpdate(
-      { farmer_id: farmerId },
-      { items: [] },
-      { session }
-    );
+    // ── 4. Clear the cart ────────────────────────────────────────────────────
+    await Cart.findOneAndUpdate({ farmer_id: farmerId }, { items: [] });
 
-    await session.commitTransaction();
-
-    // ── 4. Fire notifications (outside transaction) ──────────────────────────
+    // ── 5. Fire notifications ────────────────────────────────────────────────
     for (const order of createdOrders) {
-      const company = await Company.findById(order.company_id).populate('owner_user_id', '_id');
-      if (company) {
-        await notificationService.notifyCompany(
-          company._id,
-          company.owner_user_id._id,
-          {
-            type: 'new_order',
-            title: 'New order received',
-            body: `Order ${order.order_code} has been placed.`,
-            related_id: order._id,
-            related_type: 'order',
-          },
-          io
-        );
-      }
+      try {
+        const company = await Company.findById(order.company_id).populate('owner_user_id', '_id');
+        if (company) {
+          await notificationService.notifyCompany(
+            company._id,
+            company.owner_user_id._id,
+            {
+              type: 'new_order',
+              title: 'New order received',
+              body: `Order ${order.order_code} has been placed.`,
+              related_id: order._id,
+              related_type: 'order',
+            },
+            io
+          );
+        }
+      } catch (_) { /* notifications are non-critical — don't fail the order */ }
+    }
 
-      // Fire low_stock notification if any listing dropped to low_stock
-      for (const [, groupItems] of groups.entries()) {
-        for (const { listing } of groupItems) {
+    // Low stock notifications
+    for (const [, groupItems] of groups.entries()) {
+      for (const { listing } of groupItems) {
+        try {
           const updated = await ProductListing.findById(listing._id);
           if (updated?.stock_status === 'low_stock') {
             const company = await Company.findById(updated.company_id).populate('owner_user_id', '_id');
@@ -259,16 +243,14 @@ async function checkout(farmerId, farmerUserId, body, io) {
               );
             }
           }
-        }
+        } catch (_) { /* non-critical */ }
       }
     }
 
     return createdOrders;
+
   } catch (err) {
-    await session.abortTransaction();
     throw err;
-  } finally {
-    session.endSession();
   }
 }
 

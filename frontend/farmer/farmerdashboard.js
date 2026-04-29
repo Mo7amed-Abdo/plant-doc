@@ -8,32 +8,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadStats() {
   try {
-    const [dRes, fRes, oRes] = await Promise.all([
-      api.get('/diagnoses?limit=200'),
+    const [sRes, fRes, oRes] = await Promise.all([
+      api.get('/diagnoses/stats'),
       api.get('/farmer/fields'),
       api.get('/orders?limit=200'),
     ]);
-    const diags  = dRes.data || [];
+    const stats   = sRes.data || {};
     const fields = fRes.data || [];
     const orders = oRes.data || [];
-    const totalCrops   = fields.reduce((s,f) => s+(f.crops_count||0), 0);
-    const activeDis    = diags.filter(d => ['high','critical'].includes(d.ai_result?.severity) && d.status!=='archived').length;
-    const activeOrders = orders.filter(o => !['delivered','cancelled'].includes(o.status)).length;
-
-    setText('[data-stat="recovered-crops"]', totalCrops.toLocaleString());
-    setText('[data-stat="total-crops"]',     totalCrops.toLocaleString());
+    const activeDis    = orders.filter(o => !['delivered','cancelled'].includes(o.status)).length;
+///teo line add 
+    setText('[data-stat="recovered-crops"]', stats.recovered_crops || 0);
+    setText('[data-stat="total-crops"]', stats.total_crops || 0);
     setText('[data-stat="fields-count"]',    `Across ${fields.length} field${fields.length!==1?'s':''}`);
-    setText('[data-stat="active-diseases"]', activeDis);
-    setText('[data-stat="active-orders"]',   activeOrders);
+    setText('[data-stat="active-diseases"]', stats.active_diseases || 0);/////changed
+    setText('[data-stat="active-orders"]',   activeDis);
   } catch(e) { console.error(e); }
-}
+} 
 
 async function loadRecentDiagnoses() {
   const tbody = document.querySelector('table tbody');
   if (!tbody) return;
   tbody.innerHTML = skeletonRows(3, 6);
   try {
-    const rows = (await api.get('/diagnoses?limit=5')).data || [];
+    const res = await api.get('/diagnoses?limit=5');
+    const rows = res.data?.data || res.data || [];
     if (!rows.length) {
       tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-on-surface-variant text-sm">No diagnoses yet — upload a plant photo to get started</td></tr>`;
       return;
@@ -54,7 +53,17 @@ async function loadRecentDiagnoses() {
           </div>
         </td>
         <td class="px-6 py-4">${severityBadge(d.ai_result?.severity)}</td>
-        <td class="px-6 py-4"><button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-xl">chevron_right</span></button></td>
+        
+<td class="px-6 py-4">
+  ${
+      d.is_recovered
+        ? `<span class="text-green-600">Recovered</span>`
+        : d.ai_result?.severity?.toLowerCase() === 'low'
+          ? `<button onclick="handleRecoverClick(event, '${d.id}', this)" class="text-xs bg-green-600 text-white px-3 py-1 rounded">Mark as Recovered</button>`
+          : `<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-xl">chevron_right</span></button>`
+  }
+</td>
+
       </tr>`).join('');
   } catch(e) {
     tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-error text-sm">Failed to load diagnoses</td></tr>`;
@@ -63,7 +72,7 @@ async function loadRecentDiagnoses() {
 
 // ── Upload ────────────────────────────────────────────────────────────────────
 function setupUpload() {
-  const zone  = document.querySelector('.border-dashed');
+  const zone = document.getElementById('uploadZone');
   const input = (() => { const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.style.display='none'; document.body.appendChild(i); return i; })();
 
   if (zone) {
@@ -151,5 +160,40 @@ function promptInput(title, placeholder) {
     inp.addEventListener('keydown', e => { if(e.key==='Enter') m.querySelector('#p-ok').click(); });
   });
 }
+//////////////////////////////////farmer e
+///////////
+async function markRecovered(id, btn) {
+  try {
+    await api.patch(`/diagnoses/${id}/recover`);
+    if (btn) {
+      const cell = btn.parentElement;
+      btn.remove();
+      cell.innerHTML = `<span class="text-green-600">Recovered</span>`;
+    }
+    showToast('Crop marked as recovered', 'success');
+    await loadStats();
+  } catch(e) {
+    showToast(e.message || 'Failed to mark as recovered', 'error');
+  }
+}
+/////////////////add
+function handleRecoverClick(event, id, btn) {
+  event.stopPropagation();
+  event.preventDefault();
+
+  markRecovered(id, btn);
+}
+function rowClick(event) {
+  // لو ضغط زرار → متعملش navigation
+  if (event.target.closest('button')) return;
+
+  window.location.href = 'recendiagnoses.html';
+}
 
 function setText(sel, val) { document.querySelectorAll(sel).forEach(el => el.textContent = val??''); }
+async function applyFilter(severity) {
+  const res = await fetch(`/diagnoses?severity=${severity}`);
+  const data = await res.json();
+
+  renderDiagnoses(data);
+}

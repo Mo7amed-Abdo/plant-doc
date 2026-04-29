@@ -47,6 +47,7 @@ const diagnosisSchema = new mongoose.Schema(
       default: 'ai_only',
     },
     deleted_at: { type: Date, default: null },
+    is_recovered: { type: Boolean, default: false },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
@@ -62,6 +63,7 @@ diagnosisSchema.pre(/^find/, function (next) {
   this.where({ deleted_at: null });
   next();
 });
+// belong to rercoveded crops
 
 const Diagnosis = mongoose.model('Diagnosis', diagnosisSchema);
 module.exports = Diagnosis;

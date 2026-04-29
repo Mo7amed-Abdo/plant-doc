@@ -27,27 +27,21 @@ async function createRequest(farmerId, body, io) {
 
   const priority = SEVERITY_TO_PRIORITY[diagnosis.ai_result?.severity] || 'medium';
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
-    const [request] = await TreatmentRequest.create(
-      [{ farmer_id: farmerId, diagnosis_id, priority, farmer_message: farmer_message || null }],
-      { session }
-    );
+  // ✅ بدون session
+  const request = await TreatmentRequest.create({
+    farmer_id: farmerId,
+    diagnosis_id,
+    priority,
+    farmer_message: farmer_message || null
+  });
 
-    // Mark diagnosis as pending expert review
-    await Diagnosis.findByIdAndUpdate(diagnosis_id, { status: 'pending_expert' }, { session });
+  // ✅ update عادي
+  await Diagnosis.findByIdAndUpdate(diagnosis_id, {
+    status: 'pending_expert'
+  });
 
-    await session.commitTransaction();
-    return request;
-  } catch (err) {
-    await session.abortTransaction();
-    throw err;
-  } finally {
-    session.endSession();
-  }
+  return request;
 }
-
 // ─── Farmer: list own requests ────────────────────────────────────────────────
 
 async function getFarmerRequests(farmerId, query) {
@@ -164,77 +158,61 @@ async function submitReview(expertId, expertUserId, requestId, body, io) {
     assigned_expert_id: expertId,
     status: 'in_review',
   });
+
   if (!request) throw createError(404, 'Treatment request not found or not assigned to you');
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
-    // Create expert review
-    const [review] = await ExpertReview.create(
-      [{
-        diagnosis_id: request.diagnosis_id,
-        expert_id: expertId,
-        decision,
-        confirmed_disease: confirmed_disease || null,
-        confirmed_severity: confirmed_severity || null,
-        expert_notes: expert_notes || null,
-        reviewed_at: new Date(),
-      }],
-      { session }
+  // ✅ create review
+  const review = await ExpertReview.create({
+    diagnosis_id: request.diagnosis_id,
+    expert_id: expertId,
+    decision,
+    confirmed_disease: confirmed_disease || null,
+    confirmed_severity: confirmed_severity || null,
+    expert_notes: expert_notes || null,
+    reviewed_at: new Date(),
+  });
+
+  // ✅ update request
+  request.status = decision === 'rejected' ? 'rejected' : 'approved';
+  request.expert_review_id = review._id;
+  await request.save();
+
+  // ✅ update diagnosis
+  await Diagnosis.findByIdAndUpdate(
+    request.diagnosis_id,
+    { status: 'expert_reviewed' }
+  );
+
+  // ✅ update expert
+  await Expert.findByIdAndUpdate(
+    expertId,
+    { $inc: { cases_reviewed: 1 } }
+  );
+
+  // ✅ resolve chat
+  await Chat.findOneAndUpdate(
+    { treatment_request_id: request._id },
+    { is_resolved: true }
+  );
+
+  // 🔔 notify farmer
+  const farmer = await Farmer.findById(request.farmer_id).populate('user_id', '_id');
+  if (farmer) {
+    await notificationService.notifyFarmer(
+      farmer._id,
+      farmer.user_id._id,
+      {
+        type: 'diagnosis_ready',
+        title: 'Expert review complete',
+        body: `Your treatment request has been ${request.status}. Check the results.`,
+        related_id: request._id,
+        related_type: 'treatment_request',
+      },
+      io
     );
-
-    // Update treatment request
-    request.status = decision === 'rejected' ? 'rejected' : 'approved';
-    request.expert_review_id = review._id;
-    await request.save({ session });
-
-    // Update diagnosis status
-    await Diagnosis.findByIdAndUpdate(
-      request.diagnosis_id,
-      { status: 'expert_reviewed' },
-      { session }
-    );
-
-    // Update expert counters
-    await Expert.findByIdAndUpdate(
-      expertId,
-      { $inc: { cases_reviewed: 1 } },
-      { session }
-    );
-
-    // Mark chat as resolved
-    await Chat.findOneAndUpdate(
-      { treatment_request_id: request._id },
-      { is_resolved: true },
-      { session }
-    );
-
-    await session.commitTransaction();
-
-    // Notify farmer out of transaction
-    const farmer = await Farmer.findById(request.farmer_id).populate('user_id', '_id');
-    if (farmer) {
-      await notificationService.notifyFarmer(
-        farmer._id,
-        farmer.user_id._id,
-        {
-          type: 'diagnosis_ready',
-          title: 'Expert review complete',
-          body: `Your treatment request has been ${request.status}. Check the results.`,
-          related_id: request._id,
-          related_type: 'treatment_request',
-        },
-        io
-      );
-    }
-
-    return { request, review };
-  } catch (err) {
-    await session.abortTransaction();
-    throw err;
-  } finally {
-    session.endSession();
   }
+
+  return { request, review };
 }
 
 module.exports = {

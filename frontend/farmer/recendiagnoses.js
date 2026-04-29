@@ -152,3 +152,34 @@ function promptMsg() {
     m.querySelector('#m-skip').addEventListener('click', () => { m.remove(); resolve(null); });
   });
 }
+document.getElementById('apply-filters').addEventListener('click', async () => {
+  const filters = { severity: [], crop: [], status: [] };
+
+  document.querySelectorAll('.filter-chip input[type="checkbox"]').forEach(cb => {
+    if (cb.checked && cb.value && cb.dataset.type) {
+      filters[cb.dataset.type].push(cb.value.toLowerCase());
+    }
+  });
+
+  const params = new URLSearchParams();
+  if (filters.severity.length) params.set('severity', filters.severity.join(','));
+  if (filters.crop.length) params.set('crop', filters.crop.join(','));
+  if (filters.status.length) params.set('status', filters.status.join(','));
+
+  const queryString = params.toString();
+  const url = queryString ? `/diagnoses?${queryString}` : '/diagnoses?limit=100';
+
+  console.log('Filter request URL:', url);
+
+  try {
+    const res = await api.get(url);
+    _allDiag = res.data || [];
+    render(_filterDiag(_filterTab), document.querySelector('[data-diagnoses-grid], main .grid'));
+    document.getElementById('filter-modal').classList.add('hidden');
+  } catch(e) {
+    showToast('Failed to load diagnoses', 'error');
+  }
+});
+document.getElementById("newScanBtn").addEventListener("click", () => {
+  window.location.href = "/frontend/farmer/farmerdashboard.html#upload";
+});

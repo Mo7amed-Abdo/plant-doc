@@ -97,13 +97,13 @@
         <div class="flex-1 flex flex-col gap-2 px-4">
             <!-- Dashboard (inactive) -->
             <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
-                href="#">
+                href="expertDashboard.html">
                 <span class="material-symbols-outlined">dashboard</span>
                 <span>Dashboard</span>
             </a>
             <!-- Pending Cases (inactive) -->
             <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
-                href="#">
+                href="expertPendingcases.html">
                 <span class="material-symbols-outlined">pending_actions</span>
                 <span>Pending Cases</span>
             </a>
@@ -118,7 +118,7 @@
             </a>
             <!-- Profile (inactive) -->
             <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
-                href="#">
+                href="expertProfile.html">
                 <span class="material-symbols-outlined">account_circle</span>
                 <span>Profile</span>
             </a>
@@ -182,7 +182,7 @@
                 </div>
 
                 <!-- Chat Items -->
-                <div class="flex-1 overflow-y-auto">
+                <div class="flex-1 overflow-y-auto" data-chat-list>
 
                     <!-- Chat Item 1 (Active) -->
                     <div class="flex items-start gap-3 p-4 bg-primary/5 border-l-4 rounded-xl border-green-700 cursor-pointer">
@@ -250,11 +250,11 @@
                         <img alt="Avatar" class="w-10 h-10 rounded-full object-cover"
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxSaHItThacyXd_hGua5ao6wpSv08xsL1D4S1na1XvyDgRFOVclYlvkuqX3lajoV0RYmrBE2NWx-1tI-AexVf_NUXXfqmEggD7hnWY74aN4V_1r-PrVsUqZp5aQMtrm5By2lMdALDG4iPo6HEv1QdKrrUqwd95FIMW2Pa57QoL6F_s-8xExiXFxhrOwf3h3siV4gCI3DrmvREate3cv3FRN4lrvfvyWf_jinjNAnIcn2oDNBlus-ABmSpij5Oz8U1gW_SyqiPo3c8"/>
                         <div>
-                            <h2 class="text-lg font-bold text-on-surface flex items-center gap-2">
+                            <h2 class="text-lg font-bold text-on-surface flex items-center gap-2" data-chat-header-name>
                                 John Miller
                                 <span class="px-2 py-0.5 rounded text-xs font-semibold bg-error-container text-on-error-container">Urgent</span>
                             </h2>
-                            <p class="text-sm text-on-surface-variant flex items-center gap-1">
+                            <p class="text-sm text-on-surface-variant flex items-center gap-1" data-chat-header-sub>
                                 <span class="material-symbols-outlined text-[16px]">local_florist</span> Tomato Crop
                             </p>
                         </div>
@@ -270,7 +270,7 @@
                 </div>
 
                 <!-- Chat Messages Area -->
-                <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-surface">
+                <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-surface" data-messages-area>
 
                     <!-- System Message -->
                     <div class="flex justify-center">
@@ -369,8 +369,8 @@
                         <button class="p-2 mt-1 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-variant active:scale-[0.98]">
                             <span class="material-symbols-outlined">image</span>
                         </button>
-                        <input class="flex-1 bg-transparent border-none rounded-xl focus:ring-0 text-sm text-on-surface px-1 py-1" placeholder="Type your message..." type="text"/>
-                        <button class="p-2 bg-white border border-primary text-primary rounded-full hover:bg-primary hover:text-white transition-colors flex items-center justify-center shadow-sm active:scale-[0.98]">
+                        <input id="message-input" class="flex-1 bg-transparent border-none rounded-xl focus:ring-0 text-sm text-on-surface px-1 py-1" placeholder="Type your message..." type="text"/>
+                        <button id="send-btn" class="p-2 bg-white border border-primary text-primary rounded-full hover:bg-primary hover:text-white transition-colors flex items-center justify-center shadow-sm active:scale-[0.98]">
                             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
                         </button>
                     </div>

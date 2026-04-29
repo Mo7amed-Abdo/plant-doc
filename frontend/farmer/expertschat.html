@@ -1,164 +1,395 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Chat with Expert - PlantDoc</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script id="tailwind-config">
-        tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-container": "#eceeef", "surface-variant": "#e1e3e4", "on-background": "#191c1d", "background": "#f8fafb", "primary": "#006a39", "on-tertiary-fixed": "#40000f", "outline-variant": "#bdcabc", "on-error-container": "#93000a", "surface-container-low": "#f2f4f5", "secondary-container": "#c6e4f4", "on-error": "#ffffff", "on-primary-fixed": "#00210e", "surface-container-lowest": "#ffffff", "error": "#ba1a1a", "tertiary-fixed": "#ffdadb", "on-surface-variant": "#3e4a3f", "primary-fixed-dim": "#64dd91", "outline": "#6d7a6f", "inverse-on-surface": "#eff1f2", "secondary-fixed-dim": "#adcbda", "inverse-surface": "#2e3132", "surface-tint": "#006d3a", "tertiary": "#a23546", "on-secondary": "#ffffff", "surface": "#f8fafb", "secondary": "#466270", "primary-fixed": "#82faab", "tertiary-container": "#c24d5e", "surface-dim": "#d8dadb", "surface-container-highest": "#e1e3e4", "on-tertiary-fixed-variant": "#851f33", "on-secondary-container": "#4a6774", "surface-bright": "#f8fafb", "on-secondary-fixed": "#001f2a", "surface-container-high": "#e6e8e9", "error-container": "#ffdad6", "on-primary": "#ffffff", "tertiary-fixed-dim": "#ffb2b8", "on-primary-fixed-variant": "#00522b", "on-surface": "#191c1d", "secondary-fixed": "#c9e7f7", "on-secondary-fixed-variant": "#2e4b57", "on-primary-container": "#f6fff4", "primary-container": "#008649", "on-tertiary-container": "#fffbff", "on-tertiary": "#ffffff", "inverse-primary": "#64dd91" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] } } } }
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#eceeef", "surface-variant": "#e1e3e4", "on-background": "#191c1d",
+                        "background": "#f8fafb", "primary": "#006a39", "on-tertiary-fixed": "#40000f",
+                        "outline-variant": "#bdcabc", "on-error-container": "#93000a", "surface-container-low": "#f2f4f5",
+                        "secondary-container": "#c6e4f4", "on-error": "#ffffff", "on-primary-fixed": "#00210e",
+                        "surface-container-lowest": "#ffffff", "error": "#ba1a1a", "tertiary-fixed": "#ffdadb",
+                        "on-surface-variant": "#3e4a3f", "primary-fixed-dim": "#64dd91", "outline": "#6d7a6f",
+                        "inverse-on-surface": "#eff1f2", "secondary-fixed-dim": "#adcbda", "inverse-surface": "#2e3132",
+                        "surface-tint": "#006d3a", "tertiary": "#a23546", "on-secondary": "#ffffff", "surface": "#f8fafb",
+                        "secondary": "#466270", "primary-fixed": "#82faab", "tertiary-container": "#c24d5e",
+                        "surface-dim": "#d8dadb", "surface-container-highest": "#e1e3e4", "on-tertiary-fixed-variant": "#851f33",
+                        "on-secondary-container": "#4a6774", "surface-bright": "#f8fafb", "on-secondary-fixed": "#001f2a",
+                        "surface-container-high": "#e6e8e9", "error-container": "#ffdad6", "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b8", "on-primary-fixed-variant": "#00522b", "on-surface": "#191c1d",
+                        "secondary-fixed": "#c9e7f7", "on-secondary-fixed-variant": "#2e4b57", "on-primary-container": "#f6fff4",
+                        "primary-container": "#008649", "on-tertiary-container": "#fffbff", "on-tertiary": "#ffffff",
+                        "inverse-primary": "#64dd91"
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] }
+                }
+            }
+        }
     </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
 
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-
         .material-symbols-outlined.fill {
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
 
-        ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
+        /* ── Scrollbars ── */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #d8dadb; border-radius: 20px; }
+
+        /* ── Smooth scroll inside messages ── */
+        [data-messages-area] { scroll-behavior: smooth; }
+
+        /* ── Message entrance animation ── */
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        /* Applied to every child appended by expertschat.js */
+        [data-messages-area] > * {
+            animation: msgIn 0.2s ease both;
         }
 
-        ::-webkit-scrollbar-track {
-            background: transparent;
+        /* ── Typing indicator dots ── */
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0);   opacity: 0.45; }
+            30%            { transform: translateY(-5px); opacity: 1; }
+        }
+        .typing-dot {
+            width: 7px; height: 7px;
+            background: #6d7a6f;
+            border-radius: 9999px;
+            animation: typingBounce 1.1s ease-in-out infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.3s;  }
+
+        /* ── Typing bubble animates in same as messages ── */
+        #typing-indicator {
+            animation: msgIn 0.2s ease both;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background-color: #d8dadb;
-            border-radius: 20px;
+        /* ── Chat list item hover / active ── */
+        [data-chat-list] > * {
+            border-left: 3px solid transparent;
+            transition: background 0.15s ease, border-color 0.15s ease;
+            cursor: pointer;
         }
+        [data-chat-list] > *:hover   { background: #f0fdf4; }
+        [data-chat-list] > *.active  { background: #f0fdf4; border-left-color: #006a39; }
+
+        /* ── Send button ── */
+        #send-btn { transition: background 0.15s ease, transform 0.1s ease; }
+        #send-btn:hover  { background: #008649 !important; }
+        #send-btn:active { transform: scale(0.93); }
+
+        /* ── Input focus ── */
+        #message-input:focus { outline: none; }
+        .input-wrap:focus-within {
+            box-shadow: 0 0 0 2px rgba(0,106,57,0.22);
+            border-color: #006a39;
+        }
+
+        /* ── Quick reply chips ── */
+        .quick-chip {
+            transition: background 0.15s ease, color 0.15s ease;
+            white-space: nowrap;
+        }
+        .quick-chip:hover { background: #006a39; color: #fff; }
+
+        /* ── Online dot pulse ── */
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.35; }
+        }
+        .online-dot { animation: pulseDot 2s ease-in-out infinite; }
+
+        /* ── No scrollbar on quick replies ── */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 
 <body class="bg-background text-on-background h-screen flex font-body overflow-hidden">
 
-    <!-- SideNavBar -->
-    <nav
-        class="bg-slate-50 text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
-        <div class="px-6 pt-6 pb-1"><span class="text-2xl font-black text-green-700">PlantDoc</span></div>
-        <p class="text-xs text-slate-500 px-6 mb-4">Modern Farmer Portal</p>
+    <!-- ══════════════════════════════════════════
+         Side Nav — logo matches all other pages
+    ══════════════════════════════════════════ -->
+    <nav class="bg-slate-50 text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
+        <!-- Logo — same size & alignment as dashboard, diagnoses, treatments -->
+        <div class="flex items-center gap-1">
+            <div class="flex items-center">
+                <img src="logo dark.png" alt="" class="w-26 h-28">
+            </div>
+            <span class="text-lg font-bold text-green-700">PlantDoc</span>
+        </div>
         <div class="flex-1 flex flex-col gap-1 px-4">
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="farmerdashboard.html"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="recendiagnoses.html"><span class="material-symbols-outlined">biotech</span><span>Diagnoses</span></a>
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="treatmentsolutions.html"><span class="material-symbols-outlined">medication</span><span>Treatments</span></a>
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="ordertracking.html"><span class="material-symbols-outlined">shopping_basket</span><span>Orders</span></a>
-            <a class="bg-green-700 text-white rounded-xl px-4 py-3 flex items-center gap-3 active:scale-[0.98] transition-transform"
-                href="#"><span class="material-symbols-outlined fill">forum</span><span>Chat with Expert</span></a>
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]"
-                href="farmernotifications.html"><span class="material-symbols-outlined">notifications</span><span>Notifications</span></a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="farmerdashboard.html">
+                <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="recendiagnoses.html">
+                <span class="material-symbols-outlined">biotech</span><span>Diagnoses</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="treatmentsolutions.html">
+                <span class="material-symbols-outlined">medication</span><span>Treatments</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="ordertracking.html">
+                <span class="material-symbols-outlined">shopping_basket</span><span>Orders</span>
+            </a>
+            <a class="bg-green-700 text-white rounded-xl px-4 py-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="#">
+                <span class="material-symbols-outlined fill">forum</span><span>Chat with Expert</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="farmernotifications.html">
+                <span class="material-symbols-outlined">notifications</span><span>Notifications</span>
+            </a>
         </div>
         <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all"
-                href="farmerprofile.html">
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all" href="farmerprofile.html">
                 <img src="" class="w-8 h-8 rounded-full object-cover border border-outline-variant shrink-0" alt="Profile" data-user-avatar />
-                <div class="flex flex-col"><span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span><span class="text-xs text-on-surface-variant" data-user-role>Loading...</span></div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-lg">logout</span></button>
+                <div class="flex flex-col">
+                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
+                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
             </a>
         </div>
     </nav>
 
-    <!-- Chat Layout -->
+    <!-- ══════════════════════════════════════════
+         Chat Layout
+    ══════════════════════════════════════════ -->
     <div class="flex-1 md:ml-64 flex h-screen overflow-hidden">
 
-        <!-- Conversations Panel -->
-        <aside
-            class="w-80 shrink-0 border-r border-surface-variant flex flex-col bg-surface-container-lowest hidden md:flex">
-            <div class="p-5 border-b border-surface-variant">
-                <h2 class="text-lg font-bold text-on-surface font-headline mb-4">Messages</h2>
+        <!-- ── LEFT: Conversations Panel ── -->
+        <!-- data-chat-list preserved exactly — expertschat.js populates this -->
+        <aside class="w-80 shrink-0 border-r border-surface-variant flex-col bg-white hidden md:flex">
+
+            <!-- Panel header -->
+            <div class="px-5 py-4 border-b border-slate-100 shrink-0">
+                <h2 class="text-base font-bold text-on-surface font-headline mb-4">Messages</h2>
                 <div class="relative">
-                    <span
-                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[17px]">search</span>
                     <input
-                        class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-primary/70 rounded-xl focus:ring-1 focus:ring-primary text-sm text-on-surface placeholder:text-on-surface-variant"
-                        placeholder="Search farmers, crops..." type="text" />
+                        class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl
+                               focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none
+                               text-sm text-on-surface placeholder:text-slate-400 transition-all"
+                        placeholder="Search farmers, crops..."
+                        type="text" />
                 </div>
             </div>
-            <div class="flex-1 overflow-y-auto" data-chat-list></div>
+
+            <!-- Chat list — data-chat-list UNCHANGED -->
+            <div class="flex-1 overflow-y-auto py-1" data-chat-list></div>
         </aside>
 
-        <!-- Chat Window -->
-        <section class="flex-1 flex flex-col min-w-0 bg-surface-container-lowest">
+        <!-- ── RIGHT: Chat Window ── -->
+        <section class="flex-1 flex flex-col min-w-0 bg-background">
 
-            <!-- Chat Header -->
-            <header
-                class="h-[72px] px-6 flex items-center justify-between border-b border-surface-variant bg-surface-bright shrink-0">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-on-primary-container">support_agent</span>
+            <!-- ────────────────────────────────────────
+                 Chat Header — WHITE bg, no call/video
+                 data-chat-header-name and data-chat-header-sub PRESERVED
+            ──────────────────────────────────────── -->
+            <header class="h-[68px] px-6 flex items-center justify-between border-b border-slate-200 bg-white shadow-sm shrink-0">
+                <div class="flex items-center gap-3.5">
+                    <!-- Expert avatar -->
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-primary text-[20px]">support_agent</span>
+                        </div>
+                        <!-- Online dot (shown/hidden by JS via data-chat-header-sub or manually) -->
+                        <span class="online-dot absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
                     </div>
+
+                    <!-- Expert name + badges -->
                     <div>
-                        <h2 class="font-bold text-on-surface text-sm" data-chat-header-name>Expert Chat</h2>
-                        <p class="text-xs text-on-surface-variant" data-chat-header-sub>Active Case</p>
+                        <!-- data-chat-header-name PRESERVED -->
+                        <h2 class="font-bold text-on-surface text-sm leading-tight" data-chat-header-name>Expert Chat</h2>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-xs text-on-surface-variant">Expert · Agronomist</span>
+                            <!-- Active Case badge -->
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 border border-green-200 rounded-full text-[10px] font-semibold">
+                                <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span>
+                                Active Case
+                            </span>
+                        </div>
+                        <!-- data-chat-header-sub PRESERVED but visually hidden — JS still writes to it -->
+                        <p class="sr-only text-xs text-on-surface-variant" data-chat-header-sub>Active Case</p>
                     </div>
                 </div>
+
+                <!-- Right actions — call/video REMOVED per requirements -->
                 <div class="flex items-center gap-1 text-on-surface-variant">
-                    <button class="p-2 hover:bg-surface-container rounded-full transition-colors active:scale-95"><span
-                            class="material-symbols-outlined">call</span></button>
-                    <button class="p-2 hover:bg-surface-container rounded-full transition-colors active:scale-95"><span
-                            class="material-symbols-outlined">videocam</span></button>
-                    <button class="p-2 hover:bg-surface-container rounded-full transition-colors active:scale-95"><span
-                            class="material-symbols-outlined">more_vert</span></button>
+                    <button class="p-2 hover:bg-slate-100 hover:text-green-700 rounded-full transition-all active:scale-95"
+                            title="Case info">
+                        <span class="material-symbols-outlined text-[20px]">info</span>
+                    </button>
+                    <button class="p-2 hover:bg-slate-100 hover:text-slate-700 rounded-full transition-all active:scale-95"
+                            title="More options">
+                        <span class="material-symbols-outlined text-[20px]">more_vert</span>
+                    </button>
                 </div>
             </header>
 
-            <!-- Messages -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-surface-container-lowest" data-messages-area>
-                <div class="flex justify-center">
-                    <span class="text-xs font-medium bg-surface-container px-3 py-1 rounded-full text-on-surface-variant">Loading...</span>
+            <!-- ────────────────────────────────────────
+                 Messages Area
+                 data-messages-area PRESERVED — JS appends here
+            ──────────────────────────────────────── -->
+            <div class="flex-1 overflow-y-auto px-4 md:px-6 py-5 flex flex-col gap-1"
+                 data-messages-area
+                 style="background: #f8fafb;">
+
+                <!-- Welcome placeholder — replaced by JS when a chat is selected or no chats exist -->
+                <div id="chat-welcome" class="flex flex-col items-center justify-center h-full gap-4 text-center py-16">
+                    <div class="w-20 h-20 rounded-full bg-green-50 border-2 border-green-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[38px] text-green-300">chat_bubble</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-slate-600 text-base">Select a conversation</p>
+                        <p class="text-sm text-slate-400 mt-1 max-w-xs leading-relaxed">Choose a chat from the left to start messaging your expert.</p>
+                    </div>
+                </div>
+
+                <!-- Messages injected here by expertschat.js via renderMsgs / appendMsg -->
+                <div id="messages-container" class="flex flex-col gap-1"></div>
+
+            </div>
+
+            <!-- ── Typing Indicator (outside messages area so JS doesn't wipe it) ── -->
+            <!-- Call showTyping() / hideTyping() from expertschat.js -->
+            <div id="typing-indicator"
+                 class="hidden px-4 md:px-6 pb-2 flex items-end gap-2">
+                <div class="w-7 h-7 rounded-full bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-primary text-[13px]">person</span>
+                </div>
+                <div class="flex items-center gap-1.5 px-4 py-3 bg-white rounded-2xl rounded-bl-sm shadow-sm border border-slate-100">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
                 </div>
             </div>
 
-            <!-- Chat Input Area -->
-                <div class="p-4 bg-surface-container-lowest border-t border-surface-variant">
-                    <!-- Quick Replies -->
-                    <div class="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar">
-                        <button class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
-                            Please upload a clearer image
-                        </button>
-                        <button class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
-                            Apply recommended treatment
-                        </button>
-                        <button class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
-                            Your case is under review
-                        </button>
-                    </div>
-                    <!-- Input Field -->
-                    <div class="flex items-center gap-2 bg-surface-container rounded-3xl px-2 focus-within:ring-2 focus-within:ring-primary/50 transition-shadow">
-                        <button class="p-2 mt-1 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-variant active:scale-[0.98]">
-                            <span class="material-symbols-outlined">attach_file</span>
-                        </button>
-                        <button class="p-2 mt-1 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-variant active:scale-[0.98]">
-                            <span class="material-symbols-outlined">image</span>
-                        </button>
-                        <input class="flex-1 bg-transparent border-none rounded-xl focus:ring-0 text-sm text-on-surface px-1 py-1" placeholder="Type your message..." type="text" id="message-input"/>
-                        <button class="p-2 bg-white border border-primary text-primary rounded-full hover:bg-primary hover:text-white transition-colors flex items-center justify-center shadow-sm active:scale-[0.98]" id="send-btn">
-                            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
-                        </button>
-                    </div>
+            <!-- ────────────────────────────────────────
+                 Input Area
+            ──────────────────────────────────────── -->
+            <div class="px-4 py-3 bg-white border-t border-slate-200 shrink-0">
+
+                <!-- Quick reply chips (unchanged — same text as original) -->
+                <div class="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar">
+                    <button class="quick-chip px-3 py-1.5 rounded-full border border-outline-variant text-on-surface-variant text-xs active:scale-[0.97]">
+                        Please upload a clearer image
+                    </button>
+                    <button class="quick-chip px-3 py-1.5 rounded-full border border-outline-variant text-on-surface-variant text-xs active:scale-[0.97]">
+                        Apply recommended treatment
+                    </button>
+                    <button class="quick-chip px-3 py-1.5 rounded-full border border-outline-variant text-on-surface-variant text-xs active:scale-[0.97]">
+                        Your case is under review
+                    </button>
                 </div>
+
+                <!-- Input row -->
+                <div class="input-wrap flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-3 py-1.5 transition-all">
+
+                    <button class="p-1.5 text-slate-400 hover:text-primary hover:bg-green-50 rounded-xl transition-all active:scale-[0.95]"
+                            title="Attach file">
+                        <span class="material-symbols-outlined text-[20px]">attach_file</span>
+                    </button>
+
+                    <button class="p-1.5 text-slate-400 hover:text-primary hover:bg-green-50 rounded-xl transition-all active:scale-[0.95]"
+                            title="Send image">
+                        <span class="material-symbols-outlined text-[20px]">image</span>
+                    </button>
+
+                    <!-- id="message-input" PRESERVED -->
+                    <input
+                        id="message-input"
+                        class="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none text-sm text-on-surface placeholder:text-slate-400 px-1 py-1.5"
+                        placeholder="Type your message..."
+                        type="text" />
+
+                    <!-- id="send-btn" PRESERVED -->
+                    <button id="send-btn"
+                        class="w-9 h-9 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-sm shrink-0 active:scale-[0.93]">
+                        <span class="material-symbols-outlined text-[18px] fill">send</span>
+                    </button>
+                </div>
+
+                <p class="text-[10px] text-center text-slate-400 mt-1.5">Press Enter to send · Shift+Enter for new line</p>
+            </div>
 
         </section>
     </div>
 
+    <!-- ══════════════════════════════════════════
+         UI-only JS additions (no logic changes)
+    ══════════════════════════════════════════ -->
+    <script>
+        /* ── showTyping / hideTyping — safe to call from expertschat.js ── */
+        function showTyping() {
+            const el = document.getElementById('typing-indicator');
+            if (!el) return;
+            el.classList.remove('hidden');
+            el.classList.add('flex');
+            // Scroll messages area so indicator is visible
+            const area = document.querySelector('[data-messages-area]');
+            if (area) area.scrollTo({ top: area.scrollHeight, behavior: 'smooth' });
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('typing-indicator');
+            if (!el) return;
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+        }
+
+        /* ── Enter to send (Shift+Enter = newline) ── */
+        const _msgInput = document.getElementById('message-input');
+        if (_msgInput) {
+            _msgInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const btn = document.getElementById('send-btn');
+                    if (btn) btn.click();
+                }
+            });
+        }
+
+        /* ── Auto scroll to bottom whenever messages area changes ── */
+        const _msgArea = document.querySelector('[data-messages-area]');
+        if (_msgArea) {
+            const _scrollObs = new MutationObserver(() => {
+                _msgArea.scrollTo({ top: _msgArea.scrollHeight, behavior: 'smooth' });
+            });
+            _scrollObs.observe(_msgArea, { childList: true, subtree: true });
+        }
+
+        /* ── Quick reply chips fill the input on click ── */
+        document.querySelectorAll('.quick-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const inp = document.getElementById('message-input');
+                if (inp) { inp.value = chip.textContent.trim(); inp.focus(); }
+            });
+        });
+    </script>
+
+    <!-- Script order PRESERVED exactly as original -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="../api.js"></script>
     <script src="./expertschat.js"></script>
 </body>
-
 </html>

@@ -42,4 +42,18 @@ async function deleteDiagnosis(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { createDiagnosis, getDiagnoses, getDiagnosisById, deleteDiagnosis };
+async function markAsRecovered(req, res, next) {
+  try {
+    const diagnosis = await diagnosisService.markAsRecovered(req.user.profileId, req.params.id);
+    return success(res, 200, 'Diagnosis marked as recovered', diagnosis);
+  } catch (err) { next(err); }
+}
+
+async function getStats(req, res, next) {
+  try {
+    const stats = await diagnosisService.getStats(req.user.profileId);
+
+return success(res, 200, 'Stats fetched', stats);
+  } catch (err) { next(err); }
+}
+module.exports = { createDiagnosis, getDiagnoses, getDiagnosisById, deleteDiagnosis, markAsRecovered, getStats };

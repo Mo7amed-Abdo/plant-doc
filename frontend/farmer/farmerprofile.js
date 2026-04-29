@@ -64,6 +64,11 @@ function setupForms() {
       await api.put('/farmer/profile',fd);
       showToast('Profile updated!','success');
       const res=await api.get('/farmer/profile'); Auth.setSession({token:Auth.getToken(),user:res.data}); populateSidebarUser();
+      document.querySelectorAll('[data-profile-avatar]').forEach(img => {
+        if (img.tagName === 'IMG' && img.src) {
+          img.src = img.src.split('?')[0] + '?t=' + Date.now();
+        }
+      });
     } catch(err){showToast(err.message||'Update failed','error');}
     finally{setBtnLoad(btn,false,'Save Changes');}
   });

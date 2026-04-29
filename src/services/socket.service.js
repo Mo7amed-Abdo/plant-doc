@@ -41,7 +41,8 @@ function initSocketService(io) {
 
     // ── Join a chat room ──────────────────────────────────────────────────────
     // Client emits: { chatId: '<id>' }
-    socket.on('chat:join', async ({ chatId }) => {
+    socket.on('chat:join', async (payload = {}) => {
+      const chatId = payload.chatId || payload.conversationId;
       if (!chatId) return;
       try {
         // Verify participant before allowing join
@@ -59,6 +60,7 @@ function initSocketService(io) {
 
         if (env.isDev()) console.log(`[Socket.IO] ${role} joined chat:${chatId}`);
       } catch (err) {
+        console.error(`[Socket.IO] chat:join error - chatId=${chatId}, error=${err.message}`);
         socket.emit('error', { message: 'Failed to join chat' });
       }
     });
@@ -66,22 +68,41 @@ function initSocketService(io) {
     // ── Send a real-time message ───────────────────────────────────────────────
     // Client emits: { chatId, content_type, text?, ai_analysis? }
     // (image messages use the REST endpoint — too large for websocket)
-    socket.on('message:send', async (data) => {
-      const { chatId, content_type = 'text', text, ai_analysis } = data;
+    socket.on('message:send', async (data = {}, ack) => {
+      const chatId = data.chatId || data.conversationId;
+      const content_type = data.content_type || data.messageType || 'text';
+      const text = data.text;
+      const ai_analysis = data.ai_analysis || data.aiAnalysis;
       if (!chatId) return;
 
       try {
+        console.log(`[Socket.IO] message:send received - conversationId=${chatId}, role=${role}, messageType=${content_type}`);
+
+        // FIRST: Save message to MongoDB
         const message = await chatService.sendMessage(
           chatId,
           userId,
           role,
+          profileId,
           { content_type, text, ai_analysis },
           null // no file via socket
         );
 
-        // Broadcast to everyone in the room (including sender for confirmation)
-        io.to(`chat:${chatId}`).emit('message:new', message);
+        console.log(`[Socket.IO] message saved successfully - conversationId=${chatId}, messageId=${message.id}`);
+
+        if (typeof ack === 'function') {
+          ack({ success: true, message });
+        }
+
+        // THEN: Emit to other clients in the room
+        socket.to(`chat:${chatId}`).emit('message:new', message);
+
+        console.log(`[Socket.IO] message emitted to room chat:${chatId}`);
       } catch (err) {
+        console.error(`[Socket.IO] message:send error - chatId=${chatId}, error=${err.message}`);
+        if (typeof ack === 'function') {
+          ack({ success: false, error: err.message || 'Failed to send message' });
+        }
         socket.emit('error', { message: err.message || 'Failed to send message' });
       }
     });

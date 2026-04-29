@@ -62,6 +62,7 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
+
 orderSchema.index({ order_code: 1 }, { unique: true });
 orderSchema.index({ farmer_id: 1, placed_at: -1 });
 orderSchema.index({ company_id: 1, status: 1 });

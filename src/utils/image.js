@@ -26,10 +26,42 @@ function toMongoImage(file) {
 function toDataUri(mongoImage) {
   if (!mongoImage || !mongoImage.data) return null;
 
-  const buffer = mongoImage.data instanceof Buffer
-    ? mongoImage.data
-    : Buffer.from(mongoImage.data);
+  const raw = mongoImage.data;
+  let buffer;
 
+  try {
+    if (Buffer.isBuffer(raw)) {
+      // Already a proper Node.js Buffer (normal Mongoose retrieval)
+      buffer = raw;
+
+    } else if (raw && raw.type === 'Buffer' && Array.isArray(raw.data)) {
+      // Node.js Buffer.toJSON() format returned by .lean() queries
+      // e.g. { type: 'Buffer', data: [255, 216, ...] }
+      buffer = Buffer.from(raw.data);
+
+    } else if (raw && raw._bsontype === 'Binary') {
+      // BSON Binary object from MongoDB driver / lean queries
+      // raw.buffer is the underlying ArrayBuffer or Buffer
+      buffer = Buffer.from(raw.buffer);
+
+    } else if (raw && raw.buffer instanceof ArrayBuffer) {
+      // Uint8Array / other TypedArray
+      buffer = Buffer.from(raw.buffer);
+
+    } else if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+      // Plain object with numeric keys — Mongoose sometimes returns
+      // Buffers as { '0': 255, '1': 216, ... } after toObject()
+      buffer = Buffer.from(Object.values(raw));
+
+    } else {
+      // Last resort — let Buffer.from figure it out
+      buffer = Buffer.from(raw);
+    }
+  } catch {
+    return null;
+  }
+
+  if (!buffer || !buffer.length) return null;
   return `data:${mongoImage.content_type};base64,${buffer.toString('base64')}`;
 }
 

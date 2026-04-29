@@ -60,12 +60,12 @@ async function register(body, file) {
   if (existing) throw createError(409, 'Email already in use');
 
   // ── Role-specific validation ─────────────────────────────────────────────────
-  if (role === 'expert' && !specialization) {
-    throw createError(400, 'Specialization is required for experts');
-  }
-  if (role === 'company' && !company_name) {
-    throw createError(400, 'Company name is required');
-  }
+  // if (role === 'expert' && !specialization) {
+  //   throw createError(400, 'Specialization is required for experts');
+  // }
+  // if (role === 'company' && !company_name) {
+  //   throw createError(400, 'Company name is required');
+  // }
 
   // ── Start session for atomic write ───────────────────────────────────────────
   const avatar = file ? toMongoImage(file) : null;
@@ -100,24 +100,24 @@ async function register(body, file) {
         : [];
 
       profile = await Expert.create({
-        user_id: user._id,
-        specialization,
-        years_experience: years_experience ? Number(years_experience) : 0,
-        bio: bio || null,
-        location: location || null,
-        expertise_tags: tags,
-      });
+  user_id: user._id,
+  specialization: specialization || null,
+  years_experience: years_experience ? Number(years_experience) : 0,
+  bio: bio || null,
+  location: location || null,
+  expertise_tags: tags,
+});
     }
 
     if (role === 'company') {
       profile = await Company.create({
-        owner_user_id: user._id,
-        name: company_name,
-        address: company_address || null,
-        phone: company_phone || null,
-        email: company_email || null,
-        description: company_description || null,
-      });
+  owner_user_id: user._id,
+  name: company_name || `${full_name}'s Company`,
+  address: company_address || null,
+  phone: company_phone || null,
+  email: company_email || null,
+  description: company_description || null,
+});
     }
 
     if (role === 'delivery') {

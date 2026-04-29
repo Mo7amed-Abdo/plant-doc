@@ -109,12 +109,25 @@ async function createDiagnosis(userId, profileId, body, file) {
 }
 
 async function getDiagnoses(profileId, query) {
-  const { page = 1, limit = 10, status, severity } = query;
+  const { page = 1, limit = 10, severity, crop, status } = query;
   const skip = (Number(page) - 1) * Number(limit);
 
   const filter = { farmer_id: profileId };
-  if (status) filter.status = status;
-  if (severity) filter['ai_result.severity'] = severity;
+
+  if (severity) {
+    const severities = severity.split(',').map(s => s.trim().toLowerCase());
+    filter['ai_result.severity'] = { $in: severities };
+  }
+
+  if (crop) {
+    const crops = crop.split(',').map(c => c.trim().toLowerCase());
+    filter.crop_type = { $in: crops };
+  }
+
+  if (status) {
+    const statuses = status.split(',').map(s => s.trim().toLowerCase());
+    filter.status = { $in: statuses };
+  }
 
   const [items, total] = await Promise.all([
     Diagnosis.find(filter)
@@ -142,6 +155,19 @@ async function deleteDiagnosis(profileId, diagnosisId) {
   await diagnosis.save();
 }
 
+async function markAsRecovered(profileId, diagnosisId) {
+  const diagnosis = await Diagnosis.findOne({ _id: diagnosisId, farmer_id: profileId });
+  if (!diagnosis) throw createError(404, 'Diagnosis not found');
+
+  diagnosis.is_recovered = true;
+  await diagnosis.save();
+  return _formatDiagnosis(diagnosis, false);
+}
+
+async function getRecoveredCount(profileId) {
+  return await Diagnosis.countDocuments({ farmer_id: profileId, is_recovered: true, deleted_at: null });
+}
+
 function _formatDiagnosis(doc, includeImage) {
   const obj = doc.toObject();
   return {
@@ -151,6 +177,7 @@ function _formatDiagnosis(doc, includeImage) {
     crop_type: obj.crop_type,
     ai_result: obj.ai_result,
     status: obj.status,
+    is_recovered: obj.is_recovered,
     created_at: obj.created_at,
     updated_at: obj.updated_at,
     ...(includeImage && obj.plant_image
@@ -159,4 +186,44 @@ function _formatDiagnosis(doc, includeImage) {
   };
 }
 
-module.exports = { createDiagnosis, getDiagnoses, getDiagnosisById, deleteDiagnosis, SEVERITY_TO_PRIORITY };
+/////////////////////edit of diagnosis
+async function getRecoveredCountLastWeek(profileId) {
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  return await Diagnosis.countDocuments({
+    farmer_id: profileId,
+    "ai_result.disease_name": "Healthy Plant",
+    created_at: { $gte: oneWeekAgo },
+    deleted_at: null
+  });
+}
+///////////add
+// async function getTotalDiagnoses(profileId) {
+//   return await Diagnosis.countDocuments({
+//     farmer_id: profileId,
+//     deleted_at: null
+//   });
+// }
+async function getStats(profileId) {
+  const [total, recovered] = await Promise.all([
+    Diagnosis.countDocuments({
+      farmer_id: profileId,
+      deleted_at: null
+    }),
+    Diagnosis.countDocuments({
+      farmer_id: profileId,
+      is_recovered: true,
+      deleted_at: null
+    })
+  ]);
+
+  return {
+    total_crops: total,
+    recovered_crops: recovered,
+    active_diseases: total - recovered
+  };
+}
+
+
+module.exports = { createDiagnosis, getDiagnoses, getDiagnosisById, deleteDiagnosis, markAsRecovered, getRecoveredCount, getStats, SEVERITY_TO_PRIORITY };

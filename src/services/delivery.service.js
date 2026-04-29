@@ -16,15 +16,36 @@ async function getFarmerOrders(farmerId, query) {
   const filter = { farmer_id: farmerId };
   if (status) filter.status = status;
 
-  const [items, total] = await Promise.all([
+  const [orders, total] = await Promise.all([
     Order.find(filter)
       .populate('company_id', 'name logo')
       .sort({ placed_at: -1 })
       .skip(skip)
-      .limit(Number(limit)),
+      .limit(Number(limit))
+      .lean(),                              // lean() so we can add .items below
     Order.countDocuments(filter),
   ]);
-  return { items, total, page: Number(page), limit: Number(limit) };
+
+  // ── Batch-fetch all OrderItems for these orders in one query ──
+  if (orders.length) {
+    const orderIds = orders.map(o => o._id);
+    const allItems = await OrderItem.find({ order_id: { $in: orderIds } })
+      .populate('product_id', 'name category unit')
+      .lean();
+
+    // Group by order_id and attach
+    const byOrder = {};
+    allItems.forEach(item => {
+      const key = item.order_id.toString();
+      if (!byOrder[key]) byOrder[key] = [];
+      byOrder[key].push(item);
+    });
+    orders.forEach(order => {
+      order.items = byOrder[order._id.toString()] || [];
+    });
+  }
+
+  return { items: orders, total, page: Number(page), limit: Number(limit) };
 }
 
 async function getFarmerOrderById(farmerId, orderId) {
