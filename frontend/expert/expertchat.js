@@ -16,10 +16,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadChats() {
   const list = document.querySelector('[data-chat-list], aside .flex-1.overflow-y-auto, .w-80 .flex-1');
+  const requestedChatId = new URLSearchParams(window.location.search).get('chatId');
   try {
     _chats = (await api.get('/chats?limit=50')).data || [];
     if (!list) {
-      if (_chats.length) openChat(_chats[0]._id);
+      if (_chats.length) openChat(requestedChatId || _chats[0]._id);
       return;
     }
     if (!_chats.length) {
@@ -28,7 +29,8 @@ async function loadChats() {
     }
     list.innerHTML = _chats.map(chatItem).join('');
     list.querySelectorAll('[data-open-chat]').forEach((el) => el.addEventListener('click', () => openChat(el.dataset.openChat)));
-    openChat(_chats[0]._id);
+    const initialChat = _chats.find((chat) => String(chat._id) === String(requestedChatId))?._id || _chats[0]._id;
+    openChat(initialChat);
   } catch (e) {
     if (list) list.innerHTML = `<div class="p-4 text-error text-sm">${e.message}</div>`;
   }

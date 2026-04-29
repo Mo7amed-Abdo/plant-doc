@@ -4,84 +4,94 @@ const FarmerNotification = require('../models/notifications/FarmerNotification')
 const ExpertNotification = require('../models/notifications/ExpertNotification');
 const CompanyNotification = require('../models/notifications/CompanyNotification');
 
-/**
- * Internal helper — creates a notification doc and emits it over Socket.IO.
- *
- * @param {Object} Model      - Mongoose model to save into
- * @param {Object} payload    - Document fields (without _id / timestamps)
- * @param {string} roomId     - Socket.IO room to emit to (e.g. "user:<userId>")
- * @param {Object} [io]       - Socket.IO server instance (optional — skipped if not provided)
- */
-async function _create(Model, payload, roomId, io) {
+async function _create(Model, payload, roomIds, io) {
   const notification = await Model.create(payload);
 
   if (io) {
-    io.to(roomId).emit('notification:new', {
+    const eventPayload = {
       id: notification._id,
+      _id: notification._id,
       type: notification.type,
       title: notification.title,
       body: notification.body,
+      message: notification.body,
       related_id: notification.related_id,
       related_type: notification.related_type,
+      relatedCaseId: notification.related_case_id || null,
+      relatedConversationId: notification.related_conversation_id || null,
       is_read: false,
+      isRead: false,
       created_at: notification.created_at,
-    });
+      createdAt: notification.created_at,
+    };
+
+    for (const roomId of roomIds.filter(Boolean)) {
+      io.to(roomId).emit('notification:new', eventPayload);
+    }
   }
 
   return notification;
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
-
-/**
- * Notify a farmer.
- *
- * @param {string} farmerId
- * @param {string} userId        - Used as the Socket.IO room key
- * @param {Object} payload       - { type, title, body, related_id?, related_type? }
- * @param {Object} [io]
- */
 async function notifyFarmer(farmerId, userId, payload, io) {
   return _create(
     FarmerNotification,
     { farmer_id: farmerId, ...payload },
-    `user:${userId}`,
+    [`user:${userId}`, `farmer:${farmerId}`],
     io
   );
 }
 
-/**
- * Notify an expert.
- *
- * @param {string} expertId
- * @param {string} userId
- * @param {Object} payload       - { type, title, body, related_id?, related_type? }
- * @param {Object} [io]
- */
-async function notifyExpert(expertId, userId, payload, io) {
+async function notifyExpert(expertId, payload, io, options = {}) {
   return _create(
     ExpertNotification,
-    { expert_id: expertId, ...payload },
-    `user:${userId}`,
+    { expert_id: expertId, user_role: 'expert', ...payload },
+    [`expert:${expertId}`],
     io
   );
 }
 
-/**
- * Notify a company.
- *
- * @param {string} companyId
- * @param {string} userId
- * @param {Object} payload       - { type, title, body, related_id?, related_type? }
- * @param {Object} [io]
- */
 async function notifyCompany(companyId, userId, payload, io) {
   return _create(
     CompanyNotification,
     { company_id: companyId, ...payload },
-    `user:${userId}`,
+    [`user:${userId}`, `company:${companyId}`],
     io
   );
 }
 
-module.exports = { notifyFarmer, notifyExpert, notifyCompany };
+async function markExpertNotificationRead(expertId, notificationId) {
+  return ExpertNotification.findOneAndUpdate(
+    { _id: notificationId, expert_id: expertId },
+    { is_read: true },
+    { new: true }
+  );
+}
+
+async function markAllExpertNotificationsRead(expertId) {
+  return ExpertNotification.updateMany(
+    { expert_id: expertId, is_read: false },
+    { is_read: true }
+  );
+}
+
+async function markExpertChatNotificationsRead(expertId, conversationId) {
+  return ExpertNotification.updateMany(
+    {
+      expert_id: expertId,
+      type: 'unread_chat_message',
+      related_conversation_id: conversationId,
+      is_read: false,
+    },
+    { is_read: true }
+  );
+}
+
+module.exports = {
+  notifyFarmer,
+  notifyExpert,
+  notifyCompany,
+  markExpertNotificationRead,
+  markAllExpertNotificationsRead,
+  markExpertChatNotificationsRead,
+};

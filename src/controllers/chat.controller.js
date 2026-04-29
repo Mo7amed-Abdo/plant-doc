@@ -34,6 +34,7 @@ async function getMessages(req, res, next) {
       req.user.profileId,
       req.query
     );
+    await chatService.markRead(conversationId, req.user.role, req.user.profileId).catch(() => null);
     console.log(`[ChatController] messages fetched successfully after refresh - conversationId=${conversationId}, role=${req.user.role}, messages=${items.length}, total=${total}`);
     return paginated(res, items, total, page, limit, 'Messages fetched');
   } catch (err) { next(err); }
@@ -48,7 +49,8 @@ async function sendMessage(req, res, next) {
       req.user.role,
       req.user.profileId,
       req.body,
-      req.file || null
+      req.file || null,
+      req.app.get('io')
     );
 
     console.log(`[ChatController] message saved successfully - conversationId=${conversationId}, messageId=${message.id}, role=${req.user.role}`);

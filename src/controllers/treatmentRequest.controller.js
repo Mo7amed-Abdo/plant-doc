@@ -24,6 +24,19 @@ async function getPool(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function getPendingCases(req, res, next) {
+  try {
+    const result = await service.getPendingCases(req.query);
+    return success(res, 200, 'Pending cases fetched', result.cases, {
+      currentPage: result.currentPage,
+      totalPages: result.totalPages,
+      totalCases: result.totalCases,
+      hasNextPage: result.hasNextPage,
+      hasPrevPage: result.hasPrevPage,
+    });
+  } catch (err) { next(err); }
+}
+
 async function assignToExpert(req, res, next) {
   try {
     const result = await service.assignToExpert(
@@ -61,4 +74,51 @@ async function submitReview(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { createRequest, getFarmerRequests, getPool, assignToExpert, getRequestById, submitReview };
+function resolveExpertId(req) {
+  if (req.query.expertId && req.query.expertId !== String(req.user.profileId)) {
+    throw Object.assign(new Error('You can only access your own cases'), { statusCode: 403 });
+  }
+
+  return req.user.profileId;
+}
+
+async function getReviewedToday(req, res, next) {
+  try {
+    const expertId = resolveExpertId(req);
+    const result = await service.getReviewedToday(expertId);
+    return success(res, 200, 'Reviewed today fetched', result.items, {
+      total: result.total,
+      startOfDay: result.startOfDay,
+      endOfDay: result.endOfDay,
+    });
+  } catch (err) { next(err); }
+}
+
+async function getRecentValidatedCases(req, res, next) {
+  try {
+    const expertId = resolveExpertId(req);
+    const { items, total, page, limit } = await service.getRecentValidatedCases(expertId, req.query);
+    return paginated(res, items, total, page, limit, 'Validated cases fetched');
+  } catch (err) { next(err); }
+}
+
+async function getExpertCases(req, res, next) {
+  try {
+    const expertId = resolveExpertId(req);
+    const { items, total, page, limit } = await service.getExpertCases(expertId, req.query);
+    return paginated(res, items, total, page, limit, 'Expert cases fetched');
+  } catch (err) { next(err); }
+}
+
+module.exports = {
+  createRequest,
+  getFarmerRequests,
+  getPool,
+  getPendingCases,
+  assignToExpert,
+  getRequestById,
+  submitReview,
+  getReviewedToday,
+  getRecentValidatedCases,
+  getExpertCases,
+};

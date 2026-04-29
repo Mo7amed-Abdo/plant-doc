@@ -38,6 +38,9 @@ function initSocketService(io) {
     // ── Join personal notification room ───────────────────────────────────────
     // Notifications are pushed to "user:<userId>"
     socket.join(`user:${userId}`);
+    if (profileId && role) {
+      socket.join(`${role}:${profileId}`);
+    }
 
     // ── Join a chat room ──────────────────────────────────────────────────────
     // Client emits: { chatId: '<id>' }
@@ -85,7 +88,8 @@ function initSocketService(io) {
           role,
           profileId,
           { content_type, text, ai_analysis },
-          null // no file via socket
+          null, // no file via socket
+          io
         );
 
         console.log(`[Socket.IO] message saved successfully - conversationId=${chatId}, messageId=${message.id}`);

@@ -2,8 +2,10 @@
 
 const Chat = require('../models/Chat');
 const Message = require('../models/Message');
+const Farmer = require('../models/Farmer');
 const { createError } = require('../middleware/error.middleware');
 const { toMongoImage, toDataUri } = require('../utils/image');
+const notificationService = require('./notification.service');
 
 async function getChats(role, profileId, query) {
   const { page = 1, limit = 20 } = query;
@@ -80,7 +82,7 @@ async function getMessages(chatId, role, profileId, query = {}) {
   };
 }
 
-async function sendMessage(chatId, senderId, senderRole, senderProfileId, body = {}, file) {
+async function sendMessage(chatId, senderId, senderRole, senderProfileId, body = {}, file, io = null) {
   if (!chatId) {
     console.error('[ChatService] sendMessage: conversationId is missing');
     throw createError(400, 'conversationId is required');
@@ -128,6 +130,24 @@ async function sendMessage(chatId, senderId, senderRole, senderProfileId, body =
 
   await Chat.findByIdAndUpdate(chatId, { last_message_at: message.sent_at });
 
+  if (senderRole === 'farmer') {
+    const farmer = await Farmer.findById(chat.farmer_id).populate('user_id', 'full_name');
+    const farmerName = farmer?.user_id?.full_name || 'Farmer';
+
+    await notificationService.notifyExpert(
+      chat.expert_id,
+      {
+        type: 'unread_chat_message',
+        title: `New message from ${farmerName}`,
+        body: normalizedText || 'A farmer sent you a new message.',
+        related_id: chatId,
+        related_conversation_id: chatId,
+        related_type: 'chat',
+      },
+      io
+    ).catch(() => null);
+  }
+
   return _formatMessage(message);
 }
 
@@ -141,6 +161,10 @@ async function markRead(chatId, role, profileId) {
     { chat_id: chatId, sender_role: { $ne: role }, is_read: false },
     { is_read: true }
   );
+
+  if (role === 'expert') {
+    await notificationService.markExpertChatNotificationsRead(profileId, chatId).catch(() => null);
+  }
 }
 
 async function resolveChat(chatId, expertProfileId) {

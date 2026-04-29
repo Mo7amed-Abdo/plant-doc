@@ -18,6 +18,11 @@ router.get('/my', ...isFarmer, ctrl.getFarmerRequests);
 // Expert: browse the open pool
 router.get('/pool', ...isExpert, ctrl.getPool);
 
+// Expert: dashboard case data
+router.get('/reviewed-today', ...isExpert, ctrl.getReviewedToday);
+router.get('/validated', ...isExpert, ctrl.getRecentValidatedCases);
+router.get('/expert/cases', ...isExpert, ctrl.getExpertCases);
+
 // Expert: self-assign a case
 router.post('/:id/assign', ...isExpert, ctrl.assignToExpert);
 

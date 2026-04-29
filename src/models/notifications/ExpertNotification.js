@@ -8,15 +8,32 @@ const expertNotificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Expert',
       required: true,
+      alias: 'userId',
+    },
+    user_role: {
+      type: String,
+      default: 'expert',
+      enum: ['expert'],
+      alias: 'userRole',
     },
     type: {
       type: String,
       required: true,
-      enum: ['new_case_assigned', 'new_message', 'case_resolved', 'system'],
+      enum: ['new_case_assigned', 'new_message', 'case_resolved', 'system', 'new_pending_case', 'unread_chat_message'],
     },
     title: { type: String, required: true, trim: true },
     body: { type: String, required: true, trim: true },
     related_id: { type: mongoose.Schema.Types.ObjectId, default: null },
+    related_case_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+      alias: 'relatedCaseId',
+    },
+    related_conversation_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+      alias: 'relatedConversationId',
+    },
     related_type: {
       type: String,
       enum: ['treatment_request', 'chat', 'diagnosis', null],

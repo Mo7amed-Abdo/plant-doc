@@ -12,6 +12,20 @@ async function getProfile(req, res, next) {
 
 async function updateProfile(req, res, next) {
   try {
+    console.log('[expert.controller.updateProfile] expertId:', req.user.profileId?.toString?.() || req.user.profileId);
+    console.log('[expert.controller.updateProfile] body:', req.body);
+    console.log(
+      '[expert.controller.updateProfile] file:',
+      req.file
+        ? {
+            fieldname: req.file.fieldname,
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+          }
+        : null
+    );
+
     const profile = await expertService.updateProfile(req.user.userId, req.body, req.file);
     return success(res, 200, 'Profile updated', profile);
   } catch (err) { next(err); }

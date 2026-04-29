@@ -70,6 +70,7 @@ app.use('/api/company',            require('./routes/company.routes'));
 app.use('/api/company',            require('./routes/companyOps.routes'));
 app.use('/api/diagnoses',          require('./routes/diagnosis.routes'));
 app.use('/api/treatment-requests', require('./routes/treatmentRequest.routes'));
+app.use('/api/cases',              require('./routes/case.routes'));
 app.use('/api/chats',              require('./routes/chat.routes'));
 app.use('/api/messages',           require('./routes/message.routes'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -88,6 +89,13 @@ app.use('/frontend', express.static(path.join(__dirname, '..', 'frontend')));
 
 // Redirect root to login
 app.get('/', (req, res) => res.redirect('/frontend/login.html'));
+app.get('/expert/profile', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertProfile.html')));
+app.get('/expert/dashboard', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertDashboard.html')));
+app.get('/expert/pending-cases', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertPendingcases.html')));
+app.get('/expert/chat', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertChat.html')));
+app.get('/expert/notifications', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertnotifications.html')));
+app.get('/expert/cases', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertCases.html')));
+app.get('/expert/all-cases', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertCases.html')));
 
 // ─── 404 + Error Handlers ─────────────────────────────────────────────────────
 app.use(notFoundHandler);

@@ -140,11 +140,14 @@
                 <span>Dashboard</span>
             </a>
             <!-- Pending Cases -->
-            <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
+            <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center justify-between hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
                 href="expertPendingcases.html">
-                <span class="material-symbols-outlined"
-                    style="font-variation-settings: 'FILL' 1;">pending_actions</span>
-                <span>Pending Cases</span>
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined"
+                        style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+                    <span>Pending Cases</span>
+                </div>
+                <span data-pending-badge class="bg-error text-on-error text-xs rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center font-bold hidden">0</span>
             </a>
             <!-- Chat with badge -->
             <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform justify-between w-full"
@@ -153,8 +156,8 @@
                     <span class="material-symbols-outlined">chat_bubble</span>
                     <span>Chat</span>
                 </div>
-                <span
-                    class="bg-error text-on-error text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">3</span>
+                <span data-chat-badge
+                    class="bg-error text-on-error text-xs rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center font-bold hidden">0</span>
             </a>
             <!-- Profile (ACTIVE) -->
             <a class="bg-green-700 dark:bg-green-900/30 text-white dark:text-green-300 rounded-lg p-3 flex rounded-xl items-center gap-3 scale-100 active:scale-[0.98] transition-transform"
@@ -196,25 +199,26 @@
                     <div class="p-6 pt-10 flex flex-col md:flex-row items-center md:items-end gap-5 relative z-10">
                         <!-- Avatar -->
                         <div class="relative inline-block shrink-0 mb-6">
-                            <img alt="Dr. Sarah Jenkins"
+                            <img alt="Expert profile image" data-profile-avatar
                                 class="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-surface-container-lowest shadow-md"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-MJfvGmmJiux7LTp0ZrmXpYwDF_fsEvfYmcBC7c2gGGAZMXN91fvuXVlTRCl6gOQbpyZ8aLH3RuVoVOa8fiUfwIXX2qxSlhSw4yFlHOpvcqPM8YYmzsJXxoVb9U4j7dLIDayGm2fcsv1xrsNLxx2RFukPZvvmb2JfPBjYd-5GbJk7EfIzleQL7KKU9Dec-1FAY3TeIKZDjJ9d7qHMTQKznferezZ2Q60A7GNLwNnL-a55Zr1aJKI-OsZJiAknq-MCTteIA_x34bY" />
+                                src="https://placehold.co/160x160/eceeef/3e4a3f?text=Expert" />
                             <button aria-label="Edit Profile Picture"
+                                data-avatar-upload type="button"
                                 class="absolute bottom-0.5 right-0.5 bg-primary text-on-primary rounded-full px-3 py-1 shadow-md hover:scale-105 transition-transform">
                                 <span class="material-symbols-outlined text-sm leading-none">photo_camera</span>
                             </button>
+                            <input id="avatar-input" type="file" accept="image/*" class="hidden" />
                         </div>
                         <!-- Name & role -->
                         <div class="text-center md:text-left flex-1 pt-22">
-                            <h2 class="text-2xl font-bold text-on-surface">Dr. Sarah Jenkins</h2>
+                            <h2 class="text-2xl font-bold text-on-surface" data-profile-name>Expert Name</h2>
                             <div
                                 class="inline-flex items-center gap-1.5 mb-4 mt-4 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-sm font-medium mb-2">
                                 <span class="material-symbols-outlined text-[15px]"
                                     style="font-variation-settings: 'FILL' 1;">verified</span>
-                                Agricultural Expert
+                                <span data-profile-specialization>Agricultural Expert</span>
                             </div>
-                            <p class="text-on-surface-variant text-sm max-w-md">Senior Agronomist specialising in
-                                sustainable soil management and precise crop disease diagnostics.</p>
+                            <p class="text-on-surface-variant text-sm max-w-md" data-profile-location>Profile details will appear here.</p>
                         </div>
                         <!-- Quick stats -->
                         <div class="flex gap-5 shrink-0 pt-12">
@@ -250,10 +254,10 @@
                             <!-- Full Name -->
                             <div class="space-y-1">
                                 <label class="block text-sm font-medium text-on-surface-variant pl-1"
-                                    for="fullName">Full Name</label>
+                                    for="full_name">Full Name</label>
                                 <input
                                     class="input-field rounded-xl bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors"
-                                    id="fullName" type="text" value="Dr. Sarah Jenkins" />
+                                    id="full_name" name="full_name" type="text" value="Dr. Sarah Jenkins" />
                             </div>
                             <!-- Email -->
                             <div class="space-y-1">
@@ -269,7 +273,7 @@
                                     </span>
                                     <input
                                         class="input-field pl-10 border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors"
-                                        id="email" type="email" value="sarah.jenkins@plantdoc.ai" readonly />
+                                        id="email" name="email" type="email" value="sarah.jenkins@plantdoc.ai" readonly />
                                 </div>
                             </div>
                             <!-- Phone -->
@@ -283,7 +287,7 @@
                                     </span>
                                     <input
                                         class="input-field border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors pl-10"
-                                        id="phone" type="tel" value="+1 555-019-8372" />
+                                        id="phone" name="phone" type="tel" value="+1 555-019-8372" />
                                 </div>
                             </div>
                             <!-- Location -->
@@ -297,7 +301,7 @@
                                     </span>
                                     <input
                                         class="input-field border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors pl-10"
-                                        id="location" type="text" value="Austin, Texas, USA" />
+                                        id="location" name="location" type="text" value="Austin, Texas, USA" />
                                 </div>
                             </div>
                             <!-- Specialization -->
@@ -309,21 +313,21 @@
                                 </div>
                                 <input
                                     class="input-field border border-outline-variant rounded-xl bg-gray-100 focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors"
-                                    id="specialization" type="text" value="Pharma" />
+                                    id="specialization" name="specialization" type="text" value="Pharma" readonly />
                             </div>
                             <!-- Years of Experience -->
                             <div class="space-y-1">
                                 <label class="block text-sm font-medium text-on-surface-variant pl-1"
-                                    for="experience">Years of Experience</label>
+                                    for="years_experience">Years of Experience</label>
                                 <input
                                     class="input-field border border-outline-variant rounded-xl focus:ring-1 focus:ring-primary hover:border-primary focus:border-primary transition-colors"
-                                    id="experience" type="number" value="12" />
+                                    id="years_experience" name="years_experience" type="number" min="0" value="12" />
                             </div>
                             <!-- Bio -->
                             <div class="space-y-1 md:col-span-2">
                                 <label class="block text-sm font-medium text-on-surface-variant pl-1"
                                     for="bio">Professional Bio</label>
-                                <textarea class="input-field" id="bio"
+                                <textarea class="input-field" id="bio" name="bio"
                                     rows="4">Passionate agronomist dedicated to improving crop yields through sustainable practices. Expertise in diagnosing complex soil deficiencies and recommending organic interventions.</textarea>
                             </div>
                         </div>
@@ -377,6 +381,7 @@
                                         class="material-symbols-outlined text-[14px]">close</span></button>
                             </span>
                         </div>
+                        <input id="expertise_tags" name="expertise_tags" type="hidden" />
                         <div class="flex gap-2 mt-2">
                             <div class="relative flex-1 max-w-xs">
                                 <input id="new-tag" type="text" placeholder="Add a new expertise tag..."
@@ -540,7 +545,7 @@
                         </button>
                         <button id="save-btn"
                             class="px-6 py-2.5 rounded-lg text-sm font-medium bg-primary text-on-primary hover:bg-surface-tint shadow-sm hover:shadow transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
-                            type="button" onclick="saveChanges()">
+                            type="button">
                             <span class="material-symbols-outlined text-[18px]">save</span>
                             Save Changes
                         </button>
@@ -665,6 +670,7 @@
     </script>
 
     <script src="../api.js"></script>
+    <script src="./expertSidebarBadges.js"></script>
     <script src="./expertprofile.js"></script>
 </body>
 

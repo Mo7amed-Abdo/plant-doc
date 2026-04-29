@@ -41,10 +41,15 @@ const treatmentRequestSchema = new mongoose.Schema(
       default: 'pending_review',
     },
     farmer_message: { type: String, trim: true, default: null },
+    reviewed_at: { type: Date, default: null, alias: 'reviewedAt' },
+    validated_at: { type: Date, default: null, alias: 'validatedAt' },
+    image_url: { type: String, trim: true, default: null, alias: 'imageUrl' },
     deleted_at: { type: Date, default: null },
   },
   {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
@@ -52,10 +57,20 @@ const treatmentRequestSchema = new mongoose.Schema(
 treatmentRequestSchema.index({ status: 1, priority: -1, created_at: 1 });
 treatmentRequestSchema.index({ farmer_id: 1 });
 treatmentRequestSchema.index({ assigned_expert_id: 1 });
+treatmentRequestSchema.index({ assigned_expert_id: 1, reviewed_at: -1 });
+treatmentRequestSchema.index({ assigned_expert_id: 1, validated_at: -1 });
 
 treatmentRequestSchema.pre(/^find/, function (next) {
   this.where({ deleted_at: null });
   next();
+});
+
+treatmentRequestSchema.virtual('expertId').get(function () {
+  return this.assigned_expert_id || null;
+});
+
+treatmentRequestSchema.virtual('createdAt').get(function () {
+  return this.created_at || null;
 });
 
 const TreatmentRequest = mongoose.model('TreatmentRequest', treatmentRequestSchema);

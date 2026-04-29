@@ -11,6 +11,89 @@ const Farmer = require('../models/Farmer');
 const { createError } = require('../middleware/error.middleware');
 const { SEVERITY_TO_PRIORITY } = require('./diagnosis.service');
 const notificationService = require('./notification.service');
+const { toDataUri } = require('../utils/image');
+
+const CASE_STATUS = {
+  pending_review: 'pending',
+  in_review: 'pending',
+  approved: 'validated',
+  rejected: 'validated',
+};
+
+function getDayBounds(baseDate = new Date()) {
+  const startOfDay = new Date(baseDate);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(baseDate);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  return { startOfDay, endOfDay };
+}
+
+function normalizeValidationStatus(status) {
+  if (status === 'approved') return 'validated';
+  if (status === 'rejected') return 'rejected';
+  if (status === 'in_review') return 'in_review';
+  return 'pending';
+}
+
+function formatCaseItem(request) {
+  const diagnosis = request.diagnosis_id || {};
+  const review = request.expert_review_id || {};
+  const cropType = diagnosis.crop_type || null;
+  const diseaseName = review.confirmed_disease || diagnosis.ai_result?.disease_name || null;
+  const imageUrl = request.image_url || toDataUri(diagnosis.plant_image) || null;
+  const severity = review.confirmed_severity || diagnosis.ai_result?.severity || null;
+  const confidence = diagnosis.ai_result?.confidence || 0;
+  const recommendation = review.expert_notes || diagnosis.ai_result?.suggested_action || request.farmer_message || null;
+  const decidedAt = request.validated_at || request.reviewed_at || request.created_at;
+
+  return {
+    id: request._id,
+    expertId: request.assigned_expert_id?._id || request.assigned_expert_id || null,
+    status: CASE_STATUS[request.status] || 'pending',
+    validationStatus: normalizeValidationStatus(request.status),
+    reviewedAt: request.reviewed_at || null,
+    validatedAt: request.validated_at || null,
+    imageUrl,
+    createdAt: request.created_at,
+    updatedAt: request.updated_at,
+    title: cropType || diseaseName || 'Untitled case',
+    plantName: cropType || 'Unknown plant',
+    cropName: cropType || 'Unknown plant',
+    diseaseName,
+    severity,
+    confidence,
+    recommendation,
+    description: recommendation,
+    decidedAt,
+    priority: request.priority,
+    farmerMessage: request.farmer_message,
+  };
+}
+
+function formatPendingCaseItem(request) {
+  const diagnosis = request.diagnosis_id || {};
+  const farmer = request.farmer_id || {};
+  const imageUrl = request.image_url || toDataUri(diagnosis.plant_image) || null;
+
+  return {
+    id: request._id,
+    status: 'pending',
+    priority: request.priority,
+    farmerMessage: request.farmer_message || null,
+    createdAt: request.created_at,
+    updatedAt: request.updated_at,
+    imageUrl,
+    cropType: diagnosis.crop_type || 'Unknown crop',
+    diseaseName: diagnosis.ai_result?.disease_name || 'Unknown disease',
+    severity: diagnosis.ai_result?.severity || null,
+    confidence: diagnosis.ai_result?.confidence || 0,
+    symptoms: diagnosis.ai_result?.symptoms || [],
+    suggestedAction: diagnosis.ai_result?.suggested_action || null,
+    location: farmer.location || 'Unknown location',
+  };
+}
 
 // ─── Farmer: open a case ──────────────────────────────────────────────────────
 
@@ -39,6 +122,25 @@ async function createRequest(farmerId, body, io) {
   await Diagnosis.findByIdAndUpdate(diagnosis_id, {
     status: 'pending_expert'
   });
+
+  const experts = await Expert.find({}).select('_id user_id specialization');
+  await Promise.all(
+    experts.map((expert) =>
+      notificationService.notifyExpert(
+        expert._id,
+        {
+          type: 'new_pending_case',
+          title: 'New pending case available',
+          body: `${diagnosis.crop_type || 'A plant'} case is waiting for expert review.`,
+          related_id: request._id,
+          related_case_id: request._id,
+          related_type: 'treatment_request',
+        },
+        io,
+        { userId: expert.user_id?.toString?.() || expert.user_id }
+      ).catch(() => null)
+    )
+  );
 
   return request;
 }
@@ -79,6 +181,64 @@ async function getPool(query) {
     TreatmentRequest.countDocuments(filter),
   ]);
   return { items, total, page: Number(page), limit: Number(limit) };
+}
+
+async function getPendingCases(query) {
+  const {
+    page = 1,
+    limit = 10,
+    crop,
+    severity,
+    sort = 'newest',
+  } = query;
+
+  const currentPage = Math.max(Number(page) || 1, 1);
+  const pageSize = Math.max(Number(limit) || 10, 1);
+  const skip = (currentPage - 1) * pageSize;
+  const filter = { status: 'pending_review', assigned_expert_id: null };
+
+  const diagnosisFilter = {};
+  if (crop) diagnosisFilter.crop_type = { $regex: `^${crop.trim()}$`, $options: 'i' };
+  if (severity) diagnosisFilter['ai_result.severity'] = severity;
+
+  if (Object.keys(diagnosisFilter).length) {
+    const matchingDiagnosisIds = await Diagnosis.find(diagnosisFilter).distinct('_id');
+    if (!matchingDiagnosisIds.length) {
+      return {
+        cases: [],
+        currentPage,
+        totalPages: 0,
+        totalCases: 0,
+        hasNextPage: false,
+        hasPrevPage: currentPage > 1,
+      };
+    }
+
+    filter.diagnosis_id = { $in: matchingDiagnosisIds };
+  }
+
+  const sortOption = sort === 'oldest' ? { created_at: 1 } : { created_at: -1 };
+
+  const [items, totalCases] = await Promise.all([
+    TreatmentRequest.find(filter)
+      .populate('diagnosis_id', 'crop_type ai_result plant_image created_at')
+      .populate('farmer_id', 'location')
+      .sort(sortOption)
+      .skip(skip)
+      .limit(pageSize),
+    TreatmentRequest.countDocuments(filter),
+  ]);
+
+  const totalPages = totalCases ? Math.ceil(totalCases / pageSize) : 0;
+
+  return {
+    cases: items.map(formatPendingCaseItem),
+    currentPage,
+    totalPages,
+    totalCases,
+    hasNextPage: currentPage < totalPages,
+    hasPrevPage: currentPage > 1,
+  };
 }
 
 // ─── Expert: self-assign ──────────────────────────────────────────────────────
@@ -173,8 +333,11 @@ async function submitReview(expertId, expertUserId, requestId, body, io) {
   });
 
   // ✅ update request
+  const reviewedAt = review.reviewed_at || new Date();
   request.status = decision === 'rejected' ? 'rejected' : 'approved';
   request.expert_review_id = review._id;
+  request.reviewed_at = reviewedAt;
+  request.validated_at = reviewedAt;
   await request.save();
 
   // ✅ update diagnosis
@@ -215,11 +378,114 @@ async function submitReview(expertId, expertUserId, requestId, body, io) {
   return { request, review };
 }
 
+async function getReviewedToday(expertId) {
+  const { startOfDay, endOfDay } = getDayBounds();
+  const filter = {
+    assigned_expert_id: expertId,
+    reviewed_at: { $gte: startOfDay, $lte: endOfDay },
+  };
+
+  const items = await TreatmentRequest.find(filter)
+    .populate('diagnosis_id', 'crop_type ai_result plant_image created_at')
+    .populate('expert_review_id', 'decision confirmed_disease confirmed_severity reviewed_at')
+    .sort({ reviewed_at: -1 });
+
+  return {
+    items: items.map(formatCaseItem),
+    total: items.length,
+    startOfDay,
+    endOfDay,
+  };
+}
+
+async function getRecentValidatedCases(expertId, query) {
+  const { page = 1, limit = 5, crop, severity, sort = 'newest' } = query;
+  const currentPage = Math.max(Number(page) || 1, 1);
+  const pageSize = Math.max(Number(limit) || 5, 1);
+  const skip = (currentPage - 1) * pageSize;
+  const filter = {
+    assigned_expert_id: expertId,
+    validated_at: { $ne: null },
+  };
+
+  const diagnosisFilter = {};
+  if (crop) diagnosisFilter.crop_type = { $regex: `^${crop.trim()}$`, $options: 'i' };
+  if (severity) diagnosisFilter['ai_result.severity'] = severity;
+
+  if (Object.keys(diagnosisFilter).length) {
+    const matchingDiagnosisIds = await Diagnosis.find(diagnosisFilter).distinct('_id');
+    if (!matchingDiagnosisIds.length) {
+      return {
+        items: [],
+        total: 0,
+        page: currentPage,
+        limit: pageSize,
+      };
+    }
+
+    filter.diagnosis_id = { $in: matchingDiagnosisIds };
+  }
+
+  const sortOption = sort === 'oldest' ? { validated_at: 1, created_at: 1 } : { validated_at: -1, created_at: -1 };
+
+  const [items, total] = await Promise.all([
+    TreatmentRequest.find(filter)
+      .populate('diagnosis_id', 'crop_type ai_result plant_image created_at')
+      .populate('expert_review_id', 'decision confirmed_disease confirmed_severity reviewed_at')
+      .sort(sortOption)
+      .skip(skip)
+      .limit(pageSize),
+    TreatmentRequest.countDocuments(filter),
+  ]);
+
+  return {
+    items: items.map(formatCaseItem),
+    total,
+    page: currentPage,
+    limit: pageSize,
+  };
+}
+
+async function getExpertCases(expertId, query) {
+  const { page = 1, limit = 10, status } = query;
+  const skip = (Number(page) - 1) * Number(limit);
+  const filter = { assigned_expert_id: expertId };
+
+  if (status === 'validated') {
+    filter.validated_at = { $ne: null };
+  } else if (status === 'reviewed') {
+    filter.reviewed_at = { $ne: null };
+  } else if (status === 'pending') {
+    filter.status = { $in: ['pending_review', 'in_review'] };
+  }
+
+  const [items, total] = await Promise.all([
+    TreatmentRequest.find(filter)
+      .populate('diagnosis_id', 'crop_type ai_result plant_image created_at')
+      .populate('expert_review_id', 'decision confirmed_disease confirmed_severity reviewed_at')
+      .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(Number(limit)),
+    TreatmentRequest.countDocuments(filter),
+  ]);
+
+  return {
+    items: items.map(formatCaseItem),
+    total,
+    page: Number(page),
+    limit: Number(limit),
+  };
+}
+
 module.exports = {
   createRequest,
   getFarmerRequests,
   getPool,
+  getPendingCases,
   assignToExpert,
   getRequestById,
   submitReview,
+  getReviewedToday,
+  getRecentValidatedCases,
+  getExpertCases,
 };
