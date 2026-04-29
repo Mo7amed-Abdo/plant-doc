@@ -284,10 +284,13 @@ async function viewCase(id) {
 async function assignCase(id) {
   if (!await confirmDialog('Pick up this case? It will be assigned to you and removed from the pending queue.')) return;
   try {
-    await api.post(`/treatment-requests/${id}/assign`);
+    const res = await api.post(`/treatment-requests/${id}/assign`);
+    const chatId = res.data?.chat?._id || res.data?.chat?.id || null;
     showToast('Case assigned! Opening chat shortly.', 'success');
     await loadPendingCases();
-    setTimeout(() => { window.location.href = 'expertChat.html'; }, 1200);
+    setTimeout(() => {
+      window.location.href = chatId ? `expertChat.html?chatId=${encodeURIComponent(chatId)}` : 'expertChat.html';
+    }, 1200);
   } catch (error) {
     showToast(error.message || 'Failed to assign case', 'error');
   }

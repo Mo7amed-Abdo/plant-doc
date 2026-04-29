@@ -17,4 +17,12 @@ async function updateProfile(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { getProfile, updateProfile };
+async function getDashboard(req, res, next) {
+  try {
+    // req.user.profileId is the Company document _id set by the JWT
+    const data = await companyService.getDashboard(req.user.profileId);
+    return success(res, 200, 'Dashboard data fetched', data);
+  } catch (err) { next(err); }
+}
+
+module.exports = { getProfile, updateProfile, getDashboard };

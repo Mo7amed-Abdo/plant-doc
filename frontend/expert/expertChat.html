@@ -1,93 +1,106 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="h-full" lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>PlantDoc - Expert Chat</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-    tailwind.config = {
-        darkMode: "class",
-        theme: {
-            extend: {
-                "colors": {
-                    "surface-container": "#eceeef",
-                    "surface-variant": "#e1e3e4",
-                    "on-background": "#191c1d",
-                    "background": "#f8fafb",
-                    "primary": "#006a39",
-                    "on-tertiary-fixed": "#40000f",
-                    "outline-variant": "#bdcabc",
-                    "on-error-container": "#93000a",
-                    "surface-container-low": "#f2f4f5",
-                    "secondary-container": "#c6e4f4",
-                    "on-error": "#ffffff",
-                    "on-primary-fixed": "#00210e",
-                    "surface-container-lowest": "#ffffff",
-                    "error": "#ba1a1a",
-                    "tertiary-fixed": "#ffdadb",
-                    "on-surface-variant": "#3e4a3f",
-                    "primary-fixed-dim": "#64dd91",
-                    "outline": "#6d7a6f",
-                    "inverse-on-surface": "#eff1f2",
-                    "secondary-fixed-dim": "#adcbda",
-                    "inverse-surface": "#2e3132",
-                    "surface-tint": "#006d3a",
-                    "tertiary": "#a23546",
-                    "on-secondary": "#ffffff",
-                    "surface": "#f8fafb",
-                    "secondary": "#466270",
-                    "primary-fixed": "#82faab",
-                    "tertiary-container": "#c24d5e",
-                    "surface-dim": "#d8dadb",
-                    "surface-container-highest": "#e1e3e4",
-                    "on-tertiary-fixed-variant": "#851f33",
-                    "on-secondary-container": "#4a6774",
-                    "surface-bright": "#f8fafb",
-                    "on-secondary-fixed": "#001f2a",
-                    "surface-container-high": "#e6e8e9",
-                    "error-container": "#ffdad6",
-                    "on-primary": "#ffffff",
-                    "tertiary-fixed-dim": "#ffb2b8",
-                    "on-primary-fixed-variant": "#00522b",
-                    "on-surface": "#191c1d",
-                    "secondary-fixed": "#c9e7f7",
-                    "on-secondary-fixed-variant": "#2e4b57",
-                    "on-primary-container": "#f6fff4",
-                    "primary-container": "#008649",
-                    "on-tertiary-container": "#fffbff",
-                    "on-tertiary": "#ffffff",
-                    "inverse-primary": "#64dd91"
-                },
-                "borderRadius": {
-                    "DEFAULT": "0.25rem",
-                    "lg": "0.5rem",
-                    "xl": "0.75rem",
-                    "full": "9999px"
-                },
-                "spacing": {},
-                "fontFamily": {
-                    "headline": ["Inter"],
-                    "body": ["Inter"],
-                    "label": ["Inter"]
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>PlantDoc - Expert Chat</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#eceeef",
+                        "surface-variant": "#e1e3e4",
+                        "on-background": "#191c1d",
+                        "background": "#f8fafb",
+                        "primary": "#006a39",
+                        "on-tertiary-fixed": "#40000f",
+                        "outline-variant": "#bdcabc",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f2f4f5",
+                        "secondary-container": "#c6e4f4",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#00210e",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdadb",
+                        "on-surface-variant": "#3e4a3f",
+                        "primary-fixed-dim": "#64dd91",
+                        "outline": "#6d7a6f",
+                        "inverse-on-surface": "#eff1f2",
+                        "secondary-fixed-dim": "#adcbda",
+                        "inverse-surface": "#2e3132",
+                        "surface-tint": "#006d3a",
+                        "tertiary": "#a23546",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8fafb",
+                        "secondary": "#466270",
+                        "primary-fixed": "#82faab",
+                        "tertiary-container": "#c24d5e",
+                        "surface-dim": "#d8dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#851f33",
+                        "on-secondary-container": "#4a6774",
+                        "surface-bright": "#f8fafb",
+                        "on-secondary-fixed": "#001f2a",
+                        "surface-container-high": "#e6e8e9",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b8",
+                        "on-primary-fixed-variant": "#00522b",
+                        "on-surface": "#191c1d",
+                        "secondary-fixed": "#c9e7f7",
+                        "on-secondary-fixed-variant": "#2e4b57",
+                        "on-primary-container": "#f6fff4",
+                        "primary-container": "#008649",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#64dd91"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
                 }
             }
         }
-    }
-</script>
-<style>
-    body { font-family: 'Inter', sans-serif; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
 </head>
 
 <body class="bg-background text-on-background h-full flex overflow-hidden font-body">
 
-    <!-- SideNavBar — matches dashboard & pending cases exactly, Chat is active -->
-    <nav class="bg-slate-50 dark:bg-slate-950 text-green-600 dark:text-green-400 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 dark:border-slate-800 flex flex-col gap-2 h-full hidden md:flex z-50">
+    <!-- SideNavBar â€” matches dashboard & pending cases exactly, Chat is active -->
+    <nav
+        class="bg-slate-50 dark:bg-slate-950 text-green-600 dark:text-green-400 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 dark:border-slate-800 flex flex-col gap-2 h-full hidden md:flex z-50">
         <div class="flex items-center gap-1">
             <div class="flex items-center">
                 <img src="logo dark.png" alt="" class="w-26 h-28">
@@ -108,16 +121,17 @@
                     <span class="material-symbols-outlined">pending_actions</span>
                     <span>Pending Cases</span>
                 </div>
-                <span data-pending-badge class="bg-error text-on-error text-xs rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center font-bold hidden">0</span>
             </a>
             <!-- Chat (ACTIVE) with badge -->
             <a class="bg-green-700 dark:bg-green-900/30 text-white dark:text-green-300 rounded-lg p-3 flex rounded-xl items-center gap-3 scale-100 active:scale-[0.98] transition-transform justify-between w-full"
                 href="#">
                 <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+                    <span class="material-symbols-outlined"
+                        style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
                     <span>Chat</span>
                 </div>
-                <span data-chat-badge class="bg-white text-primary text-xs rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center font-bold hidden">0</span>
+                <span data-chat-badge
+                    class="bg-white text-primary text-xs rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center font-bold hidden">0</span>
             </a>
             <!-- Profile (inactive) -->
             <a class="text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all scale-100 active:scale-[0.98] transition-transform"
@@ -127,9 +141,10 @@
             </a>
         </div>
         <!-- Bottom profile section -->
-<div class="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800 px-4">
+        <div class="mt-auto pt-4 mb-4 border-t border-slate-200 dark:border-slate-800 px-4">
             <div class="flex items-center gap-3 px-2">
-                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
+                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant"
+                    data-user-avatar />
                 <div class="flex flex-col">
                     <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
                     <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
@@ -139,10 +154,7 @@
                 </button>
             </div>
         </div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
-                    <span class="material-symbols-outlined text-lg">logout</span>
-                </button>
-            </div>
+        </div>
         </div>
     </nav>
 
@@ -150,16 +162,19 @@
     <main class="flex-1 flex flex-col h-full overflow-hidden md:ml-64">
 
         <!-- TopAppBar (Mobile Only) -->
-        <header class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-gray-50 border-b border-slate-200 shadow-sm">
+        <header
+            class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-gray-50 border-b border-slate-200 shadow-sm">
             <div class="flex items-center gap-2">
                 <img src="logo dark.png" alt="" class="h-8">
                 <h1 class="text-xl font-bold text-green-700">PlantDoc</h1>
             </div>
             <div class="flex items-center gap-2">
-                <button class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest">
+                <button
+                    class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest">
                     <span class="material-symbols-outlined">notifications</span>
                 </button>
-                <button class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest">
+                <button
+                    class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest">
                     <span class="material-symbols-outlined">account_circle</span>
                 </button>
             </div>
@@ -169,104 +184,85 @@
         <div class="flex-1 flex overflow-hidden">
 
             <!-- Left Panel: Chat List -->
-            <aside class="w-full md:w-[320px] lg:w-[360px] bg-surface-container-lowest border-r border-surface-variant flex flex-col flex-shrink-0">
+            <aside
+                class="w-full md:w-[320px] lg:w-[360px] bg-surface-container-lowest border-r border-surface-variant flex flex-col flex-shrink-0">
                 <!-- List Header -->
                 <div class="p-4 bg-gray-50 rounded-t-2xl">
                     <h2 class="text-xl font-bold text-on-surface mb-4">Conversations</h2>
-                    <div class="relative mb-4">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                        <input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-primary/70 rounded-xl focus:ring-1 focus:ring-primary text-sm text-on-surface placeholder:text-on-surface-variant" placeholder="Search farmers, crops..." type="text"/>
-                    </div>
                     <div class="flex gap-2">
-                        <button class="px-3 py-1.5 rounded-full bg-green-700 text-white text-xs font-semibold active:scale-[0.98] transition-transform">All</button>
-                        <button class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium hover:bg-surface-variant transition-colors active:scale-[0.98]">Unread</button>
-                        <button class="px-3 py-1.5 rounded-full bg-error-container text-on-error-container text-xs font-medium hover:bg-error/20 transition-colors active:scale-[0.98]">Urgent</button>
+                        <button data-chat-filter="all"
+                            class="px-3 py-1.5 rounded-full bg-green-700 text-white text-xs font-semibold active:scale-[0.98] transition-transform">All</button>
+                        <button data-chat-filter="unread"
+                            class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium hover:bg-surface-variant transition-colors active:scale-[0.98]">Unread</button>
                     </div>
                 </div>
 
                 <!-- Chat Items -->
                 <div class="flex-1 overflow-y-auto" data-chat-list>
-
-                    <!-- Chat Item 1 (Active) -->
-                    <div class="flex items-start gap-3 p-4 bg-primary/5 border-l-4 rounded-xl border-green-700 cursor-pointer">
-                        <div class="relative">
-                            <img alt="Avatar" class="w-12 h-12 rounded-full object-cover"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWlPlNAvrFXsU8U5kiT3YPzrryF_pG__omgZlA-zOrH87ne6OiWBsYu9Q6KIF7sIyjGBuS0jXl2KkDxAhsALdEzZvDU3XQr1OZ1gX57ao2VgvvmfoFLyqvrSJMPd3H7Mwls6v-Bl6UmyL9C1pBY4htIujgdUqOAwFYf5OnSMywxXBe3PedoXxZ1yXfqZWnWZ-7SSFTRkAeEpOmTXFPFy7-SJsuIBm0wr1_sFR0vnDltltxs9wUKe-86QNiYvjpcQUVVt-04qJTySA"/>
-                            <span class="absolute bottom-0 right-0 w-3 h-3 bg-error rounded-full border-2 border-surface-container-lowest"></span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-baseline mb-1">
-                                <h3 class="font-semibold text-on-surface truncate">John Miller</h3>
-                                <span class="text-xs text-primary font-medium">10:42 AM</span>
-                            </div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary-container text-on-secondary-container">Tomato</span>
-                            </div>
-                            <p class="text-sm text-on-surface-variant truncate">The leaves are turning yellow rapidly.</p>
-                        </div>
-                    </div>
-
-                    <!-- Chat Item 2 -->
-                    <div class="flex items-start gap-3 p-4 hover:bg-surface-container/50 cursor-pointer border-l-4 border-transparent transition-colors active:scale-[0.99]">
-                        <div class="relative">
-                            <img alt="Avatar" class="w-12 h-12 rounded-full object-cover"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfYw5iaqagzuw5CeKfXCNcitxTcHKTaNwjoHGStcnfdG9lGu5e3hDh2djW_7Nz4FHAiP4hHffxf8mP8Knr9aea9Cyy4-HP-o4NiNsjjILOw1EzUOt-v9DLB5BLuD7V01VLqKLV3NBpuiADfDts3f1duwwFOMdRGxkrizlxo5xOAfhO2cm_BBe1bsosjVqn2ewIgISW_3RwMcsGBQfxgPAELpKogozkruAjYFvyrtvZUUVF04r7O1Hzi2xtiBcTy3mtmZ88rCIXLuU"/>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-baseline mb-1">
-                                <h3 class="font-medium text-on-surface truncate">Sarah Jenkins</h3>
-                                <span class="text-xs text-on-surface-variant">Yesterday</span>
-                            </div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-tertiary-container text-on-tertiary-container">Corn</span>
-                            </div>
-                            <p class="text-sm text-on-surface-variant truncate">Thanks, I'll apply the treatment today.</p>
-                        </div>
-                    </div>
-
-                    <!-- Chat Item 3 -->
-                    <div class="flex items-start gap-3 p-4 hover:bg-surface-container/50 cursor-pointer border-l-4 border-transparent transition-colors active:scale-[0.99]">
-                        <div class="relative flex items-center justify-center w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant font-bold text-lg flex-shrink-0">
-                            MR
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-baseline mb-1">
-                                <h3 class="font-medium text-on-surface truncate">Miguel Rodriguez</h3>
-                                <span class="text-xs text-on-surface-variant">Monday</span>
-                            </div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-secondary-container text-on-secondary-container">Wheat</span>
-                            </div>
-                            <p class="text-sm text-on-surface-variant truncate">Is it normal for the spots to look like this?</p>
-                        </div>
-                    </div>
-
+    <div class="p-4 space-y-4 animate-pulse">
+        <div class="flex items-start gap-3">
+            <div class="w-11 h-11 rounded-full bg-surface-variant"></div>
+            <div class="flex-1 min-w-0 space-y-2">
+                <div class="flex justify-between gap-3">
+                    <div class="h-4 w-28 rounded bg-surface-variant"></div>
+                    <div class="h-3 w-12 rounded bg-surface-variant"></div>
                 </div>
-            </aside>
+                <div class="h-3 w-24 rounded bg-surface-variant"></div>
+                <div class="h-3 w-36 rounded bg-surface-variant"></div>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <div class="w-11 h-11 rounded-full bg-surface-variant"></div>
+            <div class="flex-1 min-w-0 space-y-2">
+                <div class="flex justify-between gap-3">
+                    <div class="h-4 w-24 rounded bg-surface-variant"></div>
+                    <div class="h-3 w-14 rounded bg-surface-variant"></div>
+                </div>
+                <div class="h-3 w-20 rounded bg-surface-variant"></div>
+                <div class="h-3 w-32 rounded bg-surface-variant"></div>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <div class="w-11 h-11 rounded-full bg-surface-variant"></div>
+            <div class="flex-1 min-w-0 space-y-2">
+                <div class="flex justify-between gap-3">
+                    <div class="h-4 w-32 rounded bg-surface-variant"></div>
+                    <div class="h-3 w-10 rounded bg-surface-variant"></div>
+                </div>
+                <div class="h-3 w-16 rounded bg-surface-variant"></div>
+                <div class="h-3 w-40 rounded bg-surface-variant"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</aside>
 
             <!-- Right Panel: Chat Area -->
             <section class="flex-1 flex flex-col bg-surface-container-lowest relative hidden md:flex">
 
                 <!-- Chat Header -->
-                <div class="px-6 py-4 border-b border-surface-variant flex justify-between items-center bg-gray-50 z-10 shadow-sm">
+                <div
+                    class="px-6 py-4 border-b border-surface-variant flex justify-between items-center bg-gray-50 z-10 shadow-sm">
                     <div class="flex items-center gap-4">
-                        <img alt="Avatar" class="w-10 h-10 rounded-full object-cover"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxSaHItThacyXd_hGua5ao6wpSv08xsL1D4S1na1XvyDgRFOVclYlvkuqX3lajoV0RYmrBE2NWx-1tI-AexVf_NUXXfqmEggD7hnWY74aN4V_1r-PrVsUqZp5aQMtrm5By2lMdALDG4iPo6HEv1QdKrrUqwd95FIMW2Pa57QoL6F_s-8xExiXFxhrOwf3h3siV4gCI3DrmvREate3cv3FRN4lrvfvyWf_jinjNAnIcn2oDNBlus-ABmSpij5Oz8U1gW_SyqiPo3c8"/>
+                        <div class="w-10 h-10 rounded-full bg-surface-variant animate-pulse shrink-0" data-chat-header-avatar-shell></div>
+                        <img alt="Avatar" class="w-10 h-10 rounded-full object-cover hidden"
+                            src=""
+                            data-chat-header-avatar />
                         <div>
                             <h2 class="text-lg font-bold text-on-surface flex items-center gap-2" data-chat-header-name>
-                                John Miller
-                                <span class="px-2 py-0.5 rounded text-xs font-semibold bg-error-container text-on-error-container">Urgent</span>
+                                <span data-chat-header-name-text class="inline-block h-5 w-28 rounded bg-surface-variant animate-pulse text-transparent">Loading</span>
+                                <span data-chat-header-badge
+                                    class="hidden px-2 py-0.5 rounded text-xs font-semibold bg-error-container text-on-error-container"></span>
                             </h2>
                             <p class="text-sm text-on-surface-variant flex items-center gap-1" data-chat-header-sub>
-                                <span class="material-symbols-outlined text-[16px]">local_florist</span> Tomato Crop
+                                <span class="material-symbols-outlined text-[16px]">local_florist</span>
+                                <span data-chat-header-sub-text class="inline-block h-4 w-24 rounded bg-surface-variant animate-pulse text-transparent">Loading</span>
                             </p>
                         </div>
                     </div>
                     <div class="flex gap-3">
-                        <button class="px-4 py-2 bg-surface-container hover:bg-surface-variant text-on-surface text-sm font-semibold rounded-lg transition-colors flex items-center gap-2 active:scale-[0.98]">
-                            <span class="material-symbols-outlined text-lg">visibility</span> View Case
-                        </button>
-                        <button class="px-4 py-2 bg-green-700 text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm active:scale-[0.98]">
+                        <button data-resolve-btn
+                            class="px-4 py-2 bg-green-700 text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm active:scale-[0.98]">
                             <span class="material-symbols-outlined text-lg">check_circle</span> Resolve
                         </button>
                     </div>
@@ -274,107 +270,67 @@
 
                 <!-- Chat Messages Area -->
                 <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-surface" data-messages-area>
+    <div class="animate-pulse space-y-5">
+        <div class="flex justify-center">
+            <div class="h-6 w-44 rounded-full bg-surface-container-high"></div>
+        </div>
+        <div class="flex items-end gap-3 max-w-[80%]">
+            <div class="w-8 h-8 rounded-full bg-surface-variant flex-shrink-0"></div>
+            <div class="flex flex-col gap-2 w-full max-w-md">
+                <div class="h-3 w-24 rounded bg-surface-variant"></div>
+                <div class="h-16 rounded-2xl rounded-bl-sm bg-surface-container-high"></div>
+            </div>
+        </div>
+        <div class="flex items-end gap-3 max-w-[80%] ml-auto justify-end">
+            <div class="flex flex-col gap-2 items-end w-full max-w-md">
+                <div class="h-3 w-20 rounded bg-surface-variant"></div>
+                <div class="h-14 w-full rounded-2xl rounded-br-sm bg-green-200/70"></div>
+            </div>
+        </div>
+        <div class="flex items-end gap-3 max-w-[80%]">
+            <div class="w-8 h-8 rounded-full bg-surface-variant flex-shrink-0"></div>
+            <div class="flex flex-col gap-2 w-full max-w-md">
+                <div class="h-40 rounded-2xl rounded-bl-sm bg-surface-container-high"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                    <!-- System Message -->
-                    <div class="flex justify-center">
-                        <div class="bg-surface-container-high text-on-surface-variant text-xs py-1 px-3 rounded-full flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">smart_toy</span> AI Preliminary Analysis Completed
-                        </div>
-                    </div>
-
-                    <!-- Farmer Message (Left) -->
-                    <div class="flex items-end gap-3 max-w-[80%]">
-                        <img alt="Avatar" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuD6O92AniGAenXg0uv-Ah_bZoaSCVw6ITcAhgRMjFqnp2-TMBIQbEaPvoij_Q2mUJW8dSV-C9gdc2C9pTNzMevT83v2Xz7WlI13GAyxNDp24UivsNh7rVu9Xxz830EOnYk6Y7G8i6mzFP1fER7wMxutCtakE5XhspmT5srkigg8h_QzcQBpiIcUSvqgcUeqgoPgtIzxWN3FIra744-_IPYrnjEBWQszrlfJQTH3DIDRTCMYmANvbZdEXaGERsxPrc-x6IY7UOmHQ"/>
-                        <div class="flex flex-col gap-1">
-                            <span class="text-xs text-on-surface-variant ml-1">John Miller • 10:30 AM</span>
-                            <div class="bg-surface-container-high text-on-surface p-3 rounded-2xl rounded-bl-sm">
-                                <p class="text-sm">Hi Doc, I'm seeing strange yellow spots on my lower tomato leaves. It started yesterday.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Farmer Message with Image -->
-                    <div class="flex items-end gap-3 max-w-[80%]">
-                        <div class="w-8 h-8 flex-shrink-0"></div>
-                        <div class="flex flex-col gap-1">
-                            <div class="bg-surface-container-high p-2 rounded-2xl rounded-bl-sm">
-                                <img alt="Plant Image" class="w-64 h-48 object-cover rounded-xl"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc9ZTEMjyTdSAHf80vaPHNnt5ZfVK6pAhV78ZRzz51T2dWQgyPpHYVwYyPT9YlAd2uR0f0P-mMM2myCWJ8awZ9rvQCQb0Ju3fdzuLosFaQc6rdrkd91M9ElbxOXj5RAHuku3YXX23vNdwQPWjm1OuvMi6h7lb5gtxLIhHbPGUbfLygB_nupqBzDvfMrQgbjciJkPdWQBwROde4HGx34QUko9JCcXOFzsTUX2dlVqIwahwhcjRlaZObJIGtl5AZJyjxsA4MAkxq7F8"/>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- System Message (AI Output) -->
-                    <div class="flex justify-center my-2">
-                        <div class="bg-error-container/50 border border-error-container text-on-surface text-sm p-4 rounded-xl max-w-md w-full shadow-sm">
-                            <div class="flex items-center gap-2 text-error font-bold mb-2">
-                                <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">warning</span>
-                                AI Detection: Early Blight (High Confidence)
-                            </div>
-                            <p class="text-on-surface-variant text-xs mb-2">Severity: <span class="text-error font-semibold">High</span> | Confidence: 92%</p>
-                            <p class="text-xs text-on-surface">Suggested action: Apply copper-based fungicide immediately to prevent spreading.</p>
-                        </div>
-                    </div>
-
-                    <!-- Expert Message (Right) -->
-                    <div class="flex items-end gap-3 max-w-[80%] ml-auto justify-end">
-                        <div class="flex flex-col gap-1 items-end">
-                            <span class="text-xs text-on-surface-variant mr-1">You • 10:35 AM</span>
-                            <div class="bg-green-700 text-white p-3 rounded-2xl rounded-br-sm shadow-sm">
-                                <p class="text-sm">Hello John. Looking at the image and the AI analysis, this appears to be Early Blight.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Expert Message (Right) -->
-                    <div class="flex items-end gap-3 max-w-[80%] ml-auto justify-end">
-                        <div class="flex flex-col gap-1 items-end">
-                            <div class="bg-green-700 text-white p-3 rounded-2xl rounded-br-sm shadow-sm">
-                                <p class="text-sm">Have you noticed if the spots have concentric rings? It would help confirm the diagnosis.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Farmer Message (Left) -->
-                    <div class="flex items-end gap-3 max-w-[80%]">
-                        <img alt="Avatar" class="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4bYyBcZNxj5qzR7BRDS7r84uYeCO0rheleYPbB3nqVeBAH-Tzf-C5wFNgyAIQ1aQxnLQNe-RAjCFMbbBXQhtDvKBbNiSMlvPMXgyGq5BivPK5ggMeFXJbqr8etTkZF2xvhZNxI9jbOpuLxBqESHSnBDYWzmHlzxkrClvLGMbkcxrh1IJxbF-YQtDvBeJIsotQdz9i1_oKAW1jLB_RYpoL7kas31_rjpUSC5MrgoqH2o0gJ4g22bZH7y4Zm3DGkZt0MIxPWELZPf0"/>
-                        <div class="flex flex-col gap-1">
-                            <span class="text-xs text-on-surface-variant ml-1">John Miller • 10:42 AM</span>
-                            <div class="bg-surface-container-high text-on-surface p-3 rounded-2xl rounded-bl-sm">
-                                <p class="text-sm">Yes, actually they do look like little targets if I look closely. The leaves are turning yellow rapidly.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Chat Input Area -->
+<!-- Chat Input Area -->
                 <div class="p-4 bg-surface-container-lowest border-t border-surface-variant">
                     <!-- Quick Replies -->
                     <div class="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar">
-                        <button class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
+                        <button
+                            class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
                             Please upload a clearer image
                         </button>
-                        <button class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
+                        <button
+                            class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
                             Apply recommended treatment
                         </button>
-                        <button class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
+                        <button
+                            class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
                             Your case is under review
                         </button>
                     </div>
                     <!-- Input Field -->
-                    <div class="flex items-center gap-2 bg-surface-container rounded-3xl px-2 focus-within:ring-2 focus-within:ring-primary/50 transition-shadow">
-                        <button class="p-2 mt-1 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-variant active:scale-[0.98]">
+                    <div
+                        class="flex items-center gap-2 bg-surface-container rounded-3xl px-2 focus-within:ring-2 focus-within:ring-primary/50 transition-shadow">
+                        <button
+                            class="p-2 mt-1 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-variant active:scale-[0.98]">
                             <span class="material-symbols-outlined">attach_file</span>
                         </button>
-                        <button class="p-2 mt-1 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-variant active:scale-[0.98]">
+                        <button
+                            class="p-2 mt-1 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-variant active:scale-[0.98]">
                             <span class="material-symbols-outlined">image</span>
                         </button>
-                        <input id="message-input" class="flex-1 bg-transparent border-none rounded-xl focus:ring-0 text-sm text-on-surface px-1 py-1" placeholder="Type your message..." type="text"/>
-                        <button id="send-btn" class="p-2 bg-white border border-primary text-primary rounded-full hover:bg-primary hover:text-white transition-colors flex items-center justify-center shadow-sm active:scale-[0.98]">
-                            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+                        <input id="message-input"
+                            class="flex-1 bg-transparent border-none rounded-xl focus:ring-0 text-sm text-on-surface px-1 py-1"
+                            placeholder="Type your message..." type="text" />
+                        <button id="send-btn"
+                            class="p-2 bg-white border border-primary text-primary rounded-full hover:bg-primary hover:text-white transition-colors flex items-center justify-center shadow-sm active:scale-[0.98]">
+                            <span class="material-symbols-outlined"
+                                style="font-variation-settings: 'FILL' 1;">send</span>
                         </button>
                     </div>
                 </div>
@@ -382,36 +338,14 @@
             </section>
 
             <!-- Optional Right Side Panel (Case Preview) -->
-            <aside class="w-[300px] border-l border-surface-variant bg-surface-container-lowest flex-col hidden xl:flex">
-                <div class="p-[8.7%] border-b border-surface-variant flex text-lg justify-between items-center bg-gray-50">
+            <aside
+                class="w-[300px] border-l border-surface-variant bg-surface-container-lowest flex-col hidden xl:flex">
+                <div
+                    class="p-[8.7%] border-b border-surface-variant flex text-lg justify-between items-center bg-gray-50">
                     <h3 class="font-bold text-on-surface">Case Details</h3>
                 </div>
-                <div class="p-4 flex-1 overflow-y-auto">
-                    <img alt="Analyzed Plant" class="w-full h-40 object-cover rounded-xl mb-4"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7e_K9fYKKV1d6qckzxHSdGWYGdYNcnZxYoMhoez8SgVSJyO3dsq41wsVCnMqZNzEcN_k-HAsjZT1aSyNDrELcJLePneMaqEl3HeQtLoNOLD-3857XFuuR0tz2BqR-LFsw4UNrxXPxd8S-YH6tEGEygqQ0eGY8j_2_yOfBqZo7zvsfSoiuHoSGEoLprFrMWk2nqjnZOX4yI9YRl9MxhX13UYrFXyPiso4ADdm-IyV06WtsqzDm4k9WCvmuUAAROrPf9zedW2Lfw4o"/>
-                    <div class="space-y-4">
-                        <div class="bg-surface-container p-4 rounded-xl">
-                            <h4 class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">AI Analysis</h4>
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-sm font-bold text-on-surface">Early Blight</span>
-                                <span class="text-xs font-semibold text-primary">92% Match</span>
-                            </div>
-                            <div class="w-full bg-surface-variant rounded-full h-1.5 mb-3">
-                                <div class="bg-green-700 h-1.5 rounded-full" style="width: 92%"></div>
-                            </div>
-                            <div class="flex items-center gap-2 text-xs">
-                                <span class="text-on-surface-variant">Severity:</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-error-container text-on-error-container">Critical</span>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Symptoms Noted</h4>
-                            <ul class="text-sm text-on-surface space-y-1">
-                                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[14px] text-primary">check</span> Concentric ring spots</li>
-                                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[14px] text-primary">check</span> Lower leaf yellowing</li>
-                                <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[14px] text-primary">check</span> Rapid spread</li>
-                            </ul>
-                        </div>
+                <div class="p-4 flex-1 overflow-y-auto" data-case-details>
+                    <div class="text-sm text-on-surface-variant text-center py-10">Select a chat to load case details.
                     </div>
                 </div>
             </aside>
@@ -425,4 +359,5 @@
     <script src="./expertSidebarBadges.js"></script>
     <script src="./expertchat.js"></script>
 </body>
+
 </html>

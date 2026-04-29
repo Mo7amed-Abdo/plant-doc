@@ -28,7 +28,27 @@ async function getFarmerDelivery(req, res, next) {
   } catch (err) { next(err); }
 }
 
-// ─── Company ──────────────────────────────────────────────────────────────────
+// ─── Company: treatment requests ──────────────────────────────────────────────
+
+async function getTreatmentRequests(req, res, next) {
+  try {
+    const { items, total, page, limit } = await deliveryService.getTreatmentRequests(
+      req.user.profileId, req.query
+    );
+    return paginated(res, items, total, page, limit, 'Treatment requests fetched');
+  } catch (err) { next(err); }
+}
+
+async function rejectOrder(req, res, next) {
+  try {
+    const order = await deliveryService.rejectOrder(
+      req.user.profileId, req.params.id, req.body, req.app.get('io')
+    );
+    return success(res, 200, 'Order rejected', order);
+  } catch (err) { next(err); }
+}
+
+// ─── Company: orders ──────────────────────────────────────────────────────────
 
 async function getCompanyOrders(req, res, next) {
   try {
@@ -54,6 +74,8 @@ async function updateOrderStatus(req, res, next) {
     return success(res, 200, 'Order status updated', order);
   } catch (err) { next(err); }
 }
+
+// ─── Company: deliveries ──────────────────────────────────────────────────────
 
 async function createDelivery(req, res, next) {
   try {
@@ -101,8 +123,13 @@ async function uploadProofOfDelivery(req, res, next) {
 }
 
 module.exports = {
+  // Farmer
   getFarmerOrders, getFarmerOrderById, getFarmerDelivery,
+  // Company — treatment requests
+  getTreatmentRequests, rejectOrder,
+  // Company — orders
   getCompanyOrders, getCompanyOrderById, updateOrderStatus,
+  // Company — deliveries
   createDelivery, getCompanyDeliveries, getCompanyDeliveryById,
   updateDeliveryStatus, uploadProofOfDelivery,
 };

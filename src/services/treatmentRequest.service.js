@@ -262,7 +262,10 @@ async function assignToExpert(expertId, expertUserId, requestId, io) {
     treatment_request_id: request._id,
     farmer_id: request.farmer_id,
     expert_id: expertId,
+    last_message_at: new Date(),
   });
+
+  await notificationService.markPendingCaseNotificationsResolved(request._id).catch(() => null);
 
   // Notify farmer
   const farmer = await Farmer.findById(request.farmer_id).populate('user_id', '_id');

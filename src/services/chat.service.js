@@ -17,23 +17,52 @@ async function getChats(role, profileId, query) {
 
   const [items, total] = await Promise.all([
     Chat.find(filter)
-      .populate('farmer_id', 'user_id location')
-      .populate('expert_id', 'user_id specialization')
-      .populate('treatment_request_id', 'priority status')
+      .populate({
+        path: 'farmer_id',
+        select: 'user_id location',
+        populate: { path: 'user_id', select: 'full_name avatar' },
+      })
+      .populate({
+        path: 'expert_id',
+        select: 'user_id specialization',
+        populate: { path: 'user_id', select: 'full_name avatar' },
+      })
+      .populate({
+        path: 'treatment_request_id',
+        select: 'priority status diagnosis_id reviewed_at validated_at image_url expert_review_id created_at',
+        populate: [
+          { path: 'diagnosis_id', select: 'crop_type ai_result plant_image created_at' },
+          { path: 'expert_review_id', select: 'decision confirmed_disease confirmed_severity expert_notes reviewed_at' },
+        ],
+      })
       .sort({ last_message_at: -1 })
       .skip(skip)
       .limit(Number(limit)),
     Chat.countDocuments(filter),
   ]);
 
-  return { items, total, page: Number(page), limit: Number(limit) };
+  return { items: items.map(_formatChat), total, page: Number(page), limit: Number(limit) };
 }
 
 async function getChatById(chatId, role, profileId) {
   const chat = await Chat.findById(chatId)
-    .populate('farmer_id', 'user_id location')
-    .populate('expert_id', 'user_id specialization')
-    .populate('treatment_request_id');
+    .populate({
+      path: 'farmer_id',
+      select: 'user_id location',
+      populate: { path: 'user_id', select: 'full_name avatar' },
+    })
+    .populate({
+      path: 'expert_id',
+      select: 'user_id specialization',
+      populate: { path: 'user_id', select: 'full_name avatar' },
+    })
+    .populate({
+      path: 'treatment_request_id',
+      populate: [
+        { path: 'diagnosis_id', select: 'crop_type ai_result plant_image created_at' },
+        { path: 'expert_review_id', select: 'decision confirmed_disease confirmed_severity expert_notes reviewed_at' },
+      ],
+    });
 
   if (!chat) {
     console.error(`[ChatService] getChatById: Chat not found for chatId=${chatId}, role=${role}`);
@@ -42,7 +71,7 @@ async function getChatById(chatId, role, profileId) {
 
   _assertParticipant(chat, role, profileId);
   console.log(`[ChatService] getChatById: Found chatId=${chatId}, role=${role}`);
-  return chat;
+  return _formatChat(chat);
 }
 
 async function getMessages(chatId, role, profileId, query = {}) {
@@ -224,6 +253,49 @@ function _formatMessage(message) {
     is_read: obj.is_read,
     sent_at: obj.sent_at || createdAt,
     created_at: obj.created_at || createdAt,
+  };
+}
+
+function _formatChat(chat) {
+  const obj = chat.toObject ? chat.toObject() : chat;
+  const farmer = obj.farmer_id || {};
+  const farmerUser = farmer.user_id || {};
+  const expert = obj.expert_id || {};
+  const expertUser = expert.user_id || {};
+  const request = obj.treatment_request_id || {};
+  const diagnosis = request.diagnosis_id || {};
+  const review = request.expert_review_id || {};
+
+  const farmerAvatar = toDataUri(farmerUser.avatar) || null;
+  const expertAvatar = toDataUri(expertUser.avatar) || null;
+  const caseImageUrl = request.image_url || toDataUri(diagnosis.plant_image) || null;
+  const cropName = diagnosis.crop_type || null;
+  const diseaseName = review.confirmed_disease || diagnosis.ai_result?.disease_name || null;
+  const severity = review.confirmed_severity || diagnosis.ai_result?.severity || null;
+  const confidence = diagnosis.ai_result?.confidence || 0;
+  const recommendation = review.expert_notes || diagnosis.ai_result?.suggested_action || null;
+
+  return {
+    ...obj,
+    farmerName: farmerUser.full_name || 'Farmer',
+    farmerAvatar,
+    expertName: expertUser.full_name || 'Expert',
+    expertAvatar,
+    caseDetails: {
+      caseId: request._id || null,
+      cropName,
+      diseaseName,
+      severity,
+      confidence,
+      recommendation,
+      symptoms: diagnosis.ai_result?.symptoms || [],
+      status: request.status || null,
+      priority: request.priority || null,
+      createdAt: request.created_at || diagnosis.created_at || null,
+      reviewedAt: request.reviewed_at || review.reviewed_at || null,
+      validatedAt: request.validated_at || request.reviewed_at || review.reviewed_at || null,
+      imageUrl: caseImageUrl,
+    },
   };
 }
 

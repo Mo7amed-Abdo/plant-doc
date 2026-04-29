@@ -10,21 +10,25 @@ const { uploadSingle } = require('../middleware/upload.middleware');
 const isCompany = [authenticate, requireRole('company')];
 
 // ─── Listings ─────────────────────────────────────────────────────────────────
-router.get('/listings',         ...isCompany, productCtrl.getCompanyListings);
-router.post('/listings',        ...isCompany, productCtrl.createListing);
-router.put('/listings/:id',     ...isCompany, productCtrl.updateListing);
-router.delete('/listings/:id',  ...isCompany, productCtrl.deleteListing);
+router.get('/listings',          ...isCompany, productCtrl.getCompanyListings);
+router.post('/listings',         ...isCompany, productCtrl.createListing);
+router.put('/listings/:id',      ...isCompany, productCtrl.updateListing);
+router.delete('/listings/:id',   ...isCompany, productCtrl.deleteListing);
+
+// ─── Treatment Requests (pending orders awaiting company accept/reject) ────────
+router.get('/treatment-requests',       ...isCompany, orderCtrl.getTreatmentRequests);
 
 // ─── Orders ───────────────────────────────────────────────────────────────────
-router.get('/orders',           ...isCompany, orderCtrl.getCompanyOrders);
-router.get('/orders/:id',       ...isCompany, orderCtrl.getCompanyOrderById);
-router.put('/orders/:id/status',...isCompany, orderCtrl.updateOrderStatus);
+router.get('/orders',                   ...isCompany, orderCtrl.getCompanyOrders);
+router.get('/orders/:id',              ...isCompany, orderCtrl.getCompanyOrderById);
+router.put('/orders/:id/status',       ...isCompany, orderCtrl.updateOrderStatus);
+router.put('/orders/:id/reject',       ...isCompany, orderCtrl.rejectOrder);
 
 // ─── Deliveries ───────────────────────────────────────────────────────────────
-router.post('/orders/:id/delivery',               ...isCompany, orderCtrl.createDelivery);
-router.get('/deliveries',                         ...isCompany, orderCtrl.getCompanyDeliveries);
-router.get('/deliveries/:id',                     ...isCompany, orderCtrl.getCompanyDeliveryById);
-router.put('/deliveries/:id/status',              ...isCompany, orderCtrl.updateDeliveryStatus);
-router.put('/deliveries/:id/proof',               ...isCompany, uploadSingle('proof'), orderCtrl.uploadProofOfDelivery);
+router.post('/orders/:id/delivery',              ...isCompany, orderCtrl.createDelivery);
+router.get('/deliveries',                        ...isCompany, orderCtrl.getCompanyDeliveries);
+router.get('/deliveries/:id',                    ...isCompany, orderCtrl.getCompanyDeliveryById);
+router.put('/deliveries/:id/status',             ...isCompany, orderCtrl.updateDeliveryStatus);
+router.put('/deliveries/:id/proof', ...isCompany, uploadSingle('proof'), orderCtrl.uploadProofOfDelivery);
 
 module.exports = router;

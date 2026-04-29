@@ -87,6 +87,17 @@ async function markExpertChatNotificationsRead(expertId, conversationId) {
   );
 }
 
+async function markPendingCaseNotificationsResolved(caseId) {
+  return ExpertNotification.updateMany(
+    {
+      type: 'new_pending_case',
+      related_case_id: caseId,
+      is_read: false,
+    },
+    { is_read: true }
+  );
+}
+
 module.exports = {
   notifyFarmer,
   notifyExpert,
@@ -94,4 +105,5 @@ module.exports = {
   markExpertNotificationRead,
   markAllExpertNotificationsRead,
   markExpertChatNotificationsRead,
+  markPendingCaseNotificationsResolved,
 };

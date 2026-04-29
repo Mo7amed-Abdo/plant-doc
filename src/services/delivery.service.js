@@ -8,6 +8,20 @@ const { createError } = require('../middleware/error.middleware');
 const { toMongoImage } = require('../utils/image');
 const notificationService = require('./notification.service');
 
+// ─── Shared populate helper ───────────────────────────────────────────────────
+
+/**
+ * Deep-populates farmer_id so the frontend can read:
+ *   o.farmer_id.user_id.full_name   — farmer's real name
+ *   o.farmer_id.location            — farmer's city / region
+ *   o.farmer_id.user_id.phone       — farmer's phone number
+ */
+const FARMER_POPULATE = {
+  path: 'farmer_id',
+  select: 'user_id location',
+  populate: { path: 'user_id', select: 'full_name phone' },
+};
+
 // ─── Farmer: own orders ───────────────────────────────────────────────────────
 
 async function getFarmerOrders(farmerId, query) {
@@ -22,18 +36,17 @@ async function getFarmerOrders(farmerId, query) {
       .sort({ placed_at: -1 })
       .skip(skip)
       .limit(Number(limit))
-      .lean(),                              // lean() so we can add .items below
+      .lean(),
     Order.countDocuments(filter),
   ]);
 
-  // ── Batch-fetch all OrderItems for these orders in one query ──
+  // Batch-fetch all OrderItems for these orders in one query
   if (orders.length) {
     const orderIds = orders.map(o => o._id);
     const allItems = await OrderItem.find({ order_id: { $in: orderIds } })
       .populate('product_id', 'name category unit')
       .lean();
 
-    // Group by order_id and attach
     const byOrder = {};
     allItems.forEach(item => {
       const key = item.order_id.toString();
@@ -67,17 +80,115 @@ async function getFarmerDelivery(farmerId, orderId) {
   return delivery;
 }
 
+// ─── Company: treatment requests (pending orders awaiting acceptance) ─────────
+
+/**
+ * Returns only pending orders for this company, with full farmer info + items.
+ * These are "treatment requests" the company must accept or reject before
+ * they become real orders.
+ */
+async function getTreatmentRequests(companyId, query) {
+  const { page = 1, limit = 20 } = query;
+  const skip = (Number(page) - 1) * Number(limit);
+  const filter = { company_id: companyId, status: 'pending' };
+
+  const [orders, total] = await Promise.all([
+    Order.find(filter)
+      .populate(FARMER_POPULATE)
+      .sort({ placed_at: -1 })
+      .skip(skip)
+      .limit(Number(limit))
+      .lean(),
+    Order.countDocuments(filter),
+  ]);
+
+  // Batch-fetch items so cards can preview requested products
+  if (orders.length) {
+    const orderIds = orders.map(o => o._id);
+    const allItems = await OrderItem.find({ order_id: { $in: orderIds } })
+      .populate('product_id', 'name category unit')
+      .lean();
+
+    const byOrder = {};
+    allItems.forEach(item => {
+      const key = item.order_id.toString();
+      if (!byOrder[key]) byOrder[key] = [];
+      byOrder[key].push(item);
+    });
+    orders.forEach(order => {
+      order.items = byOrder[order._id.toString()] || [];
+    });
+  }
+
+  return { items: orders, total, page: Number(page), limit: Number(limit) };
+}
+
+/**
+ * Rejects a pending order:
+ *   - Sets status → 'cancelled'
+ *   - Stores rejection_reason in order.notes
+ *   - Notifies the farmer via socket/push
+ */
+async function rejectOrder(companyId, orderId, body, io) {
+  const { rejection_reason } = body;
+
+  const order = await Order.findOne({ _id: orderId, company_id: companyId, status: 'pending' });
+  if (!order) throw createError(404, 'Pending order not found or already processed');
+
+  order.status = 'cancelled';
+  order.notes  = rejection_reason
+    ? `Rejected: ${rejection_reason}`
+    : 'Rejected by company';
+  await order.save();
+
+  // Notify farmer — failure here must NOT break the rejection response
+  try {
+    const farmer = await Farmer.findById(order.farmer_id).populate('user_id', '_id');
+    if (farmer?.user_id) {
+      await notificationService.notifyFarmer(
+        farmer._id,
+        farmer.user_id._id,
+        {
+          type: 'order_status',
+          title: 'Order Request Rejected',
+          body: `Your order ${order.order_code} was not accepted.${
+            rejection_reason ? ` Reason: ${rejection_reason}` : ''
+          }`,
+          related_id: order._id,
+          related_type: 'order',
+        },
+        io
+      );
+    }
+  } catch (_) { /* non-critical */ }
+
+  return order;
+}
+
 // ─── Company: orders ──────────────────────────────────────────────────────────
 
+/**
+ * Returns company orders with full farmer info.
+ *
+ * Query params:
+ *   status          — filter by exact status value
+ *   exclude_pending — when 'true', excludes pending (treatment-request) orders
+ *   page, limit
+ */
 async function getCompanyOrders(companyId, query) {
-  const { page = 1, limit = 10, status } = query;
+  const { page = 1, limit = 10, status, exclude_pending } = query;
   const skip = (Number(page) - 1) * Number(limit);
   const filter = { company_id: companyId };
-  if (status) filter.status = status;
+
+  if (status) {
+    filter.status = status;
+  } else if (exclude_pending === 'true') {
+    filter.status = { $ne: 'pending' };
+  }
 
   const [items, total] = await Promise.all([
     Order.find(filter)
-      .populate('farmer_id', 'user_id location')
+      .populate(FARMER_POPULATE)
       .sort({ placed_at: -1 })
       .skip(skip)
       .limit(Number(limit)),
@@ -88,7 +199,7 @@ async function getCompanyOrders(companyId, query) {
 
 async function getCompanyOrderById(companyId, orderId) {
   const order = await Order.findOne({ _id: orderId, company_id: companyId })
-    .populate('farmer_id', 'user_id location');
+    .populate(FARMER_POPULATE);
   if (!order) throw createError(404, 'Order not found');
 
   const items = await OrderItem.find({ order_id: orderId })
@@ -100,7 +211,9 @@ async function updateOrderStatus(companyId, orderId, body, io) {
   const { status } = body;
   if (!status) throw createError(400, 'status is required');
 
-  const validStatuses = ['pending', 'processing', 'shipped', 'on_the_way', 'arriving', 'delivered', 'cancelled'];
+  const validStatuses = [
+    'pending', 'processing', 'shipped', 'on_the_way', 'arriving', 'delivered', 'cancelled',
+  ];
   if (!validStatuses.includes(status)) {
     throw createError(400, `Invalid status. Must be one of: ${validStatuses.join(', ')}`);
   }
@@ -113,21 +226,23 @@ async function updateOrderStatus(companyId, orderId, body, io) {
   await order.save();
 
   // Notify farmer of status change
-  const farmer = await Farmer.findById(order.farmer_id).populate('user_id', '_id');
-  if (farmer) {
-    await notificationService.notifyFarmer(
-      farmer._id,
-      farmer.user_id._id,
-      {
-        type: 'order_status',
-        title: 'Order status updated',
-        body: `Your order ${order.order_code} is now: ${status.replace(/_/g, ' ')}.`,
-        related_id: order._id,
-        related_type: 'order',
-      },
-      io
-    );
-  }
+  try {
+    const farmer = await Farmer.findById(order.farmer_id).populate('user_id', '_id');
+    if (farmer?.user_id) {
+      await notificationService.notifyFarmer(
+        farmer._id,
+        farmer.user_id._id,
+        {
+          type: 'order_status',
+          title: 'Order status updated',
+          body: `Your order ${order.order_code} is now: ${status.replace(/_/g, ' ')}.`,
+          related_id: order._id,
+          related_type: 'order',
+        },
+        io
+      );
+    }
+  } catch (_) { /* non-critical */ }
 
   return order;
 }
@@ -190,13 +305,12 @@ async function updateDeliveryStatus(companyId, deliveryId, body, io) {
   const delivery = await Delivery.findOne({ _id: deliveryId, company_id: companyId });
   if (!delivery) throw createError(404, 'Delivery not found');
 
-  // Map delivery status to timeline step
   const stepMap = {
-    picked_up: 'picked_up',
+    picked_up:  'picked_up',
     on_the_way: 'in_transit',
-    arriving: 'arrived',
-    delivered: 'delivered',
-    failed: 'failed',
+    arriving:   'arrived',
+    delivered:  'delivered',
+    failed:     'failed',
   };
 
   delivery.status = status;
@@ -207,18 +321,18 @@ async function updateDeliveryStatus(companyId, deliveryId, body, io) {
       note: note || null,
     });
   }
-  if (eta) delivery.eta = new Date(eta);
+  if (eta)                    delivery.eta          = new Date(eta);
   if (status === 'picked_up') delivery.picked_up_at = new Date();
   if (status === 'delivered') delivery.delivered_at = new Date();
 
   await delivery.save();
 
-  // Sync order status with delivery status
+  // Sync order status with delivery progression
   const orderStatusMap = {
-    picked_up: 'shipped',
+    picked_up:  'shipped',
     on_the_way: 'on_the_way',
-    arriving: 'arriving',
-    delivered: 'delivered',
+    arriving:   'arriving',
+    delivered:  'delivered',
   };
   if (orderStatusMap[status]) {
     await updateOrderStatus(companyId, delivery.order_id, { status: orderStatusMap[status] }, io);
@@ -242,6 +356,8 @@ module.exports = {
   getFarmerOrders,
   getFarmerOrderById,
   getFarmerDelivery,
+  getTreatmentRequests,
+  rejectOrder,
   getCompanyOrders,
   getCompanyOrderById,
   updateOrderStatus,
