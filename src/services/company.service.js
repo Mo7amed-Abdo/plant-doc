@@ -1,6 +1,7 @@
 'use strict';
 
 const Company = require('../models/Company');
+const DeliveryCompany = require('../models/DeliveryCompany');
 const User = require('../models/User');
 const ProductListing = require('../models/ProductListing');
 const Order = require('../models/Order');
@@ -61,18 +62,27 @@ async function getDashboard(companyId) {
 
   const [
     activeListings,
-    lowStockCount,
-    outOfStockCount,
+    lowStockListings,
+    outOfStockListings,
     pendingCount,
     activeOrdersCount,
     deliveredOrders,
+    cancelledCount,
     recentOrders,
     unreadNotifications,
   ] = await Promise.all([
-    // Inventory
+    // Inventory counts + enriched listing objects for alerts panel
     ProductListing.countDocuments({ company_id: companyId, is_active: true }),
-    ProductListing.countDocuments({ company_id: companyId, stock_status: 'low_stock' }),
-    ProductListing.countDocuments({ company_id: companyId, stock_status: 'out_of_stock' }),
+    ProductListing.find({ company_id: companyId, stock_status: 'low_stock' })
+      .populate('product_id', 'name category unit')
+      .select('product_id stock_quantity price')
+      .limit(10)
+      .lean(),
+    ProductListing.find({ company_id: companyId, stock_status: 'out_of_stock' })
+      .populate('product_id', 'name category unit')
+      .select('product_id stock_quantity price')
+      .limit(10)
+      .lean(),
     // Orders
     Order.countDocuments({ company_id: companyId, status: 'pending' }),
     Order.countDocuments({
@@ -80,7 +90,8 @@ async function getDashboard(companyId) {
       status: { $in: ['processing', 'shipped', 'on_the_way', 'arriving'] },
     }),
     Order.find({ company_id: companyId, status: 'delivered' }).select('total').lean(),
-    // Recent 5 non-pending orders for the table widget
+    Order.countDocuments({ company_id: companyId, status: 'cancelled' }),
+    // Recent 5 non-pending orders for the activity table
     Order.find({ company_id: companyId, status: { $ne: 'pending' } })
       .populate(FARMER_POPULATE)
       .sort({ placed_at: -1 })
@@ -94,15 +105,35 @@ async function getDashboard(companyId) {
 
   return {
     active_listings:       activeListings,
-    low_stock_count:       lowStockCount,
-    out_of_stock_count:    outOfStockCount,
-    pending_orders:        pendingCount,        // = treatment requests awaiting decision
-    active_orders:         activeOrdersCount,   // processing / in transit
+    low_stock_count:       lowStockListings.length,
+    out_of_stock_count:    outOfStockListings.length,
+    low_stock_listings:    lowStockListings,      // enriched objects for alerts panel
+    out_of_stock_listings: outOfStockListings,    // enriched objects for alerts panel
+    pending_orders:        pendingCount,
+    active_orders:         activeOrdersCount,
     delivered_orders:      deliveredOrders.length,
+    cancelled_orders:      cancelledCount,
     revenue:               parseFloat(revenue.toFixed(2)),
     recent_orders:         recentOrders,
     unread_notifications:  unreadNotifications,
   };
+}
+
+async function listDeliveryCompanies() {
+  const companies = await DeliveryCompany.find({})
+    .sort({ name: 1 })
+    .lean();
+
+  return companies.map((company) => ({
+    id: company._id,
+    name: company.name,
+    address: company.address,
+    phone: company.phone,
+    email: company.email,
+    description: company.description,
+    logo: toDataUri(company.logo),
+    is_verified: company.is_verified,
+  }));
 }
 
 // ─── Private helpers ──────────────────────────────────────────────────────────
@@ -126,4 +157,4 @@ function _formatProfile(user, company) {
   };
 }
 
-module.exports = { getProfile, updateProfile, getDashboard };
+module.exports = { getProfile, updateProfile, getDashboard, listDeliveryCompanies };

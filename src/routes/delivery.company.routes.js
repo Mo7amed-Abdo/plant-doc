@@ -51,20 +51,20 @@ router.get('/orders',           ...isDelivery, async (req, res, next) => {
 // Delivery status management (reuse existing delivery service)
 router.get('/deliveries',         ...isDelivery, async (req, res, next) => {
   try {
-    const { items, total, page, limit } = await delSvc.getCompanyDeliveries(req.user.profileId, req.query);
+    const { items, total, page, limit } = await svc.getAssignedOrders(req.user.profileId, req.query);
     return paginated(res, items, total, page, limit);
   } catch (e) { next(e); }
 });
 router.get('/deliveries/:id',     ...isDelivery, async (req, res, next) => {
-  try { return success(res, 200, 'Delivery fetched', await delSvc.getCompanyDeliveryById(req.user.profileId, req.params.id)); }
+  try { return success(res, 200, 'Delivery fetched', await delSvc.getDeliveryCompanyDeliveryById(req.user.profileId, req.params.id)); }
   catch (e) { next(e); }
 });
 router.put('/deliveries/:id/status', ...isDelivery, async (req, res, next) => {
-  try { return success(res, 200, 'Status updated', await delSvc.updateDeliveryStatus(req.user.profileId, req.params.id, req.body, req.app.get('io'))); }
+  try { return success(res, 200, 'Status updated', await delSvc.updateDeliveryCompanyStatus(req.user.profileId, req.params.id, req.body, req.app.get('io'))); }
   catch (e) { next(e); }
 });
 router.put('/deliveries/:id/proof',  ...isDelivery, uploadSingle('proof'), async (req, res, next) => {
-  try { return success(res, 200, 'Proof uploaded', await delSvc.uploadProofOfDelivery(req.user.profileId, req.params.id, req.file)); }
+  try { return success(res, 200, 'Proof uploaded', await delSvc.uploadDeliveryCompanyProof(req.user.profileId, req.params.id, req.file)); }
   catch (e) { next(e); }
 });
 

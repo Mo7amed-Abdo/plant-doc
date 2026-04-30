@@ -28,6 +28,16 @@
             outline: none;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
+        /* Skeleton shimmer for professional loading states */
+        .pd-skel {
+            background: linear-gradient(90deg, rgba(236,238,239,0.95) 25%, rgba(226,228,229,0.95) 37%, rgba(236,238,239,0.95) 63%);
+            background-size: 400% 100%;
+            animation: pd-shimmer 1.25s ease infinite;
+        }
+        @keyframes pd-shimmer {
+            0% { background-position: 100% 0; }
+            100% { background-position: 0 0; }
+        }
     </style>
 </head>
 <body class="bg-background text-on-background min-h-screen flex font-body">
@@ -56,14 +66,17 @@
                 <span class="material-symbols-outlined fill">person</span><span>Profile</span>
             </a>
         </div>
+        <!-- Profile card -->
         <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
             <div class="flex items-center gap-3 px-2">
-                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
-                <div class="flex flex-col">
-                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
-                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
-                </div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
+                <a href="companyprofile.html" class="flex items-center gap-3 flex-1 min-w-0">
+                    <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
+                    <div class="flex flex-col min-w-0">
+                        <span class="font-bold text-on-surface text-sm truncate" data-user-name>Loading...</span>
+                        <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+                    </div>
+                </a>
+                <button class="text-on-surface-variant hover:text-error transition-colors shrink-0">
                     <span class="material-symbols-outlined text-lg">logout</span>
                 </button>
             </div>
@@ -80,10 +93,10 @@
                 <h1 class="text-xl font-bold text-green-700">PlantDoc</h1>
             </div>
             <div class="flex items-center gap-2">
-                <button class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full">
+                <button aria-label="Notifications" class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full">
                     <span class="material-symbols-outlined">notifications</span>
                 </button>
-                <button class="p-2 text-green-600 transition-colors active:scale-95 rounded-full">
+                <button aria-label="Account" class="p-2 text-green-600 transition-colors active:scale-95 rounded-full">
                     <span class="material-symbols-outlined fill">account_circle</span>
                 </button>
             </div>
@@ -97,6 +110,21 @@
                 <p class="text-sm text-on-surface-variant mt-1">Manage your business information and account settings</p>
             </div>
 
+            <!-- Error / retry (shown only when profile fetch fails) -->
+            <div class="hidden mb-6" data-profile-error>
+                <div class="bg-error-container text-on-error-container border border-error/20 rounded-2xl p-5 flex items-start gap-3">
+                    <span class="material-symbols-outlined text-[20px] text-error shrink-0">error</span>
+                    <div class="flex-1">
+                        <p class="font-semibold">We couldn't load your profile.</p>
+                        <p class="text-sm opacity-80 mt-0.5">Check your connection and try again.</p>
+                    </div>
+                    <button type="button" data-profile-retry
+                            class="px-4 py-2 rounded-xl bg-surface-container-lowest text-on-surface text-sm font-semibold border border-outline-variant hover:bg-surface-container transition-colors active:scale-[0.98]">
+                        Retry
+                    </button>
+                </div>
+            </div>
+
             <!-- 3-col layout -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 border-t-2 pt-2 border-primary rounded-xl">
 
@@ -104,18 +132,45 @@
                 <div class="lg:col-span-1 space-y-5">
 
                     <!-- Profile Summary -->
-                    <div class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant p-6 flex flex-col items-center text-center">
-                        <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-surface-variant mb-4 bg-surface-container cursor-pointer relative group" id="logo-upload-trigger">
+                    <div class="bg-surface-container-lowest rounded-[18px] shadow-sm border border-surface-variant overflow-hidden">
+                        <div class="h-20 bg-gradient-to-r from-primary-fixed/40 via-surface-container-lowest to-secondary-fixed/30 border-b border-surface-variant"></div>
+                        <div class="p-6 pt-0 -mt-10 flex flex-col items-center text-center">
+                        <div class="w-24 h-24 rounded-full overflow-hidden border-[3px] border-surface-container-lowest shadow-md mb-4 bg-surface-container cursor-pointer relative group"
+                             id="logo-upload-trigger" role="button" tabindex="0" aria-label="Change company logo">
                             <img data-profile-logo src="" alt="Company Logo" class="w-full h-full object-cover" />
                             <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <span class="material-symbols-outlined text-white text-xl">photo_camera</span>
                             </div>
+                            <div class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-primary text-on-primary shadow-md border-2 border-surface-container-lowest flex items-center justify-center pointer-events-none">
+                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                            </div>
                         </div>
-                        <h3 class="font-bold text-lg text-on-surface font-headline" data-profile-name>Loading...</h3>
+                        <div class="h-5 w-40 mx-auto rounded-lg pd-skel" data-skel-name></div>
+                        <h3 class="hidden font-extrabold text-lg text-on-surface font-headline mt-1" data-profile-name></h3>
+                        <div class="h-4 w-56 mx-auto rounded-lg pd-skel mt-2" data-skel-email></div>
                         <p class="text-sm text-on-surface-variant mt-1 mb-4" data-profile-email>—</p>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-fixed text-on-primary-fixed-variant">
-                            <span class="material-symbols-outlined fill text-[14px]">store</span>Verified Seller
-                        </span>
+                        <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant border border-outline-variant">
+                                <span class="material-symbols-outlined text-[14px] text-primary">apartment</span>
+                                Company
+                            </span>
+                            <span id="verified-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-fixed text-on-primary-fixed-variant border border-primary-fixed-dim/40">
+                                <span class="material-symbols-outlined fill text-[14px]">verified</span>
+                                Verified
+                            </span>
+                        </div>
+
+                        <div class="mt-4 w-full grid grid-cols-1 gap-2">
+                            <div class="flex items-center justify-center gap-2 text-xs text-on-surface-variant">
+                                <span class="material-symbols-outlined text-[16px]">location_on</span>
+                                <span data-profile-location class="truncate max-w-[22ch]">Not set</span>
+                            </div>
+                            <div class="flex items-center justify-center gap-2 text-xs text-on-surface-variant">
+                                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                                <span data-profile-joined>Joined</span>
+                            </div>
+                        </div>
+                        </div>
                     </div>
 
                     <!-- Quick Links -->
@@ -147,7 +202,7 @@
                             <!-- Company Name -->
                             <div>
                                 <label class="block text-sm font-medium text-on-surface mb-1.5" for="company-name">Company Name</label>
-                                <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                <div data-field-wrap="company-name" class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
                                     <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">business</span></span>
                                     <input type="text" id="company-name" name="companyName" placeholder="Your company name" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
                                 </div>
@@ -156,7 +211,7 @@
                                 <!-- Contact Number -->
                                 <div>
                                     <label class="block text-sm font-medium text-on-surface mb-1.5" for="contact-number">Contact Number</label>
-                                    <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                    <div data-field-wrap="contact-number" class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
                                         <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">phone</span></span>
                                         <input type="tel" id="contact-number" name="contactNumber" placeholder="+1 (555) 000-0000" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
                                     </div>
@@ -164,7 +219,7 @@
                                 <!-- Support Email -->
                                 <div>
                                     <label class="block text-sm font-medium text-on-surface mb-1.5" for="email">Support Email</label>
-                                    <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                    <div data-field-wrap="email" class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
                                         <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">mail</span></span>
                                         <input type="email" id="email" name="email" placeholder="support@yourcompany.com" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
                                     </div>
@@ -173,7 +228,7 @@
                             <!-- Street Address -->
                             <div>
                                 <label class="block text-sm font-medium text-on-surface mb-1.5" for="street-address">Street Address</label>
-                                <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                <div data-field-wrap="street-address" class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
                                     <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">location_on</span></span>
                                     <input type="text" id="street-address" name="address" placeholder="123 Commerce Street" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
                                 </div>
@@ -183,7 +238,10 @@
                                 <label class="block text-sm font-medium text-on-surface mb-1.5" for="description">Company Description</label>
                                 <textarea id="description" name="description" rows="3" placeholder="Tell farmers about your products and services…" class="w-full px-3 py-2.5 text-sm border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none transition-all shadow-sm"></textarea>
                             </div>
-                            <div class="pt-2 flex justify-end">
+                            <div class="pt-2 flex justify-end gap-3">
+                                <button id="discard-btn" type="button" class="px-5 py-2.5 bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg text-sm font-medium hover:bg-surface-container transition-colors active:scale-[0.98]">
+                                    Discard
+                                </button>
                                 <button type="submit" class="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:translate-y-[-1px] hover:shadow-md transition-all duration-200 border border-primary hover:bg-white hover:text-primary active:scale-[0.98]">
                                     <span class="material-symbols-outlined text-[18px]">save</span>Save Details
                                 </button>

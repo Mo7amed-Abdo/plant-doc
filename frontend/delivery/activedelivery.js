@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadActiveOrders() {
-  const con = document.querySelector('[data-deliveries-grid], main .grid, main .flex.flex-col');
+  const con = document.querySelector('[data-deliveries-grid]');
   if (!con) return;
   con.innerHTML = skeletonCards(4);
   try {
@@ -23,11 +23,10 @@ async function loadActiveOrders() {
 
 function renderCards(items, con) {
   con.innerHTML = items.map(deliveryCard).join('');
-  // Wire modal open (matches existing HTML data-* pattern on activedelivery.html)
-  con.querySelectorAll('.order-card[data-order-id], [data-open-delivery]').forEach(card => {
+  con.querySelectorAll('.order-card[data-delivery-id]').forEach(card => {
     card.addEventListener('click', e => {
-      if (e.target.closest('button[data-update-status]')) return; // let button handle it
-      const id = card.dataset.deliveryId || card.dataset.openDelivery;
+      if (e.target.closest('button')) return;
+      const id = card.dataset.deliveryId;
       if (id) openDeliveryModal(id);
     });
   });
@@ -39,10 +38,10 @@ function renderCards(items, con) {
 function deliveryCard(d) {
   const o = d.order_id || {};
   const addr = o.shipping_address || {};
-  const NEXT = { pending: 'picked_up', picked_up: 'on_the_way', on_the_way: 'arriving', arriving: 'delivered' };
-  const NEXT_LABEL = { pending: 'Mark Picked Up', picked_up: 'Mark In Transit', on_the_way: 'Mark Arriving', arriving: 'Mark Delivered' };
+  const NEXT = { picked_up: 'on_the_way', on_the_way: 'arriving', arriving: 'delivered' };
+  const NEXT_LABEL = { picked_up: 'Mark In Transit', on_the_way: 'Mark Arriving', arriving: 'Mark Delivered' };
   const next = NEXT[d.status];
-  const steps = ['pending', 'picked_up', 'on_the_way', 'arriving', 'delivered'];
+  const steps = ['picked_up', 'on_the_way', 'arriving', 'delivered'];
   const ci = steps.indexOf(d.status);
 
   return `<div class="order-card bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm p-5 hover:shadow-md transition-all cursor-pointer" data-delivery-id="${d._id}">
@@ -66,10 +65,10 @@ function deliveryCard(d) {
       ${steps.map((_, i) => `<div class="flex-1 h-1.5 rounded-full ${i <= ci ? 'bg-primary' : 'bg-surface-variant'} transition-all"></div>`).join('')}
     </div>
     <div class="flex gap-2">
-      <button onclick="openDeliveryModal('${d._id}')" class="flex-1 py-2.5 border border-outline-variant rounded-xl text-sm font-medium text-on-surface hover:bg-surface-container flex items-center justify-center gap-1">
+      <button type="button" onclick="openDeliveryModal('${d._id}')" class="flex-1 py-2.5 border border-outline-variant rounded-xl text-sm font-medium text-on-surface hover:bg-surface-container flex items-center justify-center gap-1">
         <span class="material-symbols-outlined text-[16px]">visibility</span>Details
       </button>
-      ${next ? `<button data-update-status="${d._id}" data-new-status="${next}" class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:opacity-90 flex items-center justify-center gap-1 active:scale-[0.98]">
+      ${next ? `<button type="button" data-update-status="${d._id}" data-new-status="${next}" class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:opacity-90 flex items-center justify-center gap-1 active:scale-[0.98]">
         <span class="material-symbols-outlined text-[16px]">update</span>${NEXT_LABEL[d.status]}
       </button>` : `<span class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold text-center flex items-center justify-center gap-1">
         <span class="material-symbols-outlined text-[16px]">check_circle</span>Delivered
@@ -84,10 +83,10 @@ async function openDeliveryModal(id) {
     const d = (await api.get(`/delivery/deliveries/${id}`)).data;
     const o = d.order_id || {};
     const addr = o.shipping_address || {};
-    const steps = ['pending', 'picked_up', 'on_the_way', 'arriving', 'delivered'];
+    const steps = ['picked_up', 'on_the_way', 'arriving', 'delivered'];
     const ci = steps.indexOf(d.status);
-    const NEXT = { pending: 'picked_up', picked_up: 'on_the_way', on_the_way: 'arriving', arriving: 'delivered' };
-    const NEXT_LABEL = { pending: 'Mark Picked Up', picked_up: 'Mark In Transit', on_the_way: 'Mark Arriving', arriving: 'Mark Delivered' };
+    const NEXT = { picked_up: 'on_the_way', on_the_way: 'arriving', arriving: 'delivered' };
+    const NEXT_LABEL = { picked_up: 'Mark In Transit', on_the_way: 'Mark Arriving', arriving: 'Mark Delivered' };
     const next = NEXT[d.status];
 
     const m = document.createElement('div');
@@ -116,7 +115,7 @@ async function openDeliveryModal(id) {
             ${steps.map((s, i) => `<div class="flex-1 h-2 rounded-full ${i <= ci ? 'bg-primary' : 'bg-surface-variant'} transition-all"></div>`).join('')}
           </div>
           <div class="flex justify-between mt-1 text-[10px] text-on-surface-variant">
-            <span>Pending</span><span>Picked Up</span><span>In Transit</span><span>Arriving</span><span>Delivered</span>
+            <span>Picked Up</span><span>In Transit</span><span>Arriving</span><span>Delivered</span>
           </div>
         </div>
         <!-- Destination -->

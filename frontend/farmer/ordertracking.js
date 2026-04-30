@@ -37,13 +37,9 @@ function orderCard(o) {
 async function openOrderModal(id) {
   try {
     const [oRes, dRes] = await Promise.allSettled([api.get(`/orders/${id}`), api.get(`/orders/${id}/delivery`)]);
-    //////////console.log('Order:', oRes); console.log('Delivery:', dRes);
     const data = oRes.value?.data || {};
 const order = data.order || data;
 let items = data.items || order.items || [];
-console.log("FULL RESPONSE:", oRes.value?.data);
-console.log("ORDER DATA:", data);
-console.log("ITEMS:", items);
     const delivery = dRes.status==='fulfilled'?dRes.value?.data:null;
     if (!order) { showToast('Failed to load order','error'); return; }
     const co=order.company_id||{}, addr=order.shipping_address||{};
@@ -105,7 +101,7 @@ console.log("ITEMS:", items);
 }
 
 function deliveryTimeline(d) {
-  const steps = [{key:'order_received',label:'Order Received'},{key:'picked_up',label:'Picked Up'},{key:'in_transit',label:'In Transit'},{key:'arrived',label:'Arrived'},{key:'delivered',label:'Delivered'}];
+  const steps = [{key:'order_received',label:'Order Received'},{key:'picked_up',label:'Picked Up'},{key:'in_transit',label:'In Transit'},{key:'arrived',label:'Arriving'},{key:d.status==='failed'?'failed':'delivered',label:d.status==='failed'?'Delivery Failed':'Delivered'}];
   const done = new Set((d.status_timeline||[]).map(t=>t.step));
   return `<div><p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-4">Delivery Tracking</p>
     <div class="relative pl-8 space-y-4"><div class="absolute left-3 top-2 bottom-2 w-0.5 bg-surface-variant"></div>

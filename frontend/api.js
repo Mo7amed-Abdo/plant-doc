@@ -69,11 +69,209 @@ function redirectToDashboard(role) {
 function populateSidebarUser() {
   const user = Auth.getUser();
   if (!user) return;
-  const initials = user.full_name ? user.full_name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) : 'U';
-  document.querySelectorAll('[data-user-name]').forEach(el    => el.textContent = user.full_name || 'User');
-  document.querySelectorAll('[data-user-role]').forEach(el    => el.textContent = user.role ? user.role.charAt(0).toUpperCase()+user.role.slice(1) : '');
-  document.querySelectorAll('[data-user-initials]').forEach(el=> el.textContent = initials);
-  document.querySelectorAll('[data-user-avatar]').forEach(el  => { if (user.avatar) el.src = user.avatar; });
+
+  // We prefer cached role profile data when available (plantdoc_profile), and only fetch if missing.
+  const role = user.role || null;
+  const cachedProfile = Auth.getProfile();
+
+  const roleLabel =
+    role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
+  document.querySelectorAll('[data-user-role]').forEach((el) => { el.textContent = roleLabel; });
+
+  const deriveDisplayName = (u, p) => {
+    if (role === 'company') return p?.company_name || u.full_name || 'Company';
+    // delivery uses a "DeliveryCompany" profile with logo + name/description in backend
+    if (role === 'delivery') return p?.company_name || p?.name || u.full_name || 'Delivery';
+    return u.full_name || 'User';
+  };
+
+  const displayName = deriveDisplayName(user, cachedProfile);
+  const initials = (displayName || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || 'U';
+
+  document.querySelectorAll('[data-user-name]').forEach((el) => { el.textContent = displayName; });
+  document.querySelectorAll('[data-user-initials]').forEach((el) => { el.textContent = initials; });
+
+  const avatarUrlFrom = (u, p) => {
+    if (role === 'company') return p?.logo || u.avatar || null;
+    if (role === 'delivery') return p?.logo || u.avatar || null;
+    return p?.avatar || u.avatar || null;
+  };
+
+  const initialFallback = initialsAvatarDataUrl(initials);
+  const setAvatarImg = (img, maybeUrl) => {
+    if (!img) return;
+    const prev = img.getAttribute('data-prev-src') || '';
+    if (!prev) img.setAttribute('data-prev-src', prev || '');
+
+    // Always start with a clean fallback so we never show a broken image icon.
+    img.src = initialFallback;
+    img.dataset.hasRealAvatar = '0';
+
+    if (maybeUrl) {
+      const resolved = resolveAssetUrl(maybeUrl);
+      img.dataset.hasRealAvatar = '1';
+      img.src = resolved;
+      img.onerror = () => {
+        img.onerror = null;
+        img.dataset.hasRealAvatar = '0';
+        img.src = initialFallback;
+      };
+    } else {
+      img.onerror = null;
+    }
+  };
+
+  const avatarUrl = avatarUrlFrom(user, cachedProfile);
+  document.querySelectorAll('[data-user-avatar]').forEach((img) => setAvatarImg(img, avatarUrl));
+
+  // Enable click-to-change avatar for the sidebar/header avatars (uses existing profile endpoints).
+  enableSidebarAvatarUpload({ role, initials });
+
+  // If we don't have a cached profile for this role, fetch it once in the background
+  // and refresh sidebar values without requiring a page reload.
+  if (!cachedProfile && role) {
+    const endpoint = profileEndpointForRole(role);
+    if (endpoint) {
+      (async () => {
+        try {
+          const res = await api.get(endpoint);
+          localStorage.setItem('plantdoc_profile', JSON.stringify(res.data));
+          // Re-run to re-render name + avatar from fresh profile data.
+          populateSidebarUser();
+        } catch (_) {
+          // Keep UI usable with user-only fallback.
+        }
+      })();
+    }
+  }
+}
+
+function profileEndpointForRole(role) {
+  if (role === 'company') return '/company/profile';
+  if (role === 'farmer')  return '/farmer/profile';
+  if (role === 'expert')  return '/expert/profile';
+  if (role === 'delivery') return '/delivery/profile';
+  return null;
+}
+
+function uploadFieldForRole(role) {
+  if (role === 'company') return 'logo';
+  if (role === 'delivery') return 'logo';
+  return 'avatar';
+}
+
+function resolveAssetUrl(url) {
+  if (!url) return '';
+  const s = String(url);
+  if (s.startsWith('data:')) return s;
+  if (s.startsWith('http://') || s.startsWith('https://')) return s;
+  if (s.startsWith('/')) return API_BASE.replace(/\/api\/?$/, '') + s;
+  return s;
+}
+
+function initialsAvatarDataUrl(initials) {
+  const safe = String(initials || 'U').slice(0, 2).toUpperCase();
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8f5e9"/>
+      <stop offset="1" stop-color="#c8e6c9"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="32" fill="url(#g)"/>
+  <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+        font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="22"
+        font-weight="700" fill="#0f5132">${safe}</text>
+</svg>`.trim();
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function enableSidebarAvatarUpload({ role, initials }) {
+  const endpoint = profileEndpointForRole(role);
+  if (!endpoint) return;
+
+  const MAX_BYTES = 5 * 1024 * 1024; // consistent with other image uploads in the app
+  const field = uploadFieldForRole(role);
+  const inputId = 'plantdoc-profile-photo-input';
+  const getInput = () => {
+    let input = document.getElementById(inputId);
+    if (input) return input;
+    input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.id = inputId;
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    return input;
+  };
+
+  const fallback = initialsAvatarDataUrl(initials || 'U');
+
+  document.querySelectorAll('[data-user-avatar]').forEach((img) => {
+    if (!img || img.dataset.avatarUploadBound === '1') return;
+    img.dataset.avatarUploadBound = '1';
+    img.style.cursor = 'pointer';
+    img.title = 'Change photo';
+
+    img.addEventListener('click', (e) => {
+      e.preventDefault();
+      const input = getInput();
+      // Remember which avatar(s) were clicked for preview purposes.
+      input.dataset.clicked = '1';
+      input.click();
+    });
+  });
+
+  const input = getInput();
+  if (input.dataset.bound === '1') return;
+  input.dataset.bound = '1';
+  input.addEventListener('change', async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    input.value = '';
+
+    if (!file.type.startsWith('image/')) { showToast('Please select an image file', 'error'); return; }
+    if (file.size > MAX_BYTES) { showToast('Image must be under 5MB', 'error'); return; }
+
+    const previewUrl = URL.createObjectURL(file);
+    const avatars = Array.from(document.querySelectorAll('[data-user-avatar]'));
+    const prevSrcs = avatars.map((img) => img.src);
+    avatars.forEach((img) => { img.src = previewUrl; });
+
+    const ok = typeof confirmDialog === 'function'
+      ? await confirmDialog('Upload this new profile photo?')
+      : true;
+
+    if (!ok) {
+      URL.revokeObjectURL(previewUrl);
+      avatars.forEach((img, i) => { img.src = prevSrcs[i] || fallback; });
+      return;
+    }
+
+    try {
+      const fd = new FormData();
+      fd.append(field, file);
+      await api.put(endpoint, fd);
+
+      // Refresh cached profile and re-render name/avatar immediately.
+      const res = await api.get(endpoint);
+      localStorage.setItem('plantdoc_profile', JSON.stringify(res.data));
+      showToast('Profile photo updated!', 'success');
+      populateSidebarUser();
+    } catch (err) {
+      showToast(err.message || 'Upload failed', 'error');
+      avatars.forEach((img, i) => { img.src = prevSrcs[i] || fallback; });
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+    }
+  });
 }
 
 // ── Logout wiring — call once per page ───────────────────────────────────────
@@ -135,8 +333,8 @@ function escapeHtml(str) {
 
 // ── Badges ────────────────────────────────────────────────────────────────────
 const SEVERITY_CLS = { low:'bg-primary-fixed/30 text-primary', medium:'bg-secondary-container text-on-secondary-container', high:'bg-error-container text-on-error-container', critical:'bg-error text-white' };
-const ORDER_STATUS_CLS = { pending:'bg-secondary-container text-on-secondary-container', processing:'bg-primary-fixed/30 text-primary', shipped:'bg-secondary-container text-on-secondary-container', on_the_way:'bg-primary-fixed/30 text-primary', arriving:'bg-primary-fixed/40 text-primary', delivered:'bg-primary text-on-primary', cancelled:'bg-error-container text-on-error-container' };
-const DELIVERY_STATUS_CLS = { pending:'bg-secondary-container text-on-secondary-container', picked_up:'bg-primary-fixed/30 text-primary', on_the_way:'bg-secondary-container text-on-secondary-container', arriving:'bg-primary-fixed/40 text-primary', delivered:'bg-primary text-on-primary', failed:'bg-error-container text-on-error-container' };
+const ORDER_STATUS_CLS = { pending:'bg-secondary-container text-on-secondary-container', processing:'bg-primary-fixed/30 text-primary', shipped:'bg-secondary-container text-on-secondary-container', on_the_way:'bg-primary-fixed/30 text-primary', arriving:'bg-primary-fixed/40 text-primary', delivered:'bg-primary text-on-primary', delivery_failed:'bg-error-container text-on-error-container', cancelled:'bg-error-container text-on-error-container' };
+const DELIVERY_STATUS_CLS = { picked_up:'bg-primary-fixed/30 text-primary', on_the_way:'bg-secondary-container text-on-secondary-container', arriving:'bg-primary-fixed/40 text-primary', delivered:'bg-primary text-on-primary', failed:'bg-error-container text-on-error-container' };
 const PRIORITY_CLS = { low:'bg-surface-container text-on-surface-variant', medium:'bg-secondary-container text-on-secondary-container', high:'bg-error-container text-on-error-container', urgent:'bg-error text-white' };
 
 function badge(label, cls) {

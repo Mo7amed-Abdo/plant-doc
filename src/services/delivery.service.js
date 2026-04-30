@@ -3,9 +3,10 @@
 const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
 const Delivery = require('../models/Delivery');
+const DeliveryCompany = require('../models/DeliveryCompany');
 const Farmer = require('../models/Farmer');
 const { createError } = require('../middleware/error.middleware');
-const { toMongoImage } = require('../utils/image');
+const { toMongoImage, toDataUri } = require('../utils/image');
 const notificationService = require('./notification.service');
 
 // ─── Shared populate helper ───────────────────────────────────────────────────
@@ -75,9 +76,10 @@ async function getFarmerDelivery(farmerId, orderId) {
   const order = await Order.findOne({ _id: orderId, farmer_id: farmerId });
   if (!order) throw createError(404, 'Order not found');
 
-  const delivery = await Delivery.findOne({ order_id: orderId });
+  const delivery = await Delivery.findOne({ order_id: orderId })
+    .populate('delivery_company_id', 'name phone email description logo');
   if (!delivery) throw createError(404, 'Delivery not yet created for this order');
-  return delivery;
+  return serializeDelivery(delivery);
 }
 
 // ─── Company: treatment requests (pending orders awaiting acceptance) ─────────
@@ -88,9 +90,20 @@ async function getFarmerDelivery(farmerId, orderId) {
  * they become real orders.
  */
 async function getTreatmentRequests(companyId, query) {
-  const { page = 1, limit = 20 } = query;
+  const { page = 1, limit = 20, status } = query;
   const skip = (Number(page) - 1) * Number(limit);
-  const filter = { company_id: companyId, status: 'pending' };
+  // Default behavior remains the same: show incoming pending orders.
+  // If a status filter is provided, allow viewing other statuses as well.
+  const filter = { company_id: companyId };
+  if (status) {
+    const statuses = String(status)
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    filter.status = statuses.length > 1 ? { $in: statuses } : statuses[0];
+  } else {
+    filter.status = 'pending';
+  }
 
   const [orders, total] = await Promise.all([
     Order.find(filter)
@@ -212,7 +225,7 @@ async function updateOrderStatus(companyId, orderId, body, io) {
   if (!status) throw createError(400, 'status is required');
 
   const validStatuses = [
-    'pending', 'processing', 'shipped', 'on_the_way', 'arriving', 'delivered', 'cancelled',
+    'pending', 'processing', 'shipped', 'on_the_way', 'arriving', 'delivered', 'delivery_failed', 'cancelled',
   ];
   if (!validStatuses.includes(status)) {
     throw createError(400, `Invalid status. Must be one of: ${validStatuses.join(', ')}`);
@@ -220,6 +233,13 @@ async function updateOrderStatus(companyId, orderId, body, io) {
 
   const order = await Order.findOne({ _id: orderId, company_id: companyId });
   if (!order) throw createError(404, 'Order not found');
+
+  if (status === 'shipped') {
+    const delivery = await Delivery.findOne({ order_id: orderId });
+    if (!delivery) {
+      throw createError(400, 'Assign a delivery company when marking this order as shipped');
+    }
+  }
 
   order.status = status;
   if (status === 'delivered') order.delivered_at = new Date();
@@ -252,21 +272,75 @@ async function updateOrderStatus(companyId, orderId, body, io) {
 async function createDelivery(companyId, orderId, body) {
   const order = await Order.findOne({ _id: orderId, company_id: companyId });
   if (!order) throw createError(404, 'Order not found');
+  if (!['processing', 'delivery_failed'].includes(order.status)) {
+    throw createError(400, 'Only processing or failed-delivery orders can be shipped');
+  }
 
-  const existing = await Delivery.findOne({ order_id: orderId });
-  if (existing) throw createError(409, 'Delivery record already exists for this order');
+  const { eta, delivery_notes, delivery_company_id } = body;
+  if (!delivery_company_id) throw createError(400, 'delivery_company_id is required');
 
-  const { eta, delivery_notes } = body;
+  const deliveryCompany = await DeliveryCompany.findById(delivery_company_id);
+  if (!deliveryCompany) throw createError(404, 'Delivery company not found');
 
-  const delivery = await Delivery.create({
-    order_id: orderId,
-    company_id: companyId,
-    eta: eta || null,
-    delivery_notes: delivery_notes || null,
-    status_timeline: [{ step: 'order_received', occurred_at: new Date() }],
-  });
+  let delivery = await Delivery.findOne({ order_id: orderId });
+  if (delivery && delivery.status !== 'failed') {
+    throw createError(409, 'Delivery record already exists for this order');
+  }
 
-  return delivery;
+  if (delivery) {
+    delivery.company_id = companyId;
+    delivery.delivery_company_id = delivery_company_id;
+    delivery.status = 'picked_up';
+    delivery.eta = eta || null;
+    delivery.delivery_notes = delivery_notes || null;
+    delivery.picked_up_at = new Date();
+    delivery.delivered_at = null;
+    delivery.proof_of_delivery = null;
+    delivery.status_timeline.push({
+      step: 'picked_up',
+      occurred_at: new Date(),
+      note: `Seller reassigned the order to ${deliveryCompany.name}.`,
+    });
+    await delivery.save();
+  } else {
+    delivery = await Delivery.create({
+      order_id: orderId,
+      company_id: companyId,
+      delivery_company_id,
+      status: 'picked_up',
+      eta: eta || null,
+      delivery_notes: delivery_notes || null,
+      picked_up_at: new Date(),
+      status_timeline: [
+        { step: 'order_received', occurred_at: new Date() },
+        { step: 'picked_up', occurred_at: new Date(), note: 'Seller handed the order to the delivery company.' },
+      ],
+    });
+  }
+
+  order.status = 'shipped';
+  if (eta) order.estimated_delivery_at = new Date(eta);
+  await order.save();
+
+  try {
+    await notificationService.notifyCompany(
+      deliveryCompany._id,
+      deliveryCompany.owner_user_id,
+      {
+        type: 'delivery_assigned',
+        title: 'New Order Assigned',
+        body: `Order ${order.order_code} was assigned to your delivery company.`,
+        related_id: order._id,
+        related_type: 'order',
+      }
+    );
+  } catch (_) { /* non-critical */ }
+
+  return serializeDelivery(
+    await Delivery.findById(delivery._id)
+      .populate('order_id')
+      .populate('delivery_company_id', 'name phone email description logo')
+  );
 }
 
 async function getCompanyDeliveries(companyId, query) {
@@ -277,27 +351,29 @@ async function getCompanyDeliveries(companyId, query) {
 
   const [items, total] = await Promise.all([
     Delivery.find(filter)
-      .populate('order_id', 'order_code farmer_id total status')
+      .populate('order_id', 'order_code farmer_id total status shipping_address contact_phone notes placed_at estimated_delivery_at')
+      .populate('delivery_company_id', 'name phone email description logo')
       .sort({ created_at: -1 })
       .skip(skip)
       .limit(Number(limit)),
     Delivery.countDocuments(filter),
   ]);
-  return { items, total, page: Number(page), limit: Number(limit) };
+  return { items: items.map(serializeDelivery), total, page: Number(page), limit: Number(limit) };
 }
 
 async function getCompanyDeliveryById(companyId, deliveryId) {
   const delivery = await Delivery.findOne({ _id: deliveryId, company_id: companyId })
-    .populate('order_id');
+    .populate('order_id')
+    .populate('delivery_company_id', 'name phone email description logo');
   if (!delivery) throw createError(404, 'Delivery not found');
-  return delivery;
+  return serializeDelivery(delivery);
 }
 
 async function updateDeliveryStatus(companyId, deliveryId, body, io) {
   const { status, note, eta } = body;
   if (!status) throw createError(400, 'status is required');
 
-  const validStatuses = ['pending', 'picked_up', 'on_the_way', 'arriving', 'delivered', 'failed'];
+  const validStatuses = ['picked_up', 'on_the_way', 'arriving', 'delivered', 'failed'];
   if (!validStatuses.includes(status)) {
     throw createError(400, `Invalid delivery status. Must be one of: ${validStatuses.join(', ')}`);
   }
@@ -333,12 +409,17 @@ async function updateDeliveryStatus(companyId, deliveryId, body, io) {
     on_the_way: 'on_the_way',
     arriving:   'arriving',
     delivered:  'delivered',
+    failed:     'delivery_failed',
   };
   if (orderStatusMap[status]) {
     await updateOrderStatus(companyId, delivery.order_id, { status: orderStatusMap[status] }, io);
   }
 
-  return delivery;
+  return serializeDelivery(
+    await Delivery.findById(delivery._id)
+      .populate('order_id')
+      .populate('delivery_company_id', 'name phone email description logo')
+  );
 }
 
 async function uploadProofOfDelivery(companyId, deliveryId, file) {
@@ -349,6 +430,123 @@ async function uploadProofOfDelivery(companyId, deliveryId, file) {
 
   delivery.proof_of_delivery = toMongoImage(file);
   await delivery.save();
+  return serializeDelivery(
+    await Delivery.findById(delivery._id)
+      .populate('order_id')
+      .populate('delivery_company_id', 'name phone email description logo')
+  );
+}
+
+async function getDeliveryCompanyDeliveryById(deliveryCompanyId, deliveryId) {
+  const delivery = await Delivery.findOne({ _id: deliveryId, delivery_company_id: deliveryCompanyId })
+    .populate('order_id')
+    .populate('company_id', 'name phone email')
+    .populate('delivery_company_id', 'name phone email description logo');
+  if (!delivery) throw createError(404, 'Delivery not found');
+  return serializeDelivery(delivery);
+}
+
+async function updateDeliveryCompanyStatus(deliveryCompanyId, deliveryId, body, io) {
+  const { status, note, eta } = body;
+  if (!status) throw createError(400, 'status is required');
+
+  const validStatuses = ['picked_up', 'on_the_way', 'arriving', 'delivered', 'failed'];
+  if (!validStatuses.includes(status)) {
+    throw createError(400, `Invalid delivery status. Must be one of: ${validStatuses.join(', ')}`);
+  }
+
+  const delivery = await Delivery.findOne({ _id: deliveryId, delivery_company_id: deliveryCompanyId });
+  if (!delivery) throw createError(404, 'Delivery not found');
+
+  const stepMap = {
+    picked_up: 'picked_up',
+    on_the_way: 'in_transit',
+    arriving: 'arrived',
+    delivered: 'delivered',
+    failed: 'failed',
+  };
+
+  delivery.status = status;
+  if (stepMap[status]) {
+    delivery.status_timeline.push({
+      step: stepMap[status],
+      occurred_at: new Date(),
+      note: note || null,
+    });
+  }
+  if (eta) delivery.eta = new Date(eta);
+  if (status === 'picked_up') delivery.picked_up_at = new Date();
+  if (status === 'delivered') delivery.delivered_at = new Date();
+  await delivery.save();
+
+  const orderStatusMap = {
+    picked_up: 'shipped',
+    on_the_way: 'on_the_way',
+    arriving: 'arriving',
+    delivered: 'delivered',
+    failed: 'delivery_failed',
+  };
+  if (orderStatusMap[status]) {
+    await updateOrderStatus(delivery.company_id, delivery.order_id, { status: orderStatusMap[status] }, io);
+  }
+
+  if (status === 'delivered' || status === 'failed') {
+    try {
+      const [order, deliveryCompany] = await Promise.all([
+        Order.findById(delivery.order_id).select('order_code'),
+        DeliveryCompany.findById(deliveryCompanyId).select('owner_user_id'),
+      ]);
+      if (order && deliveryCompany?.owner_user_id) {
+        await notificationService.notifyCompany(
+          deliveryCompanyId,
+          deliveryCompany.owner_user_id,
+          {
+            type: status === 'delivered' ? 'delivery_completed' : 'delivery_failed',
+            title: status === 'delivered' ? 'Order Completed' : 'Delivery Failed',
+            body:
+              status === 'delivered'
+                ? `Order ${order.order_code} has been marked as delivered.`
+                : `Order ${order.order_code} was marked as failed delivery.`,
+            related_id: delivery.order_id,
+            related_type: 'order',
+          },
+          io
+        );
+      }
+    } catch (_) { /* non-critical */ }
+  }
+
+  return getDeliveryCompanyDeliveryById(deliveryCompanyId, deliveryId);
+}
+
+async function uploadDeliveryCompanyProof(deliveryCompanyId, deliveryId, file) {
+  if (!file) throw createError(400, 'Proof of delivery image is required');
+
+  const delivery = await Delivery.findOne({ _id: deliveryId, delivery_company_id: deliveryCompanyId });
+  if (!delivery) throw createError(404, 'Delivery not found');
+
+  delivery.proof_of_delivery = toMongoImage(file);
+  await delivery.save();
+  return getDeliveryCompanyDeliveryById(deliveryCompanyId, deliveryId);
+}
+
+function serializeDelivery(deliveryDoc) {
+  if (!deliveryDoc) return null;
+  const delivery = typeof deliveryDoc.toObject === 'function' ? deliveryDoc.toObject() : deliveryDoc;
+
+  if (delivery.proof_of_delivery) {
+    delivery.proof_of_delivery = toDataUri(delivery.proof_of_delivery);
+  }
+
+  if (delivery.delivery_company_id && typeof delivery.delivery_company_id === 'object') {
+    delivery.delivery_company = {
+      ...delivery.delivery_company_id,
+      logo: toDataUri(delivery.delivery_company_id.logo),
+    };
+  } else {
+    delivery.delivery_company = null;
+  }
+
   return delivery;
 }
 
@@ -366,4 +564,7 @@ module.exports = {
   getCompanyDeliveryById,
   updateDeliveryStatus,
   uploadProofOfDelivery,
+  getDeliveryCompanyDeliveryById,
+  updateDeliveryCompanyStatus,
+  uploadDeliveryCompanyProof,
 };

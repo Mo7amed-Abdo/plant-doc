@@ -25,4 +25,11 @@ async function getDashboard(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { getProfile, updateProfile, getDashboard };
+async function listDeliveryCompanies(req, res, next) {
+  try {
+    const data = await companyService.listDeliveryCompanies();
+    return success(res, 200, 'Delivery companies fetched', data);
+  } catch (err) { next(err); }
+}
+
+module.exports = { getProfile, updateProfile, getDashboard, listDeliveryCompanies };

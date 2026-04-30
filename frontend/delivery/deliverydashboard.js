@@ -10,7 +10,7 @@ async function loadStats() {
     const stats=(await api.get('/delivery/stats')).data||{};
     setText('[data-stat="active-deliveries"]',  stats.active||0);
     setText('[data-stat="completed-today"]',    stats.completed||0);
-    setText('[data-stat="pending-orders"]',     stats.pending||0);
+    setText('[data-stat="pending-orders"]',     stats.failed||0);
     setText('[data-stat="total-weekly"]',       stats.weekly||0);
   }catch(e){console.error(e);}
 }
@@ -36,12 +36,15 @@ async function loadRecentDeliveries() {
 
 function delRow(d) {
   const o=d.order_id||{};
+  const farmer = o.farmer_id || {};
+  const farmerName = farmer.user_id?.full_name || farmer.location || 'Farmer';
+  const addr = o.shipping_address || {};
   return `<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group" data-view-del="${d._id}">
     <td class="px-6 py-4 font-semibold text-primary">${o.order_code||d._id?.slice(-8)}</td>
-    <td class="px-6 py-4 text-on-surface-variant">${formatDate(o.placed_at||d.created_at)}</td>
-    <td class="px-6 py-4">$${(o.total||0).toFixed(2)}</td>
-    <td class="px-6 py-4">${deliveryStatusBadge(d.status)}</td>
-    <td class="px-6 py-4 text-right opacity-0 group-hover:opacity-100"><span class="material-symbols-outlined text-on-surface-variant">chevron_right</span></td>
+    <td class="px-6 py-4 text-on-surface-variant">${farmerName}</td>
+    <td class="px-6 py-4 text-on-surface-variant hidden sm:table-cell">${[addr.city, addr.country].filter(Boolean).join(', ') || '—'}</td>
+    <td class="px-6 py-4 text-on-surface-variant hidden md:table-cell">${formatDate(d.eta || o.estimated_delivery_at || d.created_at)}</td>
+    <td class="px-6 py-4 text-right">${deliveryStatusBadge(d.status)}</td>
   </tr>`;
 }
 

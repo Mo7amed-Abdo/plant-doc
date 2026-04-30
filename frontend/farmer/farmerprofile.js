@@ -1,4 +1,8 @@
 // farmerprofile.js
+let currentProfile = null;
+let pendingAvatarFile = null;
+let pendingAvatarPreviewUrl = null;
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('farmer')) return;
   populateSidebarUser(); setupLogout();
@@ -9,15 +13,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadProfile() {
   try {
     const p = (await api.get('/farmer/profile')).data;
-    setVal('full_name',p.full_name); setVal('email',p.email); setVal('phone',p.phone||'');
-    setVal('location',p.location||''); setVal('bio',p.bio||'');
-    setText('[data-profile-name]',p.full_name);
-    setText('[data-profile-location]',p.location||'Not set');
-    setText('[data-profile-joined]',p.joined_at?`Joined ${formatDate(p.joined_at)}`:'');
-    const inits=(p.full_name||'F').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-    setText('[data-profile-initials]',inits);
-    if(p.avatar) document.querySelectorAll('[data-profile-avatar]').forEach(img=>{if(img.tagName==='IMG')img.src=p.avatar;});
+    currentProfile = p;
+    applyProfileToView(p);
+    persistProfileSession(p);
   } catch(e) { showToast('Failed to load profile','error'); }
+}
+
+function applyProfileToView(p) {
+  setVal('full_name',p.full_name||'');
+  setVal('email',p.email||'');
+  setVal('phone',p.phone||'');
+  setVal('location',p.location||'');
+  setVal('bio',p.bio||'');
+  setText('[data-profile-name]',p.full_name||'Farmer');
+  setText('[data-profile-location]',p.location||'Not set');
+  setText('[data-profile-joined]',p.joined_at?`Joined ${formatDate(p.joined_at)}`:'');
+  const inits=(p.full_name||'F').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  setText('[data-profile-initials]',inits);
+  updateProfileImages(p.avatar||'', inits);
 }
 
 async function loadFarmStats() {
@@ -59,19 +72,30 @@ function setupForms() {
     e.preventDefault(); const btn=pf.querySelector('button[type="submit"]'); setBtnLoad(btn,true);
     try {
       const fd=new FormData();
-      ['full_name','phone','location','bio'].forEach(k=>{const v=getVal(k);if(v)fd.append(k,v);});
-      const ai=document.getElementById('avatar-input'); if(ai?.files[0]) fd.append('avatar',ai.files[0]);
+      ['full_name','phone','location','bio'].forEach(k=>{
+        const v=getVal(k);
+        if (v !== null) fd.append(k, v);
+      });
+      if (pendingAvatarFile) fd.append('avatar', pendingAvatarFile);
       await api.put('/farmer/profile',fd);
       showToast('Profile updated!','success');
-      const res=await api.get('/farmer/profile'); Auth.setSession({token:Auth.getToken(),user:res.data}); populateSidebarUser();
-      document.querySelectorAll('[data-profile-avatar]').forEach(img => {
-        if (img.tagName === 'IMG' && img.src) {
-          img.src = img.src.split('?')[0] + '?t=' + Date.now();
-        }
-      });
+      const res=await api.get('/farmer/profile');
+      currentProfile = res.data;
+      persistProfileSession(currentProfile);
+      applyProfileToView(currentProfile);
+      clearPendingAvatar();
     } catch(err){showToast(err.message||'Update failed','error');}
     finally{setBtnLoad(btn,false,'Save Changes');}
   });
+
+  // Discard changes
+  document.getElementById('discard-btn')?.addEventListener('click', () => {
+    if (!currentProfile) return;
+    clearPendingAvatar();
+    applyProfileToView(currentProfile);
+    showToast('Changes discarded','info');
+  });
+
   // Password form
   const pwf=document.getElementById('password-form')||document.querySelector('[data-form="security"]');
   if (pwf) pwf.addEventListener('submit', async e => {
@@ -82,7 +106,7 @@ function setupForms() {
     if(!cur||!nw){showToast('Fill in all fields','error');return;}
     if(nw!==conf){showToast('Passwords do not match','error');return;}
     if(nw.length<8){showToast('Min 8 characters','error');return;}
-    setBtnLoad(btn,true);
+    setBtnLoad(btn,true,'Update Password');
     try{await api.post('/auth/change-password',{current_password:cur,new_password:nw}); showToast('Password changed!','success'); pwf.reset();}
     catch(err){showToast(err.message||'Failed','error');}
     finally{setBtnLoad(btn,false,'Update Password');}
@@ -92,7 +116,22 @@ function setupForms() {
 function setupAvatar() {
   const ai=document.getElementById('avatar-input')||(() => {const i=document.createElement('input');i.type='file';i.id='avatar-input';i.accept='image/*';i.style.display='none';document.body.appendChild(i);return i;})();
   document.querySelectorAll('[data-profile-avatar],[data-avatar-upload]').forEach(el=>{el.style.cursor='pointer';el.addEventListener('click',()=>ai.click());});
-  ai.addEventListener('change',()=>{if(!ai.files[0])return;const url=URL.createObjectURL(ai.files[0]);document.querySelectorAll('[data-profile-avatar]').forEach(img=>{if(img.tagName==='IMG')img.src=url;});showToast('Save profile to apply avatar','info');});
+  ai.addEventListener('change',()=>{
+    const file = ai.files && ai.files[0];
+    if(!file) return;
+    ai.value='';
+    const err = validateAvatarFile(file);
+    if (err) { showToast(err,'error'); return; }
+
+    pendingAvatarFile = file;
+    resetPendingPreview();
+    pendingAvatarPreviewUrl = URL.createObjectURL(file);
+
+    const inits = (getVal('full_name') || currentProfile?.full_name || 'F')
+      .split(' ').filter(Boolean).map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    updateProfileImages(pendingAvatarPreviewUrl, inits);
+    showToast('Image selected. Save changes to upload it.','info');
+  });
 }
 
 function openAddField() {
@@ -128,7 +167,80 @@ async function delField(id) {
   catch(err){showToast('Delete failed','error');}
 }
 
-const getVal = k => document.querySelector(`[name="${k}"],#${k}`)?.value?.trim()||'';
+// Returns '' for existing inputs with empty value; returns null when the element doesn't exist.
+const getVal = k => {
+  const el = document.querySelector(`[name="${k}"],#${k}`);
+  if (!el) return null;
+  return (el.value || '').trim();
+};
 const setVal = (k,v) => { const el=document.querySelector(`[name="${k}"],#${k}`); if(el&&v!=null) el.value=v; };
 const setText = (sel,txt) => document.querySelectorAll(sel).forEach(el=>el.textContent=txt||'');
-const setBtnLoad = (btn,on,label='Save Changes') => { if(!btn)return; btn.disabled=on; btn.textContent=on?'Saving…':label; };
+const setBtnLoad = (btn,on,label='Save Changes') => { if(!btn)return; btn.disabled=on; btn.textContent=on?'Saving...':label; };
+
+function validateAvatarFile(file) {
+  if (!file) return '';
+  if (!file.type.startsWith('image/')) return 'Please select an image file';
+  if (file.size > MAX_AVATAR_BYTES) return 'Image must be under 5MB';
+  return '';
+}
+
+function resetPendingPreview() {
+  if (pendingAvatarPreviewUrl) {
+    URL.revokeObjectURL(pendingAvatarPreviewUrl);
+    pendingAvatarPreviewUrl = null;
+  }
+}
+
+function clearPendingAvatar() {
+  pendingAvatarFile = null;
+  resetPendingPreview();
+}
+
+function persistProfileSession(profile) {
+  const existingUser = Auth.getUser() || {};
+  const mergedUser = {
+    ...existingUser,
+    full_name: profile.full_name || existingUser.full_name,
+    email: profile.email || existingUser.email,
+    phone: profile.phone ?? existingUser.phone,
+    role: profile.role || existingUser.role,
+    avatar: profile.avatar || existingUser.avatar || null,
+  };
+  localStorage.setItem('plantdoc_user', JSON.stringify(mergedUser));
+  localStorage.setItem('plantdoc_profile', JSON.stringify(profile));
+  populateSidebarUser();
+}
+
+function initialsAvatarDataUrl(initials) {
+  const safe = String(initials || 'F').slice(0, 2).toUpperCase();
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8f5e9"/>
+      <stop offset="1" stop-color="#c8e6c9"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="48" fill="url(#g)"/>
+  <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+        font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="30"
+        font-weight="700" fill="#0f5132">${safe}</text>
+</svg>`.trim();
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function updateProfileImages(src, initials) {
+  const fallback = initialsAvatarDataUrl(initials || 'F');
+  document.querySelectorAll('[data-profile-avatar]').forEach((el) => {
+    if (el.tagName !== 'IMG') return;
+    el.onerror = null;
+    el.src = fallback;
+    if (src) {
+      el.src = src;
+      el.onerror = () => {
+        el.onerror = null;
+        el.src = fallback;
+      };
+    }
+  });
+}

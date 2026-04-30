@@ -1,6 +1,7 @@
 let currentProfile = null;
 let pendingAvatarFile = null;
 let pendingAvatarPreviewUrl = null;
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('expert')) return;
@@ -46,6 +47,14 @@ function setupForms() {
   const saveBtn = document.getElementById('save-btn');
   saveBtn?.addEventListener('click', saveProfile);
 
+  document.getElementById('discard-btn')?.addEventListener('click', () => {
+    if (!currentProfile) return;
+    pendingAvatarFile = null;
+    resetPendingPreview();
+    applyProfileToView(currentProfile);
+    showToast('Changes discarded', 'info');
+  });
+
   const avatarInput = document.getElementById('avatar-input');
   document.querySelectorAll('[data-avatar-upload],[data-profile-avatar]').forEach((element) => {
     element.style.cursor = 'pointer';
@@ -53,6 +62,15 @@ function setupForms() {
   });
 
   avatarInput?.addEventListener('change', handleAvatarSelection);
+
+  // Security & Password
+  const securityForm = document.getElementById('password-form') || document.querySelector('[data-form="security"]');
+  if (securityForm) {
+    securityForm.addEventListener('submit', handlePasswordChange);
+  } else {
+    // Expert profile page uses inputs without a form wrapper; bind via the Save button if present.
+    document.getElementById('update-password-btn')?.addEventListener('click', handlePasswordChange);
+  }
 }
 
 async function saveProfile() {
@@ -95,6 +113,10 @@ async function saveProfile() {
 function handleAvatarSelection(event) {
   const file = event.target.files?.[0];
   if (!file) return;
+  event.target.value = '';
+
+  const err = validateAvatarFile(file);
+  if (err) { showToast(err, 'error'); return; }
 
   pendingAvatarFile = file;
   resetPendingPreview();
@@ -105,11 +127,25 @@ function handleAvatarSelection(event) {
 }
 
 function updateProfileImages(src) {
-  if (!src) return;
+  const initials = (getVal('full_name') || currentProfile?.full_name || 'E')
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || 'E';
+  const fallback = initialsAvatarDataUrl(initials);
 
   document.querySelectorAll('[data-profile-avatar],[data-user-avatar]').forEach((element) => {
-    if (element.tagName === 'IMG') {
+    if (element.tagName !== 'IMG') return;
+    element.onerror = null;
+    element.src = fallback;
+    if (src) {
       element.src = src;
+      element.onerror = () => {
+        element.onerror = null;
+        element.src = fallback;
+      };
     }
   });
 }
@@ -165,6 +201,52 @@ function resetPendingPreview() {
   if (pendingAvatarPreviewUrl) {
     URL.revokeObjectURL(pendingAvatarPreviewUrl);
     pendingAvatarPreviewUrl = null;
+  }
+}
+
+function validateAvatarFile(file) {
+  if (!file) return '';
+  if (!file.type.startsWith('image/')) return 'Please select an image file';
+  if (file.size > MAX_AVATAR_BYTES) return 'Image must be under 5MB';
+  return '';
+}
+
+function initialsAvatarDataUrl(initials) {
+  const safe = String(initials || 'E').slice(0, 2).toUpperCase();
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8f5e9"/>
+      <stop offset="1" stop-color="#c8e6c9"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="48" fill="url(#g)"/>
+  <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+        font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="30"
+        font-weight="700" fill="#0f5132">${safe}</text>
+</svg>`.trim();
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+async function handlePasswordChange(event) {
+  if (event?.preventDefault) event.preventDefault();
+  const cur = document.getElementById('currentPassword')?.value;
+  const nw = document.getElementById('newPassword')?.value;
+  const conf = document.getElementById('confirmPassword')?.value;
+  if (!cur || !nw) { showToast('Fill all fields', 'error'); return; }
+  if (nw !== conf) { showToast('Passwords do not match', 'error'); return; }
+  if (nw.length < 8) { showToast('Min 8 characters', 'error'); return; }
+
+  try {
+    await api.post('/auth/change-password', { current_password: cur, new_password: nw });
+    showToast('Password changed!', 'success');
+    // clear inputs
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+  } catch (err) {
+    showToast(err.message || 'Failed', 'error');
   }
 }
 

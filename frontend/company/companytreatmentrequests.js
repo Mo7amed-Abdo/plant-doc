@@ -10,8 +10,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('company')) return;
   populateSidebarUser();
   setupLogout();
+  setupFilterUI();
+  setupTreatmentRequestNotifications();
   await loadRequests();
 });
+
+let _activeFilters = { statuses: [], priorityBands: [] };
 
 async function loadRequests() {
   const container = _findContainer();
@@ -19,12 +23,17 @@ async function loadRequests() {
   container.innerHTML = skeletonCards(4);
 
   try {
-    const res   = await api.get('/company/treatment-requests?limit=50');
-    const reqs  = res.data || [];
-    const total = res.meta?.total ?? reqs.length;
+    const statusParam = (_activeFilters.statuses && _activeFilters.statuses.length)
+      ? `&status=${encodeURIComponent(_activeFilters.statuses.join(','))}`
+      : '';
+    const res   = await api.get(`/company/treatment-requests?limit=50${statusParam}`);
+    const raw   = res.data || [];
+    const total = res.meta?.total ?? raw.length;
 
     setText('[data-stat="pending-count"]',  total);
     setText('[data-stat="total-requests"]', total);
+
+    const reqs = applyClientFilters(raw, _activeFilters);
 
     if (!reqs.length) {
       container.innerHTML = `
@@ -32,7 +41,11 @@ async function loadRequests() {
           <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center">
             <span class="material-symbols-outlined text-3xl text-on-surface-variant/40">inbox</span>
           </div>
-          <p class="text-base font-semibold text-on-surface-variant">No pending requests</p>
+          <p class="text-base font-semibold text-on-surface-variant">${
+            (_activeFilters.statuses?.length || _activeFilters.priorityBands?.length)
+              ? 'No treatment requests match your filters.'
+              : 'No pending requests'
+          }</p>
           <p class="text-sm text-on-surface-variant/70">
             New orders from farmers will appear here for your review
           </p>
@@ -63,6 +76,11 @@ function reqCard(o) {
     : '—';
   const addrLine = [addr.city, addr.state, addr.country].filter(Boolean).join(', ');
 
+  const status = o.status || 'pending';
+  const statusBadge = (typeof orderStatusBadge === 'function')
+    ? orderStatusBadge(status)
+    : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant">${escapeHtml(status)}</span>`;
+
   return `
     <div class="bg-surface-container-lowest rounded-[16px] border border-surface-variant
                 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
@@ -80,10 +98,13 @@ function reqCard(o) {
               : ''}
           </div>
         </div>
-        <span class="text-xs font-semibold text-on-surface-variant bg-surface-container
-                     px-2.5 py-1 rounded-full shrink-0">
-          ${o.order_code}
-        </span>
+        <div class="flex flex-col items-end gap-2 shrink-0">
+          <span class="text-xs font-semibold text-on-surface-variant bg-surface-container
+                       px-2.5 py-1 rounded-full">
+            ${o.order_code}
+          </span>
+          ${statusBadge}
+        </div>
       </div>
       <!-- Body -->
       <div class="p-5 space-y-3 flex-1">
@@ -105,26 +126,32 @@ function reqCard(o) {
           : ''}
       </div>
       <!-- Actions -->
-      <div class="px-5 pb-5 flex gap-2">
-        <button data-view-req="${o._id}"
-                class="flex-1 py-2.5 border border-outline-variant rounded-xl text-sm font-medium
-                       text-on-surface hover:bg-surface-container flex items-center
-                       justify-center gap-1 transition-colors">
-          <span class="material-symbols-outlined text-[16px]">visibility</span>Details
-        </button>
-        <button data-reject-req="${o._id}"
-                class="py-2.5 px-3.5 border border-error/40 text-error rounded-xl text-sm
-                       font-medium hover:bg-error-container flex items-center
-                       justify-center gap-1 transition-colors">
-          <span class="material-symbols-outlined text-[16px]">close</span>Reject
-        </button>
-        <button data-accept-req="${o._id}"
-                class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold
-                       hover:opacity-90 flex items-center justify-center gap-1 transition-colors">
-          <span class="material-symbols-outlined text-[16px]">check_circle</span>Accept
-        </button>
-      </div>
-    </div>`;
+       <div class="px-5 pb-5 flex gap-2">
+         <button data-view-req="${o._id}"
+                 class="flex-1 py-2.5 border border-outline-variant rounded-xl text-sm font-medium
+                        text-on-surface hover:bg-surface-container flex items-center
+                        justify-center gap-1 transition-colors">
+           <span class="material-symbols-outlined text-[16px]">visibility</span>Details
+         </button>
+        ${
+          status === 'pending'
+            ? `
+              <button data-reject-req="${o._id}"
+                      class="py-2.5 px-3.5 border border-error/40 text-error rounded-xl text-sm
+                             font-medium hover:bg-error-container flex items-center
+                             justify-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">close</span>Reject
+              </button>
+              <button data-accept-req="${o._id}"
+                      class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold
+                             hover:opacity-90 flex items-center justify-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span>Accept
+              </button>
+            `
+            : ''
+        }
+       </div>
+     </div>`;
 }
 
 // ─── Details modal ────────────────────────────────────────────────────────────
@@ -136,16 +163,24 @@ async function viewDetails(orderId) {
     const farmerName = farmer.user_id?.full_name || farmer.location || 'Farmer';
     const addr       = o.shipping_address || {};
 
+    const status = o.status || 'pending';
+    const statusBadge = (typeof orderStatusBadge === 'function')
+      ? orderStatusBadge(status)
+      : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant">${escapeHtml(status)}</span>`;
+
     const m = document.createElement('div');
     m.className = 'fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 overflow-y-auto';
     m.innerHTML = `
       <div class="bg-surface rounded-2xl w-full max-w-lg shadow-xl my-auto">
         <div class="p-5 border-b border-surface-variant flex justify-between items-start
                     bg-surface-bright rounded-t-2xl">
-          <div>
-            <h3 class="text-lg font-bold text-on-surface">${o.order_code}</h3>
-            <p class="text-sm text-on-surface-variant">${formatDate(o.placed_at)}</p>
-          </div>
+           <div>
+             <h3 class="text-lg font-bold text-on-surface">${o.order_code}</h3>
+             <div class="flex items-center gap-2 mt-0.5">
+               <p class="text-sm text-on-surface-variant">${formatDate(o.placed_at)}</p>
+               ${statusBadge}
+             </div>
+           </div>
           <button onclick="this.closest('.fixed').remove()"
                   class="text-on-surface-variant hover:text-on-surface">
             <span class="material-symbols-outlined">close</span>
@@ -221,20 +256,26 @@ async function viewDetails(orderId) {
                  <p class="text-sm text-on-surface italic">"${escapeHtml(o.notes)}"</p>
                </div>`
             : ''}
-          <!-- Modal actions -->
-          <div class="flex gap-3 pt-1">
-            <button onclick="openRejectModal('${o._id}'); this.closest('.fixed').remove();"
-                    class="flex-1 py-2.5 border border-error/40 text-error rounded-xl text-sm
-                           font-medium hover:bg-error-container flex items-center
-                           justify-center gap-1 transition-colors">
-              <span class="material-symbols-outlined text-[16px]">close</span>Reject
-            </button>
-            <button onclick="acceptRequest('${o._id}', this); this.closest('.fixed').remove();"
-                    class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold
-                           hover:opacity-90 flex items-center justify-center gap-1 transition-colors">
-              <span class="material-symbols-outlined text-[16px]">check_circle</span>Accept Order
-            </button>
-          </div>
+          ${
+            status === 'pending'
+              ? `
+                <!-- Modal actions -->
+                <div class="flex gap-3 pt-1">
+                  <button onclick="openRejectModal('${o._id}'); this.closest('.fixed').remove();"
+                          class="flex-1 py-2.5 border border-error/40 text-error rounded-xl text-sm
+                                 font-medium hover:bg-error-container flex items-center
+                                 justify-center gap-1 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">close</span>Reject
+                  </button>
+                  <button onclick="acceptRequest('${o._id}', this); this.closest('.fixed').remove();"
+                          class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold
+                                 hover:opacity-90 flex items-center justify-center gap-1 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">check_circle</span>Accept Order
+                  </button>
+                </div>
+              `
+              : ''
+          }
         </div>
       </div>`;
 
@@ -345,3 +386,146 @@ function _wireButtons(container) {
 
 const setText = (sel, val) =>
   document.querySelectorAll(sel).forEach(el => (el.textContent = val ?? ''));
+
+function setupFilterUI() {
+  const filterBtn = document.querySelector('button[data-filter]');
+  const modal = document.getElementById('filter-modal');
+  const closeBtn = document.getElementById('close-filter');
+  const clearBtn = document.getElementById('clear-filters');
+  const applyBtn = document.getElementById('apply-filters');
+  if (!filterBtn || !modal) return;
+
+  const positionModal = () => {
+    const btnRect = filterBtn.getBoundingClientRect();
+    const modalWidth = 320;
+    let left = btnRect.left;
+    let top = btnRect.bottom + 8;
+    if (left + modalWidth > window.innerWidth - 16) {
+      left = btnRect.right - modalWidth;
+    }
+    modal.style.top = `${top}px`;
+    modal.style.left = `${left}px`;
+  };
+
+  filterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    positionModal();
+    modal.classList.toggle('hidden');
+  });
+
+  closeBtn?.addEventListener('click', () => modal.classList.add('hidden'));
+
+  document.addEventListener('click', (e) => {
+    if (!modal.classList.contains('hidden') && !modal.contains(e.target) && e.target !== filterBtn) {
+      modal.classList.add('hidden');
+    }
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    modal.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+    _activeFilters = { statuses: [], priorityBands: [] };
+    loadRequests();
+  });
+
+  applyBtn?.addEventListener('click', () => {
+    _activeFilters = readFilters(modal);
+    modal.classList.add('hidden');
+    loadRequests();
+  });
+}
+
+function readFilters(modal) {
+  const statuses = Array.from(modal.querySelectorAll('input[data-filter-status]'))
+    .filter((el) => el.checked)
+    .map((el) => el.value)
+    .filter(Boolean);
+
+  const priorityBands = Array.from(modal.querySelectorAll('input[data-filter-priority]'))
+    .filter((el) => el.checked)
+    .map((el) => el.value)
+    .filter(Boolean);
+
+  return { statuses, priorityBands };
+}
+
+function applyClientFilters(items, filters) {
+  let out = items.slice();
+
+  // "Priority" for this page is derived from order totals (orders don't have an explicit priority field).
+  if (filters?.priorityBands?.length) {
+    const totals = out.map(o => Number(o.total ?? o.total_amount ?? 0)).filter(Number.isFinite);
+    totals.sort((a,b) => a-b);
+    const p25 = totals.length ? totals[Math.floor(totals.length * 0.25)] : 0;
+    const p75 = totals.length ? totals[Math.floor(totals.length * 0.75)] : 0;
+
+    out = out.filter(o => {
+      const t = Number(o.total ?? o.total_amount ?? 0);
+      if (!Number.isFinite(t)) return false;
+      const isLow = t <= p25;
+      const isHigh = t >= p75;
+      return (filters.priorityBands.includes('low') && isLow) ||
+             (filters.priorityBands.includes('high') && isHigh);
+    });
+  }
+
+  return out;
+}
+
+function setupTreatmentRequestNotifications() {
+  refreshUnreadDot();
+
+  // Poll unread notifications; new_order notifications are created when a farmer checks out.
+  const pollMs = 20000;
+  setInterval(async () => {
+    try {
+      const unread = await api.get('/notifications?is_read=false&limit=5');
+      const items = unread.data || [];
+      if (!items.length) return;
+
+      const seenKey = 'plantdoc_seen_company_notifications';
+      const seen = new Set(JSON.parse(sessionStorage.getItem(seenKey) || '[]'));
+
+      let hasNewOrder = false;
+      items.forEach((n) => {
+        const id = String(n._id || n.id);
+        if (!id || seen.has(id)) return;
+        seen.add(id);
+
+        if ((n.type || '').toLowerCase() === 'new_order') {
+          hasNewOrder = true;
+          showToast(n.title || 'New treatment request', 'info');
+          if (n.body) showToast(n.body, 'info');
+        }
+      });
+
+      sessionStorage.setItem(seenKey, JSON.stringify(Array.from(seen).slice(0, 200)));
+      if (hasNewOrder) {
+        showNotifDot(true);
+        await loadRequests();
+      }
+    } catch (_) {
+      // ignore polling errors
+    }
+  }, pollMs);
+
+  // Clicking the bell clears the dot (no dropdown UI on this page yet)
+  document.querySelectorAll('button').forEach(btn => {
+    const icon = btn.querySelector('.material-symbols-outlined');
+    if (icon && icon.textContent.trim() === 'notifications') {
+      btn.addEventListener('click', () => showNotifDot(false));
+    }
+  });
+}
+
+async function refreshUnreadDot() {
+  try {
+    const unread = await api.get('/notifications?is_read=false&limit=1');
+    showNotifDot(Boolean((unread.data || []).length));
+  } catch (_) {}
+}
+
+function showNotifDot(on) {
+  document.querySelectorAll('[data-notif-dot]').forEach(el => {
+    el.classList.toggle('hidden', !on);
+  });
+}

@@ -80,7 +80,14 @@ async function getListings(query) {
 
   const [items, total] = await Promise.all([
     ProductListing.find(filter)
-      .populate('product_id', '-default_image')
+      .populate({
+        path: 'product_id',
+        transform: (doc) => {
+          if (!doc) return null;
+          const obj = doc.toObject();
+          return { ...obj, default_image: toDataUri(obj.default_image) };
+        },
+      })
       .populate('company_id', 'name address is_verified')
       .sort({ created_at: -1 })
       .skip(skip)
@@ -157,23 +164,59 @@ async function deleteListing(companyId, listingId) {
 // ─── Company: list own listings ───────────────────────────────────────────────
 
 async function getCompanyListings(companyId, query) {
-  const { page = 1, limit = 20, stock_status, is_active } = query;
+  const {
+    page = 1,
+    limit = 20,
+    stock_status,
+    is_active,
+    search,
+    category,
+    sort = 'newest',
+  } = query;
   const skip = (Number(page) - 1) * Number(limit);
 
   const filter = { company_id: companyId };
   if (stock_status) filter.stock_status = stock_status;
   if (is_active !== undefined) filter.is_active = is_active === 'true';
 
-  const [items, total] = await Promise.all([
-    ProductListing.find(filter)
-      .populate('product_id', 'name category unit')
-      .sort({ created_at: -1 })
-      .skip(skip)
-      .limit(Number(limit)),
-    ProductListing.countDocuments(filter),
-  ]);
+  if (search || category) {
+    const productFilter = {};
+    if (search) productFilter.name = { $regex: search, $options: 'i' };
+    if (category) productFilter.category = category;
 
-  return { items, total, page: Number(page), limit: Number(limit) };
+    const productIds = await Product.find(productFilter).distinct('_id');
+    if (!productIds.length) {
+      return { items: [], total: 0, page: Number(page), limit: Number(limit) };
+    }
+    filter.product_id = { $in: productIds };
+  }
+
+  let items = await ProductListing.find(filter)
+    .populate({
+      path: 'product_id',
+      select: 'name category unit default_image',
+      transform: (doc) => {
+        if (!doc) return null;
+        const obj = doc.toObject();
+        return { ...obj, default_image: toDataUri(obj.default_image) };
+      },
+    });
+
+  items = items.filter((item) => item.product_id);
+
+  const sorters = {
+    newest: (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0),
+    price_asc: (a, b) => Number(a.price || 0) - Number(b.price || 0),
+    price_desc: (a, b) => Number(b.price || 0) - Number(a.price || 0),
+    name_asc: (a, b) => String(a.product_id?.name || '').localeCompare(String(b.product_id?.name || '')),
+  };
+
+  items.sort(sorters[sort] || sorters.newest);
+
+  const total = items.length;
+  const pagedItems = items.slice(skip, skip + Number(limit));
+
+  return { items: pagedItems, total, page: Number(page), limit: Number(limit) };
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

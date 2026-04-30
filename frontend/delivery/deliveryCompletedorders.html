@@ -86,44 +86,17 @@
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
 
-        /* Date pill active state */
         .date-pill.active {
             background-color: #006a39;
             color: #ffffff;
             border-color: #006a39;
-        }
-
-        /* Order details modal */
-        #order-modal-backdrop {
-            transition: opacity 0.25s ease;
-        }
-        #order-modal-backdrop.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #order-modal-backdrop:not(.hidden) {
-            opacity: 1;
-        }
-        #order-modal {
-            transition: opacity 0.25s ease, transform 0.25s ease;
-        }
-        #order-modal-backdrop.hidden #order-modal {
-            opacity: 0;
-            transform: scale(0.96) translateY(12px);
-        }
-        #order-modal-backdrop:not(.hidden) #order-modal {
-            opacity: 1;
-            transform: scale(1) translateY(0);
         }
     </style>
 </head>
 
 <body class="bg-background text-on-background min-h-screen flex font-body">
 
-    <!-- SideNavBar -->
     <nav class="bg-slate-50 text-green-600 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
-
-        <!-- Logo -->
         <div class="flex items-center gap-1">
             <div class="flex items-center">
                 <img src="logo dark.png" alt="" class="w-26 h-28">
@@ -131,7 +104,6 @@
             <span class="text-lg font-bold text-green-700">PlantDoc</span>
         </div>
 
-        <!-- Nav Links -->
         <div class="flex-1 flex flex-col gap-1 px-4 pt-3">
             <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="deliverydashboard.html">
                 <span class="material-symbols-outlined">dashboard</span>
@@ -141,7 +113,6 @@
                 <span class="material-symbols-outlined">local_shipping</span>
                 <span>Active Orders</span>
             </a>
-            <!-- Completed Orders (ACTIVE) -->
             <a class="bg-green-700 text-white rounded-xl p-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="#">
                 <span class="material-symbols-outlined fill">task_alt</span>
                 <span>Completed Orders</span>
@@ -156,25 +127,9 @@
             </a>
         </div>
 
-        <!-- Profile -->
-        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
-            <div class="flex items-center gap-3 px-2">
-                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
-                <div class="flex flex-col">
-                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
-                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
-                </div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
-                    <span class="material-symbols-outlined text-lg">logout</span>
-                </button>
-            </div>
-        </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="flex-1 flex flex-col md:ml-64 w-full">
-
-        <!-- Mobile Header -->
         <header class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-gray-50 border-b border-slate-200 shadow-sm">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined fill text-primary text-2xl">spa</span>
@@ -191,32 +146,22 @@
         </header>
 
         <div class="p-6 md:p-8 flex-1 overflow-y-auto">
-
-            <!-- Page heading row -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-
-                <!-- Left: title + subtitle -->
                 <div class="shrink-0">
                     <h2 class="text-2xl font-bold text-on-surface">Completed Orders</h2>
                 </div>
 
-                <!-- Right: notification + date pills -->
                 <div class="flex items-center gap-3 flex-wrap">
-                    <button class="relative p-2 pb-0 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all duration-200 active:scale-95">
-                        <span class="material-symbols-outlined">notifications</span>
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border-2 border-background"></span>
-                    </button>
 
-                    <!-- Date filter pills -->
                     <div class="flex items-center gap-2 bg-surface-container-lowest border border-surface-variant rounded-[12px] p-1.5">
                         <span class="text-xs font-medium text-on-surface-variant px-2 hidden sm:block">Date:</span>
                         <button class="date-pill active px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 active:scale-[0.97]" data-period="7">
                             7 Days
                         </button>
-                        <button class="date-pill px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent text-on-surface-variant hover:bg-surface-container active:hover:none transition-all duration-200 active:scale-[0.97]" data-period="30">
+                        <button class="date-pill px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent text-on-surface-variant hover:bg-surface-container transition-all duration-200 active:scale-[0.97]" data-period="30">
                             30 Days
                         </button>
-                        <button class="date-pill px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent text-on-surface-variant hover:bg-surface-container transition-all duration-200 active:scale-[0.97]" data-period="month">
+                        <button class="date-pill px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent text-on-surface-variant hover:bg-surface-container transition-all duration-200 active:scale-[0.97]" data-period="60">
                             60 Days
                         </button>
                         <button class="date-pill px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent text-on-surface-variant hover:bg-surface-container transition-all duration-200 active:scale-[0.97]" data-period="all">
@@ -226,441 +171,16 @@
                 </div>
             </div>
 
-<!-- Orders Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 rounded-xl border-t-2 border-primary pt-2" data-completed-grid>
                 <p class="col-span-full text-center text-on-surface-variant py-16">Loading completed orders...</p>
             </div>
-                        </div>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-fixed text-on-primary-fixed-variant">
-                            <span class="material-symbols-outlined text-[13px] fill">check_circle</span> Delivered
-                        </span>
-                    </div>
-                    <!-- Card Body -->
-                    <div class="p-5 flex-1 flex flex-col gap-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Items</span>
-                            <span class="font-medium text-on-surface text-right">50kg Organic Fertilizer</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Delivered At</span>
-                            <span class="font-medium text-on-surface text-right">Oct 24, 2:30 PM<br/><span class="text-xs text-on-surface-variant font-normal">Sunnyvale Farm</span></span>
-                        </div>
-                        <!-- Rating -->
-                        <div class="mt-auto pt-3 border-t border-surface-variant">
-                            <div class="flex items-center gap-0.5 mb-1.5">
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="text-xs font-semibold text-primary ml-1.5">5.0</span>
-                            </div>
-                            <p class="text-xs text-on-surface-variant italic line-clamp-2">"Fast delivery, very professional. Placed items exactly where requested."</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="order-card bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm flex flex-col gap-0 hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
-                     onclick="openModal(this)"
-                     data-order-id="ORD-8842-B"
-                     data-farmer="Maria Gonzalez"
-                     data-initials="MG"
-                     data-avatar-color="bg-tertiary-fixed text-on-tertiary-fixed-variant"
-                     data-farm="Green Acres"
-                     data-items="2x Neem Oil Extract (5L)"
-                     data-delivered-at="Oct 24, 11:15 AM"
-                     data-driver="Sarah Johnson"
-                     data-driver-id="DRV-017"
-                     data-vehicle="Truck • PLT-8832"
-                     data-notes="Left at the front gate as no one was available. Photo proof taken."
-                     data-rating="4"
-                     data-review="Good service, but packaging was slightly dented on one bottle.">
-                    <div class="p-5 border-b border-surface-variant bg-surface-bright flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center justify-center font-bold text-sm border border-surface-variant shrink-0">MG</div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface font-headline leading-tight">Maria Gonzalez</h3>
-                                <p class="text-xs text-on-surface-variant">ORD-8842-B</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-fixed text-on-primary-fixed-variant">
-                            <span class="material-symbols-outlined text-[13px] fill">check_circle</span> Delivered
-                        </span>
-                    </div>
-                    <div class="p-5 flex-1 flex flex-col gap-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Items</span>
-                            <span class="font-medium text-on-surface text-right">2x Neem Oil Extract (5L)</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Delivered At</span>
-                            <span class="font-medium text-on-surface text-right">Oct 24, 11:15 AM<br/><span class="text-xs text-on-surface-variant font-normal">Green Acres</span></span>
-                        </div>
-                        <div class="mt-auto pt-3 border-t border-surface-variant">
-                            <div class="flex items-center gap-0.5 mb-1.5">
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined text-surface-variant text-[18px]">star</span>
-                                <span class="text-xs font-semibold text-primary ml-1.5">4.0</span>
-                            </div>
-                            <p class="text-xs text-on-surface-variant italic line-clamp-2">"Good service, but packaging was slightly dented on one bottle."</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="order-card bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm flex flex-col gap-0 hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
-                     onclick="openModal(this)"
-                     data-order-id="ORD-8711-C"
-                     data-farmer="Sarah Jenkins"
-                     data-initials="SJ"
-                     data-avatar-color="bg-primary-fixed text-on-primary-fixed-variant"
-                     data-farm="Jenkins Valley Co-op"
-                     data-items="100x Tomato Seedlings, 50x Bell Pepper Seedlings"
-                     data-delivered-at="Oct 23, 4:45 PM"
-                     data-driver="James Okafor"
-                     data-driver-id="DRV-029"
-                     data-vehicle="Van • PLT-6610"
-                     data-notes="Left near the main greenhouse entrance as requested. Temperature controlled bags sealed properly."
-                     data-rating="5"
-                     data-review="Exceptional care taken with the seedlings. They arrived in perfect condition. Will order again!">
-                    <div class="p-5 border-b border-surface-variant bg-surface-bright flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center font-bold text-sm border border-surface-variant shrink-0">SJ</div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface font-headline leading-tight">Sarah Jenkins</h3>
-                                <p class="text-xs text-on-surface-variant">ORD-8711-C</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-fixed text-on-primary-fixed-variant">
-                            <span class="material-symbols-outlined text-[13px] fill">check_circle</span> Delivered
-                        </span>
-                    </div>
-                    <div class="p-5 flex-1 flex flex-col gap-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Items</span>
-                            <span class="font-medium text-on-surface text-right">100x Tomato Seedlings<br/>50x Bell Pepper Seedlings</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Delivered At</span>
-                            <span class="font-medium text-on-surface text-right">Oct 23, 4:45 PM<br/><span class="text-xs text-on-surface-variant font-normal">Jenkins Valley Co-op</span></span>
-                        </div>
-                        <div class="mt-auto pt-3 border-t border-surface-variant">
-                            <div class="flex items-center gap-0.5 mb-1.5">
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="text-xs font-semibold text-primary ml-1.5">5.0</span>
-                            </div>
-                            <p class="text-xs text-on-surface-variant italic line-clamp-2">"Exceptional care taken with the seedlings. They arrived in perfect condition. Will order again!"</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 4 -->
-                <div class="order-card bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm flex flex-col gap-0 hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
-                     onclick="openModal(this)"
-                     data-order-id="ORD-8650-D"
-                     data-farmer="David Chen"
-                     data-initials="DC"
-                     data-avatar-color="bg-secondary-container text-on-secondary-container"
-                     data-farm="Chen Orchards"
-                     data-items="1x Soil Moisture Sensor Kit"
-                     data-delivered-at="Oct 23, 9:20 AM"
-                     data-driver="Lisa Chen"
-                     data-driver-id="DRV-033"
-                     data-vehicle="Truck • PLT-2290"
-                     data-notes="Delivered to reception desk. Signed by farm manager."
-                     data-rating="5"
-                     data-review="">
-                    <div class="p-5 border-b border-surface-variant bg-surface-bright flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-sm border border-surface-variant shrink-0">DC</div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface font-headline leading-tight">David Chen</h3>
-                                <p class="text-xs text-on-surface-variant">ORD-8650-D</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-fixed text-on-primary-fixed-variant">
-                            <span class="material-symbols-outlined text-[13px] fill">check_circle</span> Delivered
-                        </span>
-                    </div>
-                    <div class="p-5 flex-1 flex flex-col gap-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Items</span>
-                            <span class="font-medium text-on-surface text-right">1x Soil Moisture Sensor Kit</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Delivered At</span>
-                            <span class="font-medium text-on-surface text-right">Oct 23, 9:20 AM<br/><span class="text-xs text-on-surface-variant font-normal">Chen Orchards</span></span>
-                        </div>
-                        <div class="mt-auto pt-3 border-t border-surface-variant">
-                            <div class="flex items-center gap-0.5 mb-1.5">
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="text-xs font-semibold text-primary ml-1.5">5.0</span>
-                            </div>
-                            <p class="text-xs text-on-surface-variant italic line-clamp-2">No comment provided.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 5 -->
-                <div class="order-card bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm flex flex-col gap-0 hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
-                     onclick="openModal(this)"
-                     data-order-id="ORD-8601-E"
-                     data-farmer="Lena Hartmann"
-                     data-initials="LH"
-                     data-avatar-color="bg-tertiary-fixed text-on-tertiary-fixed-variant"
-                     data-farm="Hartmann Bio Farm"
-                     data-items="3x FungiClear Pro (2L)"
-                     data-delivered-at="Oct 22, 3:10 PM"
-                     data-driver="Marco Perez"
-                     data-driver-id="DRV-041"
-                     data-vehicle="Van • PLT-4421"
-                     data-notes="Handed to farm owner directly at the front door."
-                     data-rating="4"
-                     data-review="Delivery was on time. Driver was polite and helpful.">
-                    <div class="p-5 border-b border-surface-variant bg-surface-bright flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant flex items-center justify-center font-bold text-sm border border-surface-variant shrink-0">LH</div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface font-headline leading-tight">Lena Hartmann</h3>
-                                <p class="text-xs text-on-surface-variant">ORD-8601-E</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-fixed text-on-primary-fixed-variant">
-                            <span class="material-symbols-outlined text-[13px] fill">check_circle</span> Delivered
-                        </span>
-                    </div>
-                    <div class="p-5 flex-1 flex flex-col gap-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Items</span>
-                            <span class="font-medium text-on-surface text-right">3x FungiClear Pro (2L)</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Delivered At</span>
-                            <span class="font-medium text-on-surface text-right">Oct 22, 3:10 PM<br/><span class="text-xs text-on-surface-variant font-normal">Hartmann Bio Farm</span></span>
-                        </div>
-                        <div class="mt-auto pt-3 border-t border-surface-variant">
-                            <div class="flex items-center gap-0.5 mb-1.5">
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined text-surface-variant text-[18px]">star</span>
-                                <span class="text-xs font-semibold text-primary ml-1.5">4.0</span>
-                            </div>
-                            <p class="text-xs text-on-surface-variant italic line-clamp-2">"Delivery was on time. Driver was polite and helpful."</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 6 -->
-                <div class="order-card bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm flex flex-col gap-0 hover:shadow-md transition-shadow overflow-hidden cursor-pointer"
-                     onclick="openModal(this)"
-                     data-order-id="ORD-8544-F"
-                     data-farmer="Omar Khalil"
-                     data-initials="OK"
-                     data-avatar-color="bg-primary-fixed text-on-primary-fixed-variant"
-                     data-farm="Khalil Desert Farms"
-                     data-items="20x NutriBoost Max (1kg)"
-                     data-delivered-at="Oct 22, 10:50 AM"
-                     data-driver="Sarah Johnson"
-                     data-driver-id="DRV-017"
-                     data-vehicle="Truck • PLT-8832"
-                     data-notes="Unloaded at the storage shed. All 20 units accounted for."
-                     data-rating="3"
-                     data-review="Delivery was late by 30 minutes, but everything arrived intact.">
-                    <div class="p-5 border-b border-surface-variant bg-surface-bright flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center font-bold text-sm border border-surface-variant shrink-0">OK</div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface font-headline leading-tight">Omar Khalil</h3>
-                                <p class="text-xs text-on-surface-variant">ORD-8544-F</p>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-fixed text-on-primary-fixed-variant">
-                            <span class="material-symbols-outlined text-[13px] fill">check_circle</span> Delivered
-                        </span>
-                    </div>
-                    <div class="p-5 flex-1 flex flex-col gap-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Items</span>
-                            <span class="font-medium text-on-surface text-right">20x NutriBoost Max (1kg)</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-on-surface-variant">Delivered At</span>
-                            <span class="font-medium text-on-surface text-right">Oct 22, 10:50 AM<br/><span class="text-xs text-on-surface-variant font-normal">Khalil Desert Farms</span></span>
-                        </div>
-                        <div class="mt-auto pt-3 border-t border-surface-variant">
-                            <div class="flex items-center gap-0.5 mb-1.5">
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined fill text-primary text-[18px]">star</span>
-                                <span class="material-symbols-outlined text-surface-variant text-[18px]">star</span>
-                                <span class="material-symbols-outlined text-surface-variant text-[18px]">star</span>
-                                <span class="text-xs font-semibold text-primary ml-1.5">3.0</span>
-                            </div>
-                            <p class="text-xs text-on-surface-variant italic line-clamp-2">"Delivery was late by 30 minutes, but everything arrived intact."</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Load More -->
-            <div class="flex justify-center mt-8">
-                <button class="flex items-center gap-2 px-6 py-2.5 border border-outline-variant rounded-full text-sm font-medium text-on-surface hover:bg-surface-container transition-colors active:scale-[0.98]">
-                    <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                    Load More Orders
-                </button>
-            </div>
-
         </div>
     </main>
 
-    <!-- ═══════════════════════════════════════════
-         ORDER DETAILS MODAL
-    ═══════════════════════════════════════════ -->
-    <div id="order-modal-backdrop" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4"
-         style="background: rgba(25,28,29,0.45); backdrop-filter: blur(6px);">
-
-        <div id="order-modal" class="bg-surface-container-lowest rounded-[20px] shadow-2xl border border-surface-variant w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-surface-variant bg-surface-bright shrink-0">
-                <div class="flex items-center gap-3">
-                    <div id="modal-avatar" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border border-surface-variant shrink-0"></div>
-                    <div>
-                        <p class="text-xs text-on-surface-variant mb-0.5">
-                            <span class="hover:text-primary cursor-pointer transition-colors" onclick="closeModal()">Completed Orders</span>
-                            <span class="mx-1 text-on-surface-variant/40">›</span>
-                            <span id="modal-order-id" class="text-on-surface font-semibold"></span>
-                        </p>
-                        <h3 id="modal-farmer-name" class="text-base font-bold text-on-surface font-headline"></h3>
-                    </div>
-                </div>
-                <button onclick="closeModal()" class="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors active:scale-[0.95]">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="flex-1 overflow-y-auto p-6 space-y-5">
-
-                <!-- Delivery confirmed banner -->
-                <div class="px-5 py-4 rounded-[12px] flex items-center justify-between bg-primary-fixed border border-primary-fixed">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center">
-                            <span class="material-symbols-outlined fill text-primary">check_circle</span>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-on-primary-fixed-variant/70">Status</p>
-                            <p class="font-bold text-base text-on-primary-fixed-variant">Successfully Delivered</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs font-medium text-on-primary-fixed-variant/70">Delivered At</p>
-                        <p id="modal-delivered-at" class="font-bold text-sm text-on-primary-fixed-variant"></p>
-                    </div>
-                </div>
-
-                <!-- 2-col grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                    <!-- Order Info -->
-                    <div class="bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm p-5 space-y-3">
-                        <h4 class="font-semibold text-on-surface flex items-center gap-2">
-                            <span class="material-symbols-outlined text-on-surface-variant text-[20px]">inventory_2</span>
-                            Order Info
-                        </h4>
-                        <div class="space-y-2.5 text-sm">
-                            <div>
-                                <p class="text-xs text-on-surface-variant mb-0.5">Items</p>
-                                <p id="modal-items" class="font-medium text-on-surface"></p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-on-surface-variant mb-0.5">Delivered To</p>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[16px] text-primary">location_on</span>
-                                    <p id="modal-farm" class="font-medium text-on-surface"></p>
-                                </div>
-                            </div>
-                            <div class="p-3 bg-surface-container-low rounded-lg border border-surface-variant">
-                                <p class="text-xs text-on-surface-variant mb-1 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[14px]">sticky_note_2</span> Delivery Notes
-                                </p>
-                                <p id="modal-notes" class="text-xs text-on-surface leading-relaxed"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Driver Info -->
-                    <div class="bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm p-5 space-y-3">
-                        <h4 class="font-semibold text-on-surface flex items-center gap-2">
-                            <span class="material-symbols-outlined text-on-surface-variant text-[20px]">person_pin</span>
-                            Driver & Vehicle
-                        </h4>
-                        <div class="flex items-center gap-3">
-                            <div id="modal-driver-avatar" class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-sm border border-surface-variant shrink-0"></div>
-                            <div>
-                                <p id="modal-driver-name" class="font-bold text-on-surface text-sm"></p>
-                                <p id="modal-driver-id" class="text-xs text-on-surface-variant"></p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm">
-                            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">directions_car</span>
-                            <p id="modal-vehicle" class="text-on-surface font-medium"></p>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Farmer Feedback -->
-                <div class="bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm p-5 space-y-3">
-                    <h4 class="font-semibold text-on-surface flex items-center gap-2">
-                        <span class="material-symbols-outlined text-on-surface-variant text-[20px]">reviews</span>
-                        Farmer Feedback
-                    </h4>
-                    <div class="flex items-center gap-1.5">
-                        <div id="modal-stars" class="flex gap-0.5"></div>
-                        <span id="modal-rating-text" class="text-sm font-bold text-primary ml-1"></span>
-                    </div>
-                    <div id="modal-review-wrap" class="p-4 bg-surface-container-low rounded-xl border border-surface-variant">
-                        <p id="modal-review" class="text-sm text-on-surface italic leading-relaxed"></p>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-surface-variant bg-surface-bright shrink-0">
-                <button onclick="closeModal()" class="px-4 py-2 border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors active:scale-[0.98]">
-                    Close
-                </button>
-                <button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
-                    <span class="material-symbols-outlined text-[18px]">print</span>
-                    Print Receipt
-                </button>
-            </div>
-
-        </div>
-    </div>
-
     <script>
-        /* ── Date pills ── */
-        document.querySelectorAll('.date-pill').forEach(pill => {
+        document.querySelectorAll('.date-pill').forEach((pill) => {
             pill.addEventListener('click', () => {
-                document.querySelectorAll('.date-pill').forEach(p => {
+                document.querySelectorAll('.date-pill').forEach((p) => {
                     p.classList.remove('active');
                     p.classList.add('text-on-surface-variant');
                     p.style.backgroundColor = '';
@@ -671,68 +191,7 @@
                 pill.classList.remove('text-on-surface-variant');
             });
         });
-
-        /* ── Order details modal ── */
-        const backdrop = document.getElementById('order-modal-backdrop');
-
-        function openModal(card) {
-            const d = card.dataset;
-
-            document.getElementById('modal-order-id').textContent      = d.orderId;
-            document.getElementById('modal-farmer-name').textContent    = d.farmer;
-            document.getElementById('modal-delivered-at').textContent   = d.deliveredAt;
-            document.getElementById('modal-items').textContent          = d.items;
-            document.getElementById('modal-farm').textContent           = d.farm;
-            document.getElementById('modal-notes').textContent          = d.notes;
-            document.getElementById('modal-driver-name').textContent    = d.driver;
-            document.getElementById('modal-driver-id').textContent      = d.driverId;
-            document.getElementById('modal-vehicle').textContent        = d.vehicle;
-
-            // Header avatar
-            const avatar = document.getElementById('modal-avatar');
-            avatar.className = `w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border border-surface-variant shrink-0 ${d.avatarColor}`;
-            avatar.textContent = d.initials;
-
-            // Driver avatar initials
-            const driverInitials = d.driver.split(' ').map(n => n[0]).join('').slice(0, 2);
-            document.getElementById('modal-driver-avatar').textContent = driverInitials;
-
-            // Stars
-            const rating = parseInt(d.rating) || 0;
-            const starsEl = document.getElementById('modal-stars');
-            starsEl.innerHTML = '';
-            for (let i = 1; i <= 5; i++) {
-                const s = document.createElement('span');
-                s.className = `material-symbols-outlined fill text-[20px] ${i <= rating ? 'text-primary' : 'text-surface-variant'}`;
-                s.textContent = 'star';
-                starsEl.appendChild(s);
-            }
-            document.getElementById('modal-rating-text').textContent = rating + '.0';
-
-            // Review
-            const reviewEl = document.getElementById('modal-review');
-            const wrapEl   = document.getElementById('modal-review-wrap');
-            if (d.review && d.review.trim()) {
-                reviewEl.textContent = `"${d.review}"`;
-                wrapEl.classList.remove('hidden');
-            } else {
-                reviewEl.textContent = 'No comment provided.';
-                wrapEl.classList.remove('hidden');
-            }
-
-            backdrop.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal() {
-            backdrop.classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-
-        backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
     </script>
-
 
     <script src="../api.js"></script>
     <script src="./deliverycompletedorders.js"></script>

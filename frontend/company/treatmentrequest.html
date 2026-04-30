@@ -145,31 +145,25 @@
                 <span class="material-symbols-outlined">shopping_basket</span>
                 <span>Orders</span>
             </a>
-        </div>
-
-        <!-- Bottom section — settings + profile -->
-        <div class="px-4 pb-2 flex flex-col gap-1">
+            <!-- Profile -->
             <a class="text-slate-600 dark:text-slate-400 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all active:scale-[0.98]"
-                href="#">
-                <span class="material-symbols-outlined">settings</span>
-                <span>Settings</span>
-            </a>
-            <a class="text-slate-600 dark:text-slate-400 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all active:scale-[0.98]"
-                href="#">
-                <span class="material-symbols-outlined">help</span>
-                <span>Help Center</span>
+                href="companyprofile.html">
+                <span class="material-symbols-outlined">person</span>
+                <span>Profile</span>
             </a>
         </div>
 
         <!-- Profile -->
         <div class="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800 px-4 pb-5">
             <div class="flex items-center gap-3 px-2">
-                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
-                <div class="flex flex-col">
-                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
-                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
-                </div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
+                <a href="companyprofile.html" class="flex items-center gap-3 flex-1 min-w-0">
+                    <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
+                    <div class="flex flex-col min-w-0">
+                        <span class="font-bold text-on-surface text-sm truncate" data-user-name>Loading...</span>
+                        <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+                    </div>
+                </a>
+                <button class="text-on-surface-variant hover:text-error transition-colors shrink-0">
                     <span class="material-symbols-outlined text-lg">logout</span>
                 </button>
             </div>
@@ -210,10 +204,6 @@
                         <span class="material-symbols-outlined text-[18px]">filter_list</span>
                         Filter
                     </button>
-                    <button class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:bg-surface-tint hover:translate-y-[-2px] transition-all duration-200 hover:border-primary border border-primary hover:shadow-lg hover:bg-white hover:text-primary shadow-sm active:scale-[0.98]">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
-                        New Request
-                    </button>
                 </div>
             </div>
 
@@ -244,13 +234,13 @@
             <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Priority</p>
             <div class="flex flex-wrap gap-2">
                 <label class="filter-chip cursor-pointer">
-                    <input type="checkbox" class="sr-only" />
+                    <input type="checkbox" class="sr-only" data-filter-priority value="high" />
                     <span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">
                         <span class="w-1.5 h-1.5 rounded-full bg-error inline-block"></span> High
                     </span>
                 </label>
                 <label class="filter-chip cursor-pointer">
-                    <input type="checkbox" class="sr-only" />
+                    <input type="checkbox" class="sr-only" data-filter-priority value="low" />
                     <span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">
                         <span class="w-1.5 h-1.5 rounded-full bg-outline inline-block"></span> Low
                     </span>
@@ -265,19 +255,19 @@
             <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Status</p>
             <div class="flex flex-wrap gap-2">
                 <label class="filter-chip cursor-pointer">
-                    <input type="checkbox" class="sr-only" />
+                    <input type="checkbox" class="sr-only" data-filter-status value="processing" />
                     <span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">
                         <span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span> Approved
                     </span>
                 </label>
                 <label class="filter-chip cursor-pointer">
-                    <input type="checkbox" class="sr-only" />
+                    <input type="checkbox" class="sr-only" data-filter-status value="cancelled" />
                     <span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">
                         <span class="w-1.5 h-1.5 rounded-full bg-error inline-block"></span> Rejected
                     </span>
                 </label>
                 <label class="filter-chip cursor-pointer">
-                    <input type="checkbox" class="sr-only" />
+                    <input type="checkbox" class="sr-only" data-filter-status value="pending" />
                     <span class="chip-label inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors select-none">
                         <span class="w-1.5 h-1.5 rounded-full bg-tertiary inline-block"></span> Pending Review
                     </span>
@@ -297,47 +287,6 @@
             </button>
         </div>
     </div>
-
-    <script>
-        const filterBtn = document.querySelector('button[data-filter]');
-        const modal = document.getElementById('filter-modal');
-        const closeBtn = document.getElementById('close-filter');
-        const clearBtn = document.getElementById('clear-filters');
-        const applyBtn = document.getElementById('apply-filters');
-
-        function positionModal() {
-            const btnRect = filterBtn.getBoundingClientRect();
-            const modalWidth = 320;
-            let left = btnRect.left;
-            let top = btnRect.bottom + 8;
-            if (left + modalWidth > window.innerWidth - 16) {
-                left = btnRect.right - modalWidth;
-            }
-            modal.style.top = top + 'px';
-            modal.style.left = left + 'px';
-        }
-
-        filterBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            positionModal();
-            modal.classList.toggle('hidden');
-        });
-
-        closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
-
-        document.addEventListener('click', (e) => {
-            if (!modal.contains(e.target) && e.target !== filterBtn) {
-                modal.classList.add('hidden');
-            }
-        });
-
-        clearBtn.addEventListener('click', () => {
-            modal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        });
-
-        applyBtn.addEventListener('click', () => modal.classList.add('hidden'));
-    </script>
-
 
     <script src="../api.js"></script>
     <script src="./companytreatmentrequests.js"></script>

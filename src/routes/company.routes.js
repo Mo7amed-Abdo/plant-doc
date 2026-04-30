@@ -11,6 +11,7 @@ const isCompany = [authenticate, requireRole('company')];
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 // PUT THIS ROUTE BEFORE /profile so it doesn't get swallowed
 router.get('/dashboard', ...isCompany, ctrl.getDashboard);
+router.get('/delivery-companies', ...isCompany, ctrl.listDeliveryCompanies);
 
 // ── Profile ───────────────────────────────────────────────────────────────────
 router.get('/profile', ...isCompany, ctrl.getProfile);

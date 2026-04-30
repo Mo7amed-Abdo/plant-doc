@@ -36,13 +36,18 @@ const deliverySchema = new mongoose.Schema(
       ref: 'Company',
       required: true,
     },
+    delivery_company_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'DeliveryCompany',
+      required: true,
+    },
     status: {
       type: String,
       enum: {
-        values: ['pending', 'picked_up', 'on_the_way', 'arriving', 'delivered', 'failed'],
+        values: ['picked_up', 'on_the_way', 'arriving', 'delivered', 'failed'],
         message: '{VALUE} is not a valid delivery status',
       },
-      default: 'pending',
+      default: 'picked_up',
     },
     status_timeline: { type: [timelineEventSchema], default: [] },
     eta: { type: Date, default: null },
@@ -59,6 +64,7 @@ const deliverySchema = new mongoose.Schema(
 
 deliverySchema.index({ order_id: 1 }, { unique: true });
 deliverySchema.index({ company_id: 1, status: 1 });
+deliverySchema.index({ delivery_company_id: 1, status: 1 });
 
 deliverySchema.pre(/^find/, function (next) {
   this.where({ deleted_at: null });

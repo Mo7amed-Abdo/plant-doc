@@ -2,50 +2,30 @@
 let _socket = null;
 let _activeChatId = null;
 let _chats = [];
+let _allChats = [];
+let _chatSearchTerm = '';
 let _renderedMessageIds = new Set();
+let _activeExpertName = 'Expert';
+let _activeExpertAvatar = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('farmer')) return;
   populateSidebarUser();
   setupLogout(_socket);
   await loadChats();
+  setupChatSearch();
   connectSocket();
   setupInput();
 });
 
 async function loadChats() {
-  const list = document.querySelector('[data-chat-list], aside .flex-1.overflow-y-auto');
   try {
-    _chats = (await api.get('/chats?limit=50')).data || [];
-    if (!list) return;
-
-    if (!_chats.length) {
-      list.innerHTML = `
-        <div class="p-6 text-center flex flex-col items-center gap-3">
-          <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-            <span class="material-symbols-outlined text-3xl text-primary/50">forum</span>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-on-surface">No active chats yet</p>
-            <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">
-              To chat with an expert, first run a diagnosis on your plant,
-              then submit a <strong>Treatment Request</strong> from the Diagnoses page.
-              An expert will be assigned and a chat will open here.
-            </p>
-          </div>
-          <a href="recendiagnoses.html"
-             class="mt-1 flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary/90 transition-all active:scale-[0.97]">
-            <span class="material-symbols-outlined text-[15px]">biotech</span>
-            Go to Diagnoses
-          </a>
-        </div>`;
-      return;
-    }
-
-    list.innerHTML = _chats.map(chatItem).join('');
-    list.querySelectorAll('[data-open-chat]').forEach((el) => el.addEventListener('click', () => openChat(el.dataset.openChat)));
-    openChat(_chats[0]._id);
+    _allChats = (await api.get('/chats?limit=50')).data || [];
+    _chats = [..._allChats];
+    renderChatList();
+    if (_chats.length) openChat(_chats[0]._id);
   } catch (e) {
+    const list = document.querySelector('[data-chat-list], aside .flex-1.overflow-y-auto');
     if (list) list.innerHTML = `<div class="p-4 text-error text-sm">${e.message}</div>`;
   }
 }
@@ -53,9 +33,19 @@ async function loadChats() {
 function chatItem(c) {
   const ex = c.expert_id || {};
   const req = c.treatment_request_id || {};
+  const expertName = getExpertName(c, ex);
+  const initials = expertName.charAt(0).toUpperCase() || ex.specialization?.[0] || 'E';
+  const avatar = getExpertAvatar(c, ex);
   return `<div data-open-chat="${c._id}" class="flex items-start gap-3 p-4 cursor-pointer rounded-xl transition-colors hover:bg-surface-container-low ${_activeChatId === c._id ? 'border-l-2 border-primary bg-surface-container-low' : ''}">
-    <div class="relative shrink-0"><div class="w-11 h-11 rounded-full bg-primary-container/20 text-primary flex items-center justify-center font-bold text-sm border border-surface-variant">${ex.specialization?.[0] || 'E'}</div>${!c.is_resolved ? `<div class="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-surface-container-lowest"></div>` : ''}</div>
-    <div class="flex-1 min-w-0"><div class="flex items-baseline justify-between gap-2 mb-0.5"><p class="font-semibold text-on-surface text-sm truncate">Expert - ${ex.specialization || 'Agronomist'}</p>${c.last_message_at ? `<span class="text-xs text-on-surface-variant shrink-0">${timeAgo(c.last_message_at)}</span>` : ''}</div>
+    <div class="relative shrink-0">
+      <div class="w-11 h-11 rounded-full bg-primary-container/20 text-primary flex items-center justify-center font-bold text-sm border border-surface-variant overflow-hidden">
+        ${avatar
+          ? `<img src="${escapeHtml(avatar)}" alt="${escapeHtml(expertName)}" class="w-full h-full object-cover" />`
+          : escapeHtml(initials)}
+      </div>
+      ${!c.is_resolved ? `<div class="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-surface-container-lowest"></div>` : ''}
+    </div>
+    <div class="flex-1 min-w-0"><div class="flex items-baseline justify-between gap-2 mb-0.5"><p class="font-semibold text-on-surface text-sm truncate">${escapeHtml(expertName)}</p>${c.last_message_at ? `<span class="text-xs text-on-surface-variant shrink-0">${timeAgo(c.last_message_at)}</span>` : ''}</div>
     <p class="text-xs text-on-surface-variant truncate">${c.is_resolved ? 'Case Resolved' : `Priority: ${req.priority || 'medium'}`}</p></div>
   </div>`;
 }
@@ -79,6 +69,11 @@ async function openChat(chatId) {
     ]);
     const msgs = msgsRes.data || [];
     const chat = chatRes.data;
+    const ex = chat.expert_id || {};
+    const expertName = getExpertName(chat, ex);
+    const expertAvatar = getExpertAvatar(chat, ex);
+    _activeExpertName = expertName || 'Expert';
+    _activeExpertAvatar = expertAvatar || null;
 
     console.log(`[FarmerChat] conversationId exists: ${chatId}`);
     console.log(`[FarmerChat] messages fetched successfully after refresh - conversationId=${chatId}, count=${msgs.length}, total=${msgsRes.meta?.total ?? msgs.length}`);
@@ -89,16 +84,119 @@ async function openChat(chatId) {
     }
     if (_socket?.connected) _socket.emit('chat:join', { conversationId: chatId });
 
-    const ex = chat.expert_id || {};
     document.querySelectorAll('[data-chat-header-name]').forEach((el) => {
-      el.textContent = `Expert - ${ex.specialization || 'Agronomist'}`;
+      el.textContent = expertName;
     });
     document.querySelectorAll('[data-chat-header-sub]').forEach((el) => {
       el.textContent = chat.is_resolved ? 'Case Resolved' : 'Active Case';
     });
+    document.querySelectorAll('[data-chat-header-avatar]').forEach((el) => {
+      if (expertAvatar) {
+        el.src = expertAvatar;
+        el.classList.remove('hidden');
+      } else {
+        el.removeAttribute('src');
+        el.classList.add('hidden');
+      }
+    });
+    document.querySelectorAll('[data-chat-header-avatar-fallback]').forEach((el) => {
+      el.textContent = expertName.charAt(0).toUpperCase() || 'E';
+      el.classList.toggle('hidden', !!expertAvatar);
+    });
   } catch (e) {
     if (area) area.innerHTML = `<div class="p-4 text-error text-sm text-center">${e.message}</div>`;
   }
+}
+
+function renderChatList() {
+  const list = document.querySelector('[data-chat-list], aside .flex-1.overflow-y-auto');
+  if (!list) return;
+
+  if (!_allChats.length) {
+    list.innerHTML = `
+      <div class="p-6 text-center flex flex-col items-center gap-3">
+        <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-3xl text-primary/50">forum</span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-on-surface">No active chats yet</p>
+          <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">
+            To chat with an expert, first run a diagnosis on your plant,
+            then submit a <strong>Treatment Request</strong> from the Diagnoses page.
+            An expert will be assigned and a chat will open here.
+          </p>
+        </div>
+        <a href="recendiagnoses.html"
+           class="mt-1 flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg text-xs font-semibold hover:bg-primary/90 transition-all active:scale-[0.97]">
+          <span class="material-symbols-outlined text-[15px]">biotech</span>
+          Go to Diagnoses
+        </a>
+      </div>`;
+    return;
+  }
+
+  _chats = filterChats(_allChats, _chatSearchTerm);
+  if (!_chats.length) {
+    list.innerHTML = `<div class="p-4 text-sm text-on-surface-variant">No experts match your search.</div>`;
+    return;
+  }
+
+  list.innerHTML = _chats.map(chatItem).join('');
+  list.querySelectorAll('[data-open-chat]').forEach((el) => {
+    el.addEventListener('click', () => openChat(el.dataset.openChat));
+  });
+}
+
+function setupChatSearch() {
+  const input = document.querySelector('[data-chat-search], input[placeholder*="Search"]');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    _chatSearchTerm = input.value.trim().toLowerCase();
+    renderChatList();
+  });
+}
+
+function filterChats(chats, term) {
+  if (!term) return [...chats];
+  return chats.filter((chat) => {
+    const ex = chat.expert_id || {};
+    const req = chat.treatment_request_id || {};
+    const haystack = [
+      getExpertName(chat, ex),
+      ex.specialization,
+      req.priority,
+      req.crop_type,
+      req.notes,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(term);
+  });
+}
+
+function getExpertName(chat, expert) {
+  return (
+    chat?.expertName ||
+    expert?.full_name ||
+    expert?.name ||
+    expert?.user_id?.full_name ||
+    expert?.user?.full_name ||
+    (expert?.specialization ? `Expert - ${expert.specialization}` : 'Expert')
+  );
+}
+
+function getExpertAvatar(chat, expert) {
+  return (
+    chat?.expertAvatar ||
+    expert?.profile_picture ||
+    expert?.avatar ||
+    expert?.image ||
+    expert?.logo ||
+    expert?.user_id?.profile_picture ||
+    expert?.user?.profile_picture ||
+    null
+  );
 }
 
 function renderMsgs(msgs, container) {
@@ -153,7 +251,11 @@ function msgEl(message) {
   }
 
   return `<div data-message-id="${messageId}" class="flex items-end gap-2 ${isMe ? 'flex-row-reverse' : ''} max-w-[80%] ${isMe ? 'ml-auto' : ''}">
-    ${!isMe ? `<div class="w-7 h-7 rounded-full bg-primary-container/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">E</div>` : ''}
+    ${!isMe ? `<div class="w-7 h-7 rounded-full bg-primary-container/20 text-primary flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden border border-surface-variant">
+      ${_activeExpertAvatar
+        ? `<img src="${escapeHtml(_activeExpertAvatar)}" alt="${escapeHtml(_activeExpertName)}" class="w-full h-full object-cover" />`
+        : escapeHtml((_activeExpertName || 'Expert').charAt(0).toUpperCase())}
+    </div>` : ''}
     <div class="flex flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}">
       <span class="text-xs text-on-surface-variant px-1">${formatDateTime(timestamp)}</span>
       <div class="px-4 py-2.5 rounded-2xl ${isMe ? 'bg-primary text-on-primary rounded-br-sm' : 'bg-surface-container-high text-on-surface rounded-bl-sm'}">

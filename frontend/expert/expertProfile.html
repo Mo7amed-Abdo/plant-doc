@@ -405,7 +405,7 @@
                         </h3>
                     </div>
                     <div class="p-6">
-                        <div class="space-y-5 max-w-md">
+                        <form id="password-form" class="space-y-5 max-w-md">
                             <!-- Current Password -->
                             <div class="space-y-1">
                                 <label class="block text-sm font-medium text-on-surface-variant"
@@ -461,7 +461,14 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                            <div class="pt-2 flex justify-end">
+                                <button type="submit"
+                                    class="px-5 py-2.5 rounded-xl text-sm font-medium bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container transition-colors flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[18px]">lock_reset</span>
+                                    Update Password
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
@@ -537,7 +544,7 @@
                         Delete Account
                     </button>
                     <div class="flex items-center gap-3">
-                        <button
+                        <button id="discard-btn"
                             class="px-6 py-2.5 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-container-high transition-colors"
                             type="button">
                             Cancel

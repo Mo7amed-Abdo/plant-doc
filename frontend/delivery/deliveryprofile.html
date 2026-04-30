@@ -132,20 +132,6 @@
                 <span>Profile</span>
             </a>
         </div>
-
-        <!-- Profile -->
-        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
-            <div class="flex items-center gap-3 px-2">
-                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
-                <div class="flex flex-col">
-                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
-                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
-                </div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
-                    <span class="material-symbols-outlined text-lg">logout</span>
-                </button>
-            </div>
-        </div>
     </nav>
 
     <!-- Main Content -->
@@ -183,11 +169,11 @@
                     <!-- Profile Summary Card -->
                     <div class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant p-6 flex flex-col items-center text-center">
                         <!-- Company image -->
-                        <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-surface-variant mb-4 bg-surface-container shrink-0">
+                        <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-surface-variant mb-4 bg-surface-container shrink-0 cursor-pointer" data-avatar-upload>
                             <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4Dl9fSmM6ytP_6OM-rkQuoGNLfxm6Y7SvACCUIHzV3ge1b3c05EAL2UrJuIOpTjbuFK8E6Jty_QH0vb8za8_T4jP383d_U11O_tELU8mdussq4zK59dXNknOMMaiwmiy3-8fthZQxYL-HivzUcaqDVdC8cLRq8QVydJ9KwIer2sDj1bI1Y7Hgj-R59t6BelQUyJShdfCzfH2Xtr0GIHQruIXyOFz4yPthsuCN0HpPfhX6ik5A25pVvcY1pN4H8mfWwWSeQ-NCZhA"
-                                 alt="EcoDeliver Logistics" class="w-full h-full object-cover" />
+                                 alt="Company Logo" class="w-full h-full object-cover" data-profile-logo />
                         </div>
-                        <h3 class="font-bold text-lg text-on-surface font-headline">EcoDeliver Logistics</h3>
+                        <h3 class="font-bold text-lg text-on-surface font-headline" data-company-name-card>EcoDeliver Logistics</h3>
                         <p class="text-sm text-on-surface-variant mt-1 mb-4">Partner since 2023</p>
                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-fixed text-on-primary-fixed-variant">
                             <span class="material-symbols-outlined fill text-[14px]">verified</span>
@@ -375,82 +361,7 @@
                         </div>
                     </div>
 
-                    <!-- Payout Settings -->
-                    <div id="payout" class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant overflow-hidden">
-                        <div class="p-6 border-b border-surface-variant bg-surface-bright">
-                            <h3 class="text-base font-bold text-on-surface font-headline flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[20px] text-primary">payments</span>
-                                Payout Settings
-                            </h3>
-                            <p class="text-sm text-on-surface-variant mt-1">Configure how and where you receive your payments.</p>
-                        </div>
-                        <div class="p-6 space-y-5">
-
-                            <!-- Bank Name -->
-                            <div>
-                                <label class="block text-sm font-medium text-on-surface mb-1.5" for="bank-name">Bank Name</label>
-                                <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
-                                    <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0">
-                                        <span class="material-symbols-outlined text-[18px]">account_balance</span>
-                                    </span>
-                                    <input type="text" id="bank-name" placeholder="e.g. First National Bank"
-                                        class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0 focus:shadow-none" />
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <!-- Account Number -->
-                                <div>
-                                    <label class="block text-sm font-medium text-on-surface mb-1.5" for="account-number">Account Number</label>
-                                    <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
-                                        <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0">
-                                            <span class="material-symbols-outlined text-[18px]">credit_card</span>
-                                        </span>
-                                        <input type="text" id="account-number" placeholder="•••• •••• ••••"
-                                            class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0 focus:shadow-none" />
-                                    </div>
-                                </div>
-
-                                <!-- Routing Number -->
-                                <div>
-                                    <label class="block text-sm font-medium text-on-surface mb-1.5" for="routing-number">Routing Number</label>
-                                    <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
-                                        <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0">
-                                            <span class="material-symbols-outlined text-[18px]">tag</span>
-                                        </span>
-                                        <input type="text" id="routing-number" placeholder="9-digit routing number"
-                                            class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0 focus:shadow-none" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Payout frequency -->
-                            <div>
-                                <label class="block text-sm font-medium text-on-surface mb-1.5">Payout Frequency</label>
-                                <div class="flex gap-3 flex-wrap">
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="payout-freq" class="sr-only" checked />
-                                        <span class="payout-pill inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border border-primary bg-primary text-on-primary transition-all select-none">Weekly</span>
-                                    </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="payout-freq" class="sr-only" />
-                                        <span class="payout-pill inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all select-none">Bi-weekly</span>
-                                    </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="payout-freq" class="sr-only" />
-                                        <span class="payout-pill inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium border border-outline-variant bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all select-none">Monthly</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="px-6 py-4 bg-surface-container-low border-t border-surface-variant flex justify-end">
-                            <button class="flex items-center gap-2 px-5 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:translate-y-[-1px] hover:shadow-md transition-all duration-200 border border-primary hover:bg-white hover:text-primary active:scale-[0.98]">
-                                <span class="material-symbols-outlined text-[18px]">save</span>
-                                Save Payout Info
-                            </button>
-                        </div>
-                    </div>
+                    
 
                 </div>
             </div>

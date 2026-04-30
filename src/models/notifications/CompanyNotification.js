@@ -12,7 +12,16 @@ const companyNotificationSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ['new_order', 'new_treatment_request', 'low_stock', 'system'],
+      enum: [
+        'new_order',
+        'new_treatment_request',
+        'low_stock',
+        'delivery_assigned',
+        'delivery_completed',
+        'delivery_failed',
+        'delivery_update',
+        'system',
+      ],
     },
     title: { type: String, required: true, trim: true },
     body: { type: String, required: true, trim: true },
