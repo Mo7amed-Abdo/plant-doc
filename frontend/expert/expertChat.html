@@ -93,6 +93,15 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        .chat-pane-bg {
+            background-image:
+                linear-gradient(rgba(14, 35, 18, 0.16), rgba(14, 35, 18, 0.24)),
+                url('/frontend/farmer/3769a023f846161745aefeaad3dce3df%20(1).jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 
@@ -142,15 +151,15 @@
         </div>
         <!-- Bottom profile section -->
         <div class="mt-auto pt-4 mb-4 border-t border-slate-200 dark:border-slate-800 px-4">
-            <div class="flex items-center gap-3 px-2">
-                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant"
+            <div class="flex items-center gap-3 px-3 py-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 shadow-sm hover:bg-emerald-50 transition-colors">
+                <img src="" alt="Profile" class="w-11 h-11 rounded-full object-cover border-2 border-white shadow-sm"
                     data-user-avatar />
-                <div class="flex flex-col">
-                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
-                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+                <div class="flex flex-col leading-tight">
+                    <span class="font-bold text-emerald-900 text-sm" data-user-name>Loading...</span>
+                    <span class="text-emerald-700 text-xs" data-user-role>Loading...</span>
                 </div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
-                    <span class="material-symbols-outlined text-lg">logout</span>
+                <button class="ml-auto text-emerald-700 hover:text-emerald-900 transition-colors">
+                    <span class="material-symbols-outlined text-xl">logout</span>
                 </button>
             </div>
         </div>
@@ -185,16 +194,26 @@
 
             <!-- Left Panel: Chat List -->
             <aside
-                class="w-full md:w-[320px] lg:w-[360px] bg-surface-container-lowest border-r border-surface-variant flex flex-col flex-shrink-0">
+                class="w-full md:w-[320px] lg:w-[360px] bg-[#23313a] border-r border-black/25 flex flex-col flex-shrink-0">
                 <!-- List Header -->
-                <div class="p-4 bg-gray-50 rounded-t-2xl">
-                    <h2 class="text-xl font-bold text-on-surface mb-4">Conversations</h2>
+                <div class="relative p-4 bg-[#23313a] rounded-t-2xl">
+                    <h2 class="text-xl font-bold text-white mb-4">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700">
+                            <span class="material-symbols-outlined text-[18px]">forum</span>
+                            <span>Conversations</span>
+                        </span>
+                    </h2>
+                    <button data-select-delete
+                        class="absolute top-5 right-4 text-[12px] font-semibold text-emerald-200 hover:text-white px-3 py-1.5 rounded-full border border-white/10 hover:border-white/20 hover:bg-white/5 transition-colors">
+                        Select
+                    </button>
                     <div class="flex gap-2">
                         <button data-chat-filter="all"
-                            class="px-3 py-1.5 rounded-full bg-green-700 text-white text-xs font-semibold active:scale-[0.98] transition-transform">All</button>
+                            class="px-3 py-1.5 rounded-full bg-white text-[#23313a] text-xs font-semibold active:scale-[0.98] transition-transform">All</button>
                         <button data-chat-filter="unread"
-                            class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant text-xs font-medium hover:bg-surface-variant transition-colors active:scale-[0.98]">Unread</button>
+                            class="px-3 py-1.5 rounded-full bg-white/8 text-slate-200 text-xs font-medium hover:bg-white/12 transition-colors active:scale-[0.98]">Unread</button>
                     </div>
+                    <div class="absolute bottom-0 left-4 right-4 h-px bg-[#1b2a33] shadow-[0_-1px_0_rgba(8,14,18,0.65)]"></div>
                 </div>
 
                 <!-- Chat Items -->
@@ -238,84 +257,71 @@
 </aside>
 
             <!-- Right Panel: Chat Area -->
-            <section class="flex-1 flex flex-col bg-surface-container-lowest relative hidden md:flex">
+            <section class="chat-pane-bg flex-1 flex flex-col relative hidden md:flex overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-b from-emerald-950/16 via-emerald-900/8 to-emerald-950/24 pointer-events-none"></div>
 
                 <!-- Chat Header -->
-                <div
-                    class="px-6 py-4 border-b border-surface-variant flex justify-between items-center bg-gray-50 z-10 shadow-sm">
+                <div id="chat-header" data-chat-header
+                    class="relative z-10 px-5 py-3.5 border-b border-black/35 flex justify-between items-center bg-[#23313a] shadow-[0_10px_25px_rgba(0,0,0,0.20)] hidden">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-surface-variant animate-pulse shrink-0" data-chat-header-avatar-shell></div>
-                        <img alt="Avatar" class="w-10 h-10 rounded-full object-cover hidden"
+                        <div class="w-10 h-10 rounded-full bg-white/8 border border-white/15 animate-pulse shrink-0" data-chat-header-avatar-shell></div>
+                        <img alt="Avatar" class="w-10 h-10 rounded-full object-cover hidden border border-white/15"
                             src=""
                             data-chat-header-avatar />
                         <div>
-                            <h2 class="text-lg font-bold text-on-surface flex items-center gap-2" data-chat-header-name>
-                                <span data-chat-header-name-text class="inline-block h-5 w-28 rounded bg-surface-variant animate-pulse text-transparent">Loading</span>
+                            <h2 class="text-[15px] font-bold text-white flex items-center gap-2" data-chat-header-name>
+                                <span data-chat-header-name-text class="inline-block h-5 w-28 rounded bg-white/20 animate-pulse text-transparent">Loading</span>
                                 <span data-chat-header-badge
                                     class="hidden px-2 py-0.5 rounded text-xs font-semibold bg-error-container text-on-error-container"></span>
                             </h2>
-                            <p class="text-sm text-on-surface-variant flex items-center gap-1" data-chat-header-sub>
-                                <span class="material-symbols-outlined text-[16px]">local_florist</span>
-                                <span data-chat-header-sub-text class="inline-block h-4 w-24 rounded bg-surface-variant animate-pulse text-transparent">Loading</span>
+                            <p class="text-[11px] text-slate-300 flex items-center gap-1" data-chat-header-sub>
+                                <span class="material-symbols-outlined text-[15px] text-slate-300">local_florist</span>
+                                <span data-chat-header-sub-text class="inline-block h-4 w-24 rounded bg-white/15 animate-pulse text-transparent">Loading</span>
                             </p>
                         </div>
                     </div>
                     <div class="flex gap-3">
                         <button data-resolve-btn
-                            class="px-4 py-2 bg-green-700 text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm active:scale-[0.98]">
-                            <span class="material-symbols-outlined text-lg">check_circle</span> Resolve
+                            class="px-3.5 py-2 bg-emerald-100 text-emerald-900 text-sm font-semibold rounded-lg border border-emerald-200 hover:bg-emerald-200 transition-colors flex items-center gap-2 shadow-sm active:scale-[0.98]">
+                            <span class="material-symbols-outlined text-lg text-emerald-200">check_circle</span> Resolve
                         </button>
                     </div>
                 </div>
 
                 <!-- Chat Messages Area -->
-                <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-surface" data-messages-area>
-    <div class="animate-pulse space-y-5">
-        <div class="flex justify-center">
-            <div class="h-6 w-44 rounded-full bg-surface-container-high"></div>
-        </div>
-        <div class="flex items-end gap-3 max-w-[80%]">
-            <div class="w-8 h-8 rounded-full bg-surface-variant flex-shrink-0"></div>
-            <div class="flex flex-col gap-2 w-full max-w-md">
-                <div class="h-3 w-24 rounded bg-surface-variant"></div>
-                <div class="h-16 rounded-2xl rounded-bl-sm bg-surface-container-high"></div>
-            </div>
-        </div>
-        <div class="flex items-end gap-3 max-w-[80%] ml-auto justify-end">
-            <div class="flex flex-col gap-2 items-end w-full max-w-md">
-                <div class="h-3 w-20 rounded bg-surface-variant"></div>
-                <div class="h-14 w-full rounded-2xl rounded-br-sm bg-green-200/70"></div>
-            </div>
-        </div>
-        <div class="flex items-end gap-3 max-w-[80%]">
-            <div class="w-8 h-8 rounded-full bg-surface-variant flex-shrink-0"></div>
-            <div class="flex flex-col gap-2 w-full max-w-md">
-                <div class="h-40 rounded-2xl rounded-bl-sm bg-surface-container-high"></div>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="relative z-10 flex-1 overflow-y-auto p-6 flex flex-col gap-1.5" data-messages-area>
+                    <div id="chat-welcome" class="flex flex-col items-center justify-center h-full gap-4 text-center py-16">
+                        <div class="w-20 h-20 rounded-full bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[38px] text-emerald-300">chat_bubble</span>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-slate-600 text-base">Select a conversation</p>
+                            <p class="text-sm text-slate-400 mt-1 max-w-xs leading-relaxed">Choose a chat from the left to start messaging your farmer.</p>
+                        </div>
+                    </div>
+                    <div id="messages-container" class="space-y-1.5 hidden"></div>
+                </div>
 
 <!-- Chat Input Area -->
-                <div class="p-4 bg-surface-container-lowest border-t border-surface-variant">
+                <div class="relative z-10 p-4 bg-[#dfeccf]/92 border-t border-emerald-900/20 backdrop-blur-sm shadow-[0_-10px_30px_rgba(20,60,24,0.12)]">
                     <!-- Quick Replies -->
                     <div class="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar">
                         <button
-                            class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
+                            class="whitespace-nowrap px-3 py-1.5 rounded-full border border-emerald-700 bg-[#eff7e5] text-emerald-950 text-xs font-medium hover:bg-[#dceecf] transition-colors active:scale-[0.98]">
                             Please upload a clearer image
                         </button>
                         <button
-                            class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
+                            class="whitespace-nowrap px-3 py-1.5 rounded-full border border-emerald-700 bg-[#eff7e5] text-emerald-950 text-xs font-medium hover:bg-[#dceecf] transition-colors active:scale-[0.98]">
                             Apply recommended treatment
                         </button>
                         <button
-                            class="whitespace-nowrap px-3 py-1.5 rounded-full border border-primary text-on-surface-variant text-xs hover:bg-surface-container transition-colors active:scale-[0.98]">
+                            class="whitespace-nowrap px-3 py-1.5 rounded-full border border-emerald-700 bg-[#eff7e5] text-emerald-950 text-xs font-medium hover:bg-[#dceecf] transition-colors active:scale-[0.98]">
                             Your case is under review
                         </button>
                     </div>
                     <!-- Input Field -->
                     <div
-                        class="flex items-center gap-2 bg-surface-container rounded-3xl px-2 focus-within:ring-2 focus-within:ring-primary/50 transition-shadow">
+                        class="flex items-center gap-2 bg-[#f7fbf1] border border-emerald-700/30 rounded-3xl px-2 focus-within:ring-2 focus-within:ring-primary/40 transition-shadow">
                         <button
                             class="p-2 mt-1 text-on-surface-variant hover:text-primary transition-colors rounded-lg hover:bg-surface-variant active:scale-[0.98]">
                             <span class="material-symbols-outlined">attach_file</span>

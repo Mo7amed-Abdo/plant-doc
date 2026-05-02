@@ -133,12 +133,11 @@ async function getDiagnoses(profileId, query) {
     Diagnosis.find(filter)
       .sort({ created_at: -1 })
       .skip(skip)
-      .limit(Number(limit))
-      .select('-plant_image'), // Exclude binary image from list view
+      .limit(Number(limit)),
     Diagnosis.countDocuments(filter),
   ]);
 
-  return { items: items.map((d) => _formatDiagnosis(d, false)), total, page: Number(page), limit: Number(limit) };
+  return { items: items.map((d) => _formatDiagnosis(d, true)), total, page: Number(page), limit: Number(limit) };
 }
 
 async function getDiagnosisById(profileId, diagnosisId) {

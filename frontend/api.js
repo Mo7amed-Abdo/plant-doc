@@ -3,6 +3,172 @@
 
 const API_BASE = 'http://localhost:5000/api';
 
+function ensureBrandLogoTheme() {
+  if (!document.head) return;
+
+  if (!document.querySelector('link[data-brand-baloo-font]')) {
+    const font = document.createElement('link');
+    font.rel = 'stylesheet';
+    font.href = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap';
+    font.setAttribute('data-brand-baloo-font', '1');
+    document.head.appendChild(font);
+  }
+
+  if (!document.getElementById('plantdoc-brand-style')) {
+    const style = document.createElement('style');
+    style.id = 'plantdoc-brand-style';
+    style.textContent = `
+      .brand-logo-text {
+        font-family: 'Baloo 2', sans-serif;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        animation: brandLogoIn 560ms ease-out both, brandFloat 2.8s ease-in-out infinite;
+        display: inline-block;
+        line-height: 1;
+      }
+      .brand-logo-size-sidebar { font-size: 1.36rem; }
+      .brand-logo-size-mobile { font-size: 1.52rem; }
+      .brand-logo-plant {
+        color: #047a43;
+        animation: plantPulse 2.2s ease-in-out infinite;
+      }
+      .brand-logo-doc {
+        color: #67b689;
+        animation: docPulse 2.2s ease-in-out infinite;
+      }
+      .brand-logo-text:hover {
+        transform: translateY(-1px) scale(1.02);
+        filter: drop-shadow(0 3px 10px rgba(3, 122, 67, 0.26));
+      }
+      @keyframes brandFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+      }
+      @keyframes plantPulse {
+        0%, 100% { color: #047a43; filter: brightness(1); }
+        50% { color: #06a15a; filter: brightness(1.08); }
+      }
+      @keyframes docPulse {
+        0%, 100% { color: #67b689; filter: brightness(1); }
+        50% { color: #8bdeb0; filter: brightness(1.1); }
+      }
+      @keyframes brandLogoIn {
+        from { opacity: 0; transform: translateY(6px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+function applyBrandLogoText() {
+  const candidates = document.querySelectorAll('span, h1, h2, h3, h4, div, a');
+  candidates.forEach((el) => {
+    if (!el || el.classList.contains('brand-logo-text')) return;
+    if (el.children.length > 0) return;
+    if ((el.textContent || '').trim() !== 'PlantDoc') return;
+    const cls = (el.className || '').toString();
+    const isMobileSize = /\btext-xl\b|\btext-2xl\b/.test(cls);
+    const sizeClass = isMobileSize ? 'brand-logo-size-mobile' : 'brand-logo-size-sidebar';
+    el.innerHTML = `<span class="brand-logo-text ${sizeClass}"><span class="brand-logo-plant">Plant</span><span class="brand-logo-doc">Doc</span></span>`;
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ensureBrandLogoTheme();
+  applyBrandLogoText();
+  setupFarmerChatBadge().catch(() => null);
+  setupFarmerNotificationBadge().catch(() => null);
+});
+
+async function setupFarmerChatBadge() {
+  // Adds/updates an unread badge on the "Chat with Expert" nav item (farmer only).
+  if (Auth.getRole() !== 'farmer') return;
+
+  const links = Array.from(document.querySelectorAll('a[href$="expertschat.html"], a[href*="expertschat.html"]'));
+  if (!links.length) return;
+
+  let totalUnread = 0;
+  try {
+    const res = await api.get('/chats?limit=50');
+    const chats = res.data || [];
+    totalUnread = chats.reduce((sum, c) => sum + Number(c.unreadCount || 0), 0);
+  } catch (_) {
+    totalUnread = 0;
+  }
+
+  links.forEach((a) => {
+    if (a.dataset._chatBadgeBound === '1') {
+      const badge = a.querySelector('[data-chat-unread-count]');
+      if (badge) {
+        badge.textContent = totalUnread > 99 ? '99+' : String(totalUnread);
+        badge.classList.toggle('hidden', totalUnread === 0);
+      }
+      return;
+    }
+
+    a.classList.add('relative');
+    const badge = document.createElement('span');
+    badge.dataset.chatUnreadCount = '1';
+    badge.className = 'hidden ml-auto min-w-[18px] h-[18px] px-1.5 rounded-full bg-error text-white text-[10px] font-bold inline-flex items-center justify-center';
+    badge.textContent = totalUnread > 99 ? '99+' : String(totalUnread);
+    badge.classList.toggle('hidden', totalUnread === 0);
+
+    // Ensure spacing: wrap existing content with a flex row if needed.
+    if (!a.classList.contains('flex')) {
+      a.classList.add('flex', 'items-center', 'gap-3');
+    }
+    a.appendChild(badge);
+    a.dataset._chatBadgeBound = '1';
+  });
+}
+
+async function setupFarmerNotificationBadge() {
+  // Adds/updates an unread count badge on the "Notifications" nav item (farmer only).
+  if (Auth.getRole() !== 'farmer') return;
+
+  const navLinks = Array.from(document.querySelectorAll('a'));
+  const targets = navLinks.filter((a) => {
+    const icon = a.querySelector('.material-symbols-outlined');
+    const iconText = icon?.textContent?.trim();
+    const label = (a.textContent || '').toLowerCase();
+    return iconText === 'notifications' || label.includes('notifications');
+  });
+  if (!targets.length) return;
+
+  let unread = 0;
+  try {
+    const res = await api.get('/notifications?is_read=false&limit=1');
+    unread = Number(res.meta?.total ?? (res.data || []).length ?? 0);
+  } catch (_) {
+    unread = 0;
+  }
+
+  targets.forEach((a) => {
+    if (a.dataset._notifBadgeBound === '1') {
+      const badge = a.querySelector('[data-notif-unread-count]');
+      if (badge) {
+        badge.textContent = unread > 99 ? '99+' : String(unread);
+        badge.classList.toggle('hidden', unread === 0);
+      }
+      return;
+    }
+
+    const badge = document.createElement('span');
+    badge.dataset.notifUnreadCount = '1';
+    badge.className =
+      'hidden ml-auto min-w-[18px] h-[18px] px-1.5 rounded-full bg-error text-white text-[10px] font-bold inline-flex items-center justify-center';
+    badge.textContent = unread > 99 ? '99+' : String(unread);
+    badge.classList.toggle('hidden', unread === 0);
+
+    if (!a.classList.contains('flex')) {
+      a.classList.add('flex', 'items-center', 'gap-3');
+    }
+    a.appendChild(badge);
+    a.dataset._notifBadgeBound = '1';
+  });
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 const Auth = {
   getToken:    ()     => localStorage.getItem('plantdoc_token'),
@@ -301,6 +467,71 @@ function showToast(message, type = 'success') {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 }
+
+// —— Notification tone ————————————————————————————————————————————————
+let _plantdocAudioCtx = null;
+let _plantdocToneUnlocked = false;
+let _lastNotificationToneAt = 0;
+
+function ensureNotificationToneUnlock() {
+  if (_plantdocToneUnlocked) return;
+  const unlock = () => {
+    _plantdocToneUnlocked = true;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx && !_plantdocAudioCtx) _plantdocAudioCtx = new Ctx();
+      if (_plantdocAudioCtx?.state === 'suspended') _plantdocAudioCtx.resume().catch(() => null);
+    } catch (_) {}
+    window.removeEventListener('pointerdown', unlock);
+    window.removeEventListener('keydown', unlock);
+  };
+  window.addEventListener('pointerdown', unlock, { once: true });
+  window.addEventListener('keydown', unlock, { once: true });
+}
+
+function _emitNotificationTone() {
+  const nowMs = Date.now();
+  if (nowMs - _lastNotificationToneAt < 250) return;
+  _lastNotificationToneAt = nowMs;
+
+  const now = _plantdocAudioCtx.currentTime;
+  const osc = _plantdocAudioCtx.createOscillator();
+  const gain = _plantdocAudioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(880, now);
+  osc.frequency.exponentialRampToValueAtTime(1046, now + 0.12);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.06, now + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+  osc.connect(gain);
+  gain.connect(_plantdocAudioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.2);
+}
+
+function playNotificationTone() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    if (!_plantdocAudioCtx) _plantdocAudioCtx = new Ctx();
+
+    if (_plantdocAudioCtx.state === 'suspended') {
+      _plantdocAudioCtx.resume()
+        .then(() => {
+          if (_plantdocAudioCtx.state === 'running') _emitNotificationTone();
+        })
+        .catch(() => null);
+      return;
+    }
+
+    if (_plantdocAudioCtx.state === 'running') _emitNotificationTone();
+  } catch (_) {
+    // no-op if autoplay/audio is blocked
+  }
+}
+
+window.playNotificationTone = playNotificationTone;
+ensureNotificationToneUnlock();
 
 // ── Loading skeleton ──────────────────────────────────────────────────────────
 function skeletonRows(count, cols) {

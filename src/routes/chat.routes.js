@@ -14,5 +14,6 @@ router.get('/:id', ...isParticipant, ctrl.getChatById);
 router.get('/:id/messages', ...isParticipant, ctrl.getMessages);
 router.post('/:id/messages', ...isParticipant, uploadOptional('image'), ctrl.sendMessage);
 router.put('/:id/resolve', ...isExpert, ctrl.resolveChat);
+router.delete('/:id', ...isParticipant, ctrl.deleteChat);
 
 module.exports = router;

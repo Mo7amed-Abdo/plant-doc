@@ -75,8 +75,19 @@ async function resolveChat(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function deleteChat(req, res, next) {
+  try {
+    const result = await chatService.deleteChat(
+      req.params.id,
+      req.user.role,
+      req.user.profileId
+    );
+    return success(res, 200, 'Chat deleted', result);
+  } catch (err) { next(err); }
+}
+
 function resolveConversationId(req) {
   return req.params.conversationId || req.params.id;
 }
 
-module.exports = { getChats, getChatById, getMessages, sendMessage, resolveChat };
+module.exports = { getChats, getChatById, getMessages, sendMessage, resolveChat, deleteChat };

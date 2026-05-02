@@ -6,15 +6,43 @@ let _activeChat = null;
 let _chats = [];
 let _chatFilter = 'all';
 let _renderedMessageIds = new Set();
+let _selectDeleteMode = false;
+let _selectedChatIds = new Set();
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('expert')) return;
   populateSidebarUser();
   setupLogout(null);
   bindChatFilters();
+  setupSelectDeleteAction();
+  // Ensure clicks on chat items always open the chat (delegation)
+  const chatListContainer = document.querySelector('[data-chat-list]');
+  if (chatListContainer && !chatListContainer.dataset._delegationBound) {
+    chatListContainer.addEventListener('click', (ev) => {
+      const checkbox = ev.target.closest('[data-select-checkbox]');
+      if (checkbox) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        toggleChatSelection(checkbox.dataset.chatId);
+        return;
+      }
+      const item = ev.target.closest('[data-open-chat]');
+      if (item) {
+        console.log('[ExpertChat] chat click ->', item.dataset.openChat);
+        const chatId = item.dataset.openChat;
+        if (_selectDeleteMode) {
+          toggleChatSelection(chatId);
+          return;
+        }
+        openChat(chatId);
+      }
+    });
+    chatListContainer.dataset._delegationBound = '1';
+  }
   await loadChats();
   connectSocket();
   setupInput();
+  setupQuickReplies();
 });
 
 async function loadChats() {
@@ -22,29 +50,29 @@ async function loadChats() {
   const requestedChatId = new URLSearchParams(window.location.search).get('chatId');
   try {
     const chats = (await api.get('/chats?limit=50')).data || [];
-    const unreadConversationIds = await loadUnreadConversationIds();
     _chats = chats.map((chat) => ({
       ...chat,
-      hasUnreadMessage: unreadConversationIds.has(String(chat._id)),
+      unreadCount: Number(chat.unreadCount || 0),
     }));
 
     const visibleChats = getVisibleChats();
-    if (!list) {
-      if (_chats.length) openChat(requestedChatId || _chats[0]._id);
-      return;
+    renderChatListView(list, visibleChats);
+    if (requestedChatId && _chats.some((chat) => String(chat._id) === String(requestedChatId))) {
+      const initialChat = visibleChats.find((chat) => String(chat._id) === String(requestedChatId))?._id;
+      if (initialChat) openChat(initialChat);
     }
-    if (!visibleChats.length) {
-      list.innerHTML = `<div class="p-6 text-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant/40 block mb-2">forum</span><p class="text-sm text-on-surface-variant">No active chats</p><p class="text-xs text-on-surface-variant/70 mt-1">Pick up a case from Pending Cases</p></div>`;
-      return;
-    }
-    list.innerHTML = visibleChats.map(chatItem).join('');
-    list.querySelectorAll('[data-open-chat]').forEach((el) => el.addEventListener('click', () => openChat(el.dataset.openChat)));
-    const initialChat = visibleChats.find((chat) => String(chat._id) === String(requestedChatId))?._id
-      || visibleChats[0]._id;
-    openChat(initialChat);
   } catch (e) {
     if (list) list.innerHTML = `<div class="p-4 text-error text-sm">${e.message}</div>`;
   }
+}
+
+function renderChatListView(list, visibleChats) {
+  if (!list) return;
+  if (!visibleChats?.length) {
+    list.innerHTML = `<div class="p-6 text-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant/40 block mb-2">forum</span><p class="text-sm text-on-surface-variant">No active chats</p><p class="text-xs text-on-surface-variant/70 mt-1">Pick up a case from Pending Cases</p></div>`;
+    return;
+  }
+  list.innerHTML = visibleChats.map(chatItem).join('');
 }
 
 function chatItem(c) {
@@ -53,37 +81,145 @@ function chatItem(c) {
   const req = c.treatment_request_id || {};
   const name = farmerU.full_name || 'Farmer';
   const initials = name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2) || 'F';
-  const unread = Boolean(c.hasUnreadMessage);
+  const unreadCount = Number(c.unreadCount || 0);
   const avatar = c.farmerAvatar || farmerU.avatar_url || farmerU.avatarUrl || null;
   const cropName = c.caseDetails?.cropName || req.diagnosis_id?.crop_type || 'Unknown crop';
+  const chatId = String(c._id || '');
+  const isChecked = _selectedChatIds.has(chatId);
+  const selectBox = _selectDeleteMode
+    ? `<button type="button" data-select-checkbox="1" data-chat-id="${escapeHtml(chatId)}" class="shrink-0 w-7 h-7 rounded-md border border-white/15 bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center">
+        <span class="material-symbols-outlined text-[18px] leading-none text-white">${isChecked ? 'check_box' : 'check_box_outline_blank'}</span>
+      </button>`
+    : '';
 
-  return `<div data-open-chat="${c._id}" class="flex items-start gap-3 p-4 cursor-pointer rounded-xl transition-colors hover:bg-surface-container-low ${_activeChatId === c._id ? 'border-l-2 border-primary bg-surface-container-low' : ''}">
+  return `<div data-open-chat="${c._id}" class="relative flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-black/8 ${_activeChatId === c._id ? 'bg-[#1d473f] shadow-[inset_3px_0_0_rgba(52,211,153,0.95)]' : ''}">
+    ${_activeChatId === c._id ? '' : '<div class="absolute bottom-0 left-[6.75rem] right-8 h-px bg-[#1b2a33] shadow-[0_-1px_0_rgba(8,14,18,0.65)]"></div>'}
+    ${selectBox}
     <div class="relative shrink-0">
       ${avatar
-        ? `<img src="${avatar}" alt="${escapeHtml(name)}" class="w-11 h-11 rounded-full object-cover border border-surface-variant" />`
-        : `<div class="w-11 h-11 rounded-full bg-secondary-container/30 text-secondary flex items-center justify-center font-bold text-sm border border-surface-variant">${initials}</div>`}
-      ${unread ? `<div class="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-surface-container-lowest"></div>` : ''}
+        ? `<img src="${avatar}" alt="${escapeHtml(name)}" class="w-12 h-12 rounded-full object-cover border border-white/10" />`
+        : `<div class="w-12 h-12 rounded-full bg-white/10 text-white flex items-center justify-center font-bold text-sm border border-white/10">${initials}</div>`}
     </div>
     <div class="flex-1 min-w-0">
-      <div class="flex items-baseline justify-between gap-2 mb-0.5">
-        <p class="font-semibold text-on-surface text-sm truncate">${escapeHtml(name)}</p>
-        ${c.last_message_at ? `<span class="text-xs text-on-surface-variant shrink-0">${timeAgo(c.last_message_at)}</span>` : ''}
+      <div class="grid grid-cols-[minmax(0,1fr)_auto] grid-rows-2 gap-x-2 gap-y-0.5">
+        <p class="font-semibold text-white text-[15px] truncate row-start-1 col-start-1">${escapeHtml(name)}</p>
+        <span class="text-[12px] text-emerald-300 shrink-0 row-start-1 col-start-2 text-right">${c.last_message_at ? timeAgo(c.last_message_at) : ''}</span>
+        <p class="text-[13px] text-slate-300 truncate row-start-2 col-start-1">${c.is_resolved ? 'Resolved' : escapeHtml(cropName)}</p>
+        <span data-unread-badge class="inline-flex items-center justify-center w-6 h-6 bg-emerald-400 text-[#102026] rounded-full text-[10px] font-bold leading-none row-start-2 col-start-2 ${unreadCount > 0 ? '' : 'opacity-0'}">${Math.min(Math.max(unreadCount, 0), 99)}</span>
       </div>
-      <p class="text-xs text-on-surface-variant truncate">${unread ? 'Unread farmer message' : (c.is_resolved ? 'Resolved' : escapeHtml(cropName))}</p>
     </div>
   </div>`;
+}
+
+function setupSelectDeleteAction() {
+  const btn = document.querySelector('[data-select-delete]');
+  if (!btn) return;
+
+  const setMode = (on) => {
+    _selectDeleteMode = !!on;
+    _selectedChatIds = new Set();
+    if (_selectDeleteMode) {
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px] leading-none">delete</span>';
+      btn.setAttribute('title', 'Delete selected chats');
+    } else {
+      btn.textContent = 'Select';
+      btn.removeAttribute('title');
+    }
+    updateSelectDeleteButtonState();
+    const list = document.querySelector('[data-chat-list], aside .flex-1.overflow-y-auto, .w-80 .flex-1');
+    renderChatListView(list, getVisibleChats());
+  };
+
+  btn.addEventListener('click', async () => {
+    if (!_selectDeleteMode) {
+      setMode(true);
+      return;
+    }
+    if (!_selectedChatIds.size) {
+      setMode(false);
+      return;
+    }
+    const ok = window.confirm(`Delete ${_selectedChatIds.size} chat(s) from your list?`);
+    if (!ok) return;
+    await deleteChatsFromList(Array.from(_selectedChatIds));
+    setMode(false);
+  });
+}
+
+function updateSelectDeleteButtonState() {
+  const btn = document.querySelector('[data-select-delete]');
+  if (!btn || !_selectDeleteMode) return;
+  btn.classList.toggle('opacity-60', !_selectedChatIds.size);
+}
+
+function toggleChatSelection(chatId) {
+  if (!chatId) return;
+  const id = String(chatId);
+  if (_selectedChatIds.has(id)) _selectedChatIds.delete(id);
+  else _selectedChatIds.add(id);
+  updateSelectDeleteButtonState();
+  const list = document.querySelector('[data-chat-list], aside .flex-1.overflow-y-auto, .w-80 .flex-1');
+  renderChatListView(list, getVisibleChats());
+}
+
+async function deleteChatsFromList(chatIds) {
+  const ids = (chatIds || []).map(String).filter(Boolean);
+  if (!ids.length) return;
+  const results = await Promise.allSettled(ids.map((id) => api.delete(`/chats/${id}`)));
+  const succeeded = [];
+  const failed = [];
+  results.forEach((r, idx) => {
+    if (r.status === 'fulfilled') succeeded.push(ids[idx]);
+    else failed.push(ids[idx]);
+  });
+
+  if (!succeeded.length) {
+    showToast('Failed to delete chat', 'error');
+    return;
+  }
+
+  const succeededSet = new Set(succeeded);
+
+  _chats = _chats.filter((c) => !succeededSet.has(String(c._id)));
+
+  if (_socket?.connected) {
+    succeeded.forEach((id) => _socket.emit('chat:leave', { conversationId: id }));
+  }
+
+  if (_activeChatId && succeededSet.has(String(_activeChatId))) {
+    _activeChatId = null;
+    _activeChat = null;
+    _activeRequestId = null;
+    _renderedMessageIds = new Set();
+  }
+
+  const list = document.querySelector('[data-chat-list], aside .flex-1.overflow-y-auto, .w-80 .flex-1');
+  renderChatListView(list, getVisibleChats());
+
+  showToast(succeeded.length > 1 ? 'Chats deleted' : 'Chat deleted', 'success');
+  if (failed.length) showToast(`${failed.length} chat(s) failed to delete`, 'error');
 }
 
 async function openChat(chatId) {
   _activeChatId = chatId;
   document.querySelectorAll('[data-open-chat]').forEach((el) => {
-    el.classList.toggle('border-l-2', el.dataset.openChat === chatId);
-    el.classList.toggle('border-primary', el.dataset.openChat === chatId);
-    el.classList.toggle('bg-surface-container-low', el.dataset.openChat === chatId);
+    el.classList.toggle('bg-[#1d473f]', el.dataset.openChat === chatId);
+    el.classList.toggle('shadow-[inset_3px_0_0_rgba(52,211,153,0.95)]', el.dataset.openChat === chatId);
   });
+  updateChatUnreadState(chatId, 0);
+  removeUnreadBadge(chatId);
 
+  const welcome = document.getElementById('chat-welcome');
+  const msgContainer = document.getElementById('messages-container');
+  const chatHeader = document.getElementById('chat-header');
   const area = document.getElementById('messages-area') || document.querySelector('[data-messages-area]');
-  if (area) area.innerHTML = `<div class="flex justify-center py-4"><span class="text-xs text-on-surface-variant animate-pulse">Loading...</span></div>`;
+  
+  if (welcome) welcome.style.display = 'none';
+  if (msgContainer) {
+    msgContainer.classList.remove('hidden');
+    msgContainer.innerHTML = `<div class="flex justify-center py-4"><span class="text-xs text-on-surface-variant animate-pulse">Loading...</span></div>`;
+  }
+  if (chatHeader) chatHeader.classList.remove('hidden');
 
   try {
     const [msgsRes, chatRes] = await Promise.all([
@@ -103,13 +239,14 @@ async function openChat(chatId) {
       scrollBot(area);
     }
     if (_socket?.connected) _socket.emit('chat:join', { conversationId: chatId });
+    emitReadReceipt(chatId);
 
     renderChatHeader(chat);
     renderCaseDetails(chat);
 
     updateActionBtns(chat);
   } catch (e) {
-    if (area) area.innerHTML = `<div class="p-4 text-error text-sm text-center">${e.message}</div>`;
+    if (msgContainer) msgContainer.innerHTML = `<div class="p-4 text-error text-sm text-center">${e.message}</div>`;
   }
 }
 
@@ -131,11 +268,19 @@ function updateActionBtns(chat) {
 }
 
 function renderMsgs(msgs, container) {
+  const welcome = document.getElementById('chat-welcome');
+  if (welcome) welcome.style.display = 'none';
+
+  const msgContainer = document.getElementById('messages-container') || container;
+  if (msgContainer && msgContainer.id === 'messages-container') {
+    msgContainer.classList.remove('hidden');
+  }
+
   const normalizedMsgs = msgs.map(normalizeMessage).filter(Boolean);
   _renderedMessageIds = new Set();
 
   if (!normalizedMsgs.length) {
-    container.innerHTML = `<div data-empty-state="true" class="flex justify-center py-8"><div class="bg-surface-container-high text-on-surface-variant text-xs py-1.5 px-4 rounded-full">No messages yet</div></div>`;
+    msgContainer.innerHTML = `<div data-empty-state="true" class="flex justify-center py-8"><div class="bg-surface-container-high text-on-surface-variant text-xs py-1.5 px-4 rounded-full">No messages yet</div></div>`;
     return;
   }
 
@@ -144,7 +289,7 @@ function renderMsgs(msgs, container) {
     if (messageId) _renderedMessageIds.add(messageId);
   });
 
-  container.innerHTML = normalizedMsgs.map((m) => msgEl(m)).join('');
+  msgContainer.innerHTML = normalizedMsgs.map((m) => msgEl(m)).join('');
 }
 
 function msgEl(message) {
@@ -154,6 +299,7 @@ function msgEl(message) {
   const timestamp = message.createdAt || message.sent_at;
   const isMe = senderRole === 'expert';
   const isSys = senderRole === 'system';
+  const isRead = Boolean(message.is_read ?? message.isRead);
 
   if (isSys) {
     return `<div data-message-id="${messageId}" class="flex justify-center my-2"><div class="bg-surface-container-high text-on-surface-variant text-xs py-1 px-3 rounded-full">${message.text || 'System'}</div></div>`;
@@ -177,21 +323,35 @@ function msgEl(message) {
     }
   }
 
-  return `<div data-message-id="${messageId}" class="flex items-end gap-2 ${isMe ? 'flex-row-reverse' : ''} max-w-[80%] ${isMe ? 'ml-auto' : ''}">
+  const bubbleMeta = isMe
+    ? `<span class="inline-flex items-center gap-1 pl-2 text-[10px] leading-none whitespace-nowrap ${isRead ? 'text-cyan-200' : 'text-emerald-100/80'}">
+        <span>${formatTime(timestamp)}</span>
+        <span data-read-state data-read="${isRead ? '1' : '0'}" class="inline-flex items-center leading-none">
+          <span class="material-symbols-outlined text-[13px] -mr-1">${isRead ? 'done_all' : 'done'}</span>
+        </span>
+      </span>`
+    : `<span class="inline-flex items-center pl-2 text-[10px] text-slate-300 whitespace-nowrap">${formatTime(timestamp)}</span>`;
+
+  return `<div data-message-id="${messageId}" data-message-owner="${isMe ? 'me' : 'other'}" class="flex items-end gap-2 ${isMe ? 'flex-row-reverse' : ''} max-w-[80%] ${isMe ? 'ml-auto' : ''} mb-0.5">
     ${!isMe ? renderFarmerMessageAvatar() : ''}
     <div class="flex flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}">
-      <span class="text-xs text-on-surface-variant px-1">${formatDateTime(timestamp)}</span>
-      <div class="px-4 py-2.5 rounded-2xl ${isMe ? 'bg-green-700 text-white rounded-br-sm' : 'bg-surface-container-high text-on-surface rounded-bl-sm'}">
+      <div class="px-3 py-2 rounded-[10px] shadow-sm ${isMe ? 'bg-[#0c8f78] text-white rounded-br-[3px] border border-emerald-300/10' : 'bg-[#2f3c46] text-white rounded-bl-[3px] border border-white/5'}">
         ${imageHtml}
-        ${message.text ? `<p class="text-sm">${escapeHtml(message.text)}</p>` : ''}
+        ${message.text ? `<div class="flex items-end justify-end gap-1.5"><p class="text-[13px] leading-relaxed tracking-[0.01em] text-right">${escapeHtml(message.text)}</p>${bubbleMeta}</div>` : bubbleMeta}
       </div>
     </div>
   </div>`;
 }
 
 function appendMsg(rawMessage) {
+  const welcome = document.getElementById('chat-welcome');
+  if (welcome) welcome.style.display = 'none';
+
   const area = document.getElementById('messages-area') || document.querySelector('[data-messages-area]');
   if (!area) return;
+
+  const msgContainer = document.getElementById('messages-container');
+  if (msgContainer) msgContainer.classList.remove('hidden');
 
   const target = document.getElementById('messages-container') || area;
   const message = normalizeMessage(rawMessage);
@@ -210,6 +370,7 @@ function appendMsg(rawMessage) {
     if (messageId) _renderedMessageIds.add(messageId);
   }
 
+  if (message.senderRole !== 'expert') emitReadReceipt(_activeChatId);
   scrollBot(area);
 }
 
@@ -219,11 +380,11 @@ function bindChatFilters() {
       _chatFilter = button.dataset.chatFilter || 'all';
       document.querySelectorAll('[data-chat-filter]').forEach((item) => {
         const active = item === button;
-        item.classList.toggle('bg-green-700', active);
-        item.classList.toggle('text-white', active);
+        item.classList.toggle('bg-white', active);
+        item.classList.toggle('text-[#23313a]', active);
         item.classList.toggle('font-semibold', active);
-        item.classList.toggle('bg-surface-container', !active);
-        item.classList.toggle('text-on-surface-variant', !active);
+        item.classList.toggle('bg-white/8', !active);
+        item.classList.toggle('text-slate-200', !active);
         item.classList.toggle('font-medium', !active);
       });
       await loadChats();
@@ -233,30 +394,9 @@ function bindChatFilters() {
 
 function getVisibleChats() {
   if (_chatFilter === 'unread') {
-    return _chats.filter((chat) => chat.hasUnreadMessage);
+    return _chats.filter((chat) => chat.unreadCount > 0);
   }
   return _chats;
-}
-
-async function loadUnreadConversationIds() {
-  try {
-    const expertId = typeof getExpertSidebarProfileId === 'function'
-      ? await getExpertSidebarProfileId()
-      : await getExpertProfileIdForChat();
-    if (!expertId) return new Set();
-
-    const res = await api.get(`/notifications/expert/${expertId}`);
-    const notifications = Array.isArray(res.data) ? res.data : [];
-    return new Set(
-      notifications
-        .filter((item) => !item.is_read && item.type === 'unread_chat_message')
-        .map((item) => String(item.relatedConversationId || item.related_conversation_id || item.related_id || ''))
-        .filter(Boolean)
-    );
-  } catch (error) {
-    console.error('[ExpertChat] failed to load unread conversation ids:', error);
-    return new Set();
-  }
 }
 
 async function getExpertProfileIdForChat() {
@@ -283,12 +423,12 @@ function renderChatHeader(chat) {
 
   document.querySelectorAll('[data-chat-header-name-text]').forEach((el) => {
     el.textContent = farmerName;
-    el.classList.remove('h-5', 'w-28', 'rounded', 'bg-surface-variant', 'animate-pulse', 'text-transparent', 'inline-block');
+    el.classList.remove('h-5', 'w-28', 'rounded', 'bg-surface-variant', 'bg-white/20', 'animate-pulse', 'text-transparent', 'inline-block');
   });
 
   document.querySelectorAll('[data-chat-header-sub-text]').forEach((el) => {
     el.textContent = chat.is_resolved ? 'Conversation resolved' : `${cropName} crop`;
-    el.classList.remove('h-4', 'w-24', 'rounded', 'bg-surface-variant', 'animate-pulse', 'text-transparent', 'inline-block');
+    el.classList.remove('h-4', 'w-24', 'rounded', 'bg-surface-variant', 'bg-white/15', 'animate-pulse', 'text-transparent', 'inline-block');
   });
 
   document.querySelectorAll('[data-chat-header-avatar-shell]').forEach((el) => {
@@ -434,6 +574,112 @@ function setupInput() {
   });
 }
 
+function setupQuickReplies() {
+  const defaultReplies = [
+    'Please upload a clearer image',
+    'Apply recommended treatment',
+    'Your case is under review',
+  ];
+
+  const inp =
+    document.getElementById('message-input') ||
+    document.querySelector('[data-message-input], input[placeholder*="essage"], textarea[placeholder*="essage"]');
+
+  const sendBtn =
+    document.getElementById('send-btn') ||
+    document.querySelector('[data-send-btn]');
+
+  if (!inp) return;
+
+  // Hide the old quick-replies row (the 3 pill buttons) if it exists.
+  const oldQuickRepliesRow = document.querySelector('div.flex.gap-2.mb-3, .flex.gap-2.mb-3');
+  if (oldQuickRepliesRow) {
+    const oldTexts = Array.from(oldQuickRepliesRow.querySelectorAll('button'))
+      .map((b) => b.textContent.trim())
+      .filter(Boolean);
+    const looksLikeQuickReplies = oldTexts.some((t) => defaultReplies.includes(t));
+    if (looksLikeQuickReplies) oldQuickRepliesRow.classList.add('hidden');
+  }
+
+  // Insert a 3-dot menu at the far-left of the message input row.
+  const host =
+    inp.closest('.input-wrap') ||
+    (sendBtn && sendBtn.parentElement) ||
+    inp.closest('form') ||
+    inp.parentElement;
+  if (!host) return;
+
+  // Avoid duplicating if setup runs twice.
+  if (host.querySelector('[data-quick-replies-menu="1"]')) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.dataset.quickRepliesMenu = '1';
+  wrapper.className = 'relative inline-flex items-center mr-1';
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.setAttribute('aria-haspopup', 'menu');
+  btn.setAttribute('aria-expanded', 'false');
+  btn.className =
+    'inline-flex items-center justify-center w-10 h-10 rounded-full bg-transparent hover:bg-black/5 active:bg-black/10 border border-black/10 text-slate-900 transition-colors';
+  btn.innerHTML = '<span class="material-symbols-outlined text-[22px] leading-none">more_vert</span>';
+
+  const menu = document.createElement('div');
+  menu.setAttribute('role', 'menu');
+  menu.className =
+    'absolute bottom-[calc(100%+10px)] left-0 z-50 min-w-[220px] rounded-xl border border-black/10 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.20)] p-1 hidden';
+
+  defaultReplies.forEach((text) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.setAttribute('role', 'menuitem');
+    item.className =
+      'w-full text-left px-3 py-2 rounded-lg text-[13px] text-slate-900 hover:bg-black/5 active:bg-black/10 transition-colors';
+    item.textContent = text;
+    item.addEventListener('click', () => {
+      menu.classList.add('hidden');
+      btn.setAttribute('aria-expanded', 'false');
+      if (!_activeChatId) return;
+      inp.value = text;
+      send(inp);
+    });
+    menu.appendChild(item);
+  });
+
+  const closeMenu = () => {
+    if (menu.classList.contains('hidden')) return;
+    menu.classList.add('hidden');
+    btn.setAttribute('aria-expanded', 'false');
+  };
+
+  const toggleMenu = () => {
+    const willOpen = menu.classList.contains('hidden');
+    if (willOpen) {
+      menu.classList.remove('hidden');
+      btn.setAttribute('aria-expanded', 'true');
+      return;
+    }
+    closeMenu();
+  };
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+
+  // Close when clicking outside or pressing Escape.
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) closeMenu();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  wrapper.appendChild(btn);
+  wrapper.appendChild(menu);
+  host.insertBefore(wrapper, host.firstChild);
+}
+
 async function send(inp) {
   const text = inp.value.trim();
   if (!text || !_activeChatId) return;
@@ -533,8 +779,34 @@ function connectSocket() {
   _socket.on('connect', () => {
     if (_activeChatId) _socket.emit('chat:join', { conversationId: _activeChatId });
   });
-  _socket.on('message:new', (message) => appendMsg(message));
-  _socket.on('notification:new', (n) => showToast(n.title || 'New notification', 'info'));
+  _socket.on('message:new', (message) => {
+    const normalized = normalizeMessage(message);
+    const conversationId = getConversationId(normalized);
+    const isActive = String(conversationId || '') === String(_activeChatId || '');
+    if (isActive) {
+      appendMsg(normalized);
+      return;
+    }
+    incrementChatUnread(conversationId);
+    const chatEl = document.querySelector(`[data-open-chat="${conversationId}"]`);
+    if (chatEl) {
+      const chat = _chats.find((c) => String(c._id) === String(conversationId));
+      if (chat) {
+        chatEl.outerHTML = chatItem(chat);
+        document.querySelector(`[data-open-chat="${conversationId}"]`)
+          ?.addEventListener('click', () => openChat(conversationId));
+      }
+    }
+    if (typeof playNotificationTone === 'function') playNotificationTone();
+  });
+  _socket.on('message:read', ({ chatId }) => {
+    if (String(chatId || '') !== String(_activeChatId || '')) return;
+    markOutgoingMessagesRead();
+  });
+  _socket.on('notification:new', (n) => {
+    if (typeof playNotificationTone === 'function') playNotificationTone();
+    showToast(n.title || 'New notification', 'info');
+  });
   _socket.on('error', ({ message }) => console.error('[ExpertChat][Socket]', message));
 }
 
@@ -555,6 +827,7 @@ function normalizeMessage(message) {
     senderRole: message.senderRole || message.sender_role || '',
     messageType: message.messageType || message.content_type || 'text',
     imageUrl: message.imageUrl || message.image || null,
+    is_read: Boolean(message.is_read ?? message.isRead),
     createdAt: message.createdAt || message.created_at || message.sent_at || null,
     sent_at: message.sent_at || message.createdAt || message.created_at || null,
   };
@@ -566,4 +839,68 @@ function getMessageId(message) {
 
 function getConversationId(message) {
   return String(message?.conversationId || message?.chat_id || '');
+}
+
+function emitReadReceipt(chatId) {
+  if (!_socket?.connected || !chatId) return;
+  _socket.emit('message:read', { chatId });
+}
+
+function markOutgoingMessagesRead() {
+  document.querySelectorAll('[data-message-owner="me"] [data-read-state]').forEach((el) => {
+    if (el.dataset.read === '1') return;
+    el.dataset.read = '1';
+    el.className = 'inline-flex items-center leading-none';
+    el.innerHTML = '<span class="material-symbols-outlined text-[13px] -mr-1">done_all</span>';
+  });
+}
+
+function removeUnreadBadge(chatId) {
+  const chatEl = document.querySelector(`[data-open-chat="${chatId}"]`);
+  if (!chatEl) return;
+  const badge = chatEl.querySelector('[data-unread-badge]');
+  if (!badge) return;
+  badge.textContent = '0';
+  badge.classList.add('opacity-0');
+}
+
+function updateChatUnreadState(chatId, unreadCount) {
+  if (!chatId) return;
+  const nextCount = Math.max(0, Number(unreadCount || 0));
+  _chats = _chats.map((chat) => String(chat._id) === String(chatId)
+    ? { ...chat, unreadCount: nextCount }
+    : chat);
+}
+
+function incrementChatUnread(chatId) {
+  if (!chatId) return;
+  _chats = _chats.map((chat) => String(chat._id) === String(chatId)
+    ? { ...chat, unreadCount: Number(chat.unreadCount || 0) + 1 }
+    : chat);
+}
+
+function refreshChatBadgeExpert(chatId) {
+  if (!chatId) return;
+  const el = document.querySelector(`[data-open-chat="${chatId}"]`);
+  const chat = _chats.find((c) => String(c._id) === String(chatId));
+  const count = Number(chat?.unreadCount || 0);
+  if (!el) return;
+
+  const badge = el.querySelector('[data-unread-badge]');
+  if (!badge) return;
+
+  if (count > 0) {
+    badge.textContent = String(Math.min(count, 99));
+    badge.classList.remove('opacity-0');
+  } else {
+    badge.textContent = '0';
+    badge.classList.add('opacity-0');
+  }
+}
+
+function formatTime(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }

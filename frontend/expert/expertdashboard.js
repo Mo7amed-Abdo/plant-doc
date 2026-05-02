@@ -42,13 +42,16 @@ async function loadRecentCases() {
             <div class="hidden absolute inset-0">${placeholderImageHtml()}</div>
           </div>`
         : placeholderImageHtml();
+      const isTreatment = c.validationStatus === 'validated';
+      const actionIcon = isTreatment ? 'medication' : 'search';
+      const actionTitle = isTreatment ? 'المعالجة' : 'الكشف';
       return `<tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer" onclick="window.location.href='/expert/cases'">
         <td class="px-2 py-4">${image}</td>
         <td class="px-4 py-4 font-semibold text-on-surface">${escapeHtml(c.plantName || 'Unknown plant')}</td>
         <td class="px-4 py-4 text-on-surface-variant">${escapeHtml(c.title || 'Untitled case')}</td>
         <td class="px-4 py-4">${validationBadge(c.validationStatus)}</td>
         <td class="px-4 py-4 hidden sm:table-cell text-on-surface-variant">${formatDateTime(c.validatedAt)}</td>
-        <td class="px-2 py-4 text-right"><button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-xl">chevron_right</span></button></td>
+        <td class="px-2 py-4 text-right"><button class="text-on-surface-variant hover:text-primary" title="${actionTitle}" aria-label="${actionTitle}"><span class="material-symbols-outlined text-[20px]">${actionIcon}</span></button></td>
       </tr>`;
     }).join('');
   } catch (error) {
@@ -240,6 +243,7 @@ function connectExpertDashboardSocket() {
     }
     expertNotifications.unshift(normalized);
     expertNotifications = dedupeNotifications(expertNotifications);
+    if (typeof playNotificationTone === 'function') playNotificationTone();
     renderNotifications();
     updateNotificationBadge();
   });

@@ -6,14 +6,15 @@ const Farmer = require('../models/Farmer');
 const { createError } = require('../middleware/error.middleware');
 const { toMongoImage, toDataUri } = require('../utils/image');
 const notificationService = require('./notification.service');
+const ExpertNotification = require('../models/notifications/ExpertNotification');
 
 async function getChats(role, profileId, query) {
   const { page = 1, limit = 20 } = query;
   const skip = (Number(page) - 1) * Number(limit);
 
   const filter = role === 'farmer'
-    ? { farmer_id: profileId }
-    : { expert_id: profileId };
+    ? { farmer_id: profileId, deleted_for_farmer: { $ne: true } }
+    : { expert_id: profileId, deleted_for_expert: { $ne: true } };
 
   const [items, total] = await Promise.all([
     Chat.find(filter)
@@ -41,7 +42,9 @@ async function getChats(role, profileId, query) {
     Chat.countDocuments(filter),
   ]);
 
-  return { items: items.map(_formatChat), total, page: Number(page), limit: Number(limit) };
+  const unreadCounts = await _getUnreadCounts(items, role, profileId);
+
+  return { items: items.map((chat) => _formatChat(chat, unreadCounts[String(chat._id)] || 0)), total, page: Number(page), limit: Number(limit) };
 }
 
 async function getChatById(chatId, role, profileId) {
@@ -69,7 +72,7 @@ async function getChatById(chatId, role, profileId) {
     throw createError(404, 'Chat not found');
   }
 
-  _assertParticipant(chat, role, profileId);
+  _assertVisibleToParticipant(chat, role, profileId);
   console.log(`[ChatService] getChatById: Found chatId=${chatId}, role=${role}`);
   return _formatChat(chat);
 }
@@ -86,7 +89,7 @@ async function getMessages(chatId, role, profileId, query = {}) {
     throw createError(404, 'Chat not found');
   }
 
-  _assertParticipant(chat, role, profileId);
+  _assertVisibleToParticipant(chat, role, profileId);
   console.log(`[ChatService] getMessages: conversationId=${chatId}, role=${role}, profileId=${profileId} - fetching from MongoDB`);
 
   const { page = 1, limit = 50 } = query;
@@ -123,7 +126,7 @@ async function sendMessage(chatId, senderId, senderRole, senderProfileId, body =
     throw createError(404, 'Chat not found');
   }
 
-  _assertParticipant(chat, senderRole, senderProfileId);
+  _assertVisibleToParticipant(chat, senderRole, senderProfileId);
 
   if (chat.is_resolved) {
     throw createError(409, 'This chat has been resolved and is now read-only');
@@ -177,6 +180,27 @@ async function sendMessage(chatId, senderId, senderRole, senderProfileId, body =
     ).catch(() => null);
   }
 
+  if (senderRole === 'expert') {
+    const farmer = await Farmer.findById(chat.farmer_id).populate({ path: 'user_id', select: 'full_name' });
+    const farmerUserId = farmer?.user_id?._id || null;
+    const preview =
+      normalizedText ||
+      (contentType === 'image' ? 'Sent you an image.' : 'Sent you a new message.');
+
+    await notificationService.notifyFarmer(
+      chat.farmer_id,
+      farmerUserId,
+      {
+        type: 'expert_reply',
+        title: 'New message from expert',
+        body: preview,
+        related_id: chatId,
+        related_type: 'chat',
+      },
+      io
+    ).catch(() => null);
+  }
+
   return _formatMessage(message);
 }
 
@@ -184,7 +208,7 @@ async function markRead(chatId, role, profileId) {
   const chat = await Chat.findById(chatId);
   if (!chat) throw createError(404, 'Chat not found');
 
-  _assertParticipant(chat, role, profileId);
+  _assertVisibleToParticipant(chat, role, profileId);
 
   await Message.updateMany(
     { chat_id: chatId, sender_role: { $ne: role }, is_read: false },
@@ -194,16 +218,66 @@ async function markRead(chatId, role, profileId) {
   if (role === 'expert') {
     await notificationService.markExpertChatNotificationsRead(profileId, chatId).catch(() => null);
   }
+  if (role === 'farmer') {
+    await notificationService.markFarmerChatNotificationsRead(profileId, chatId).catch(() => null);
+  }
 }
 
 async function resolveChat(chatId, expertProfileId) {
   const chat = await Chat.findOne({ _id: chatId, expert_id: expertProfileId });
   if (!chat) throw createError(404, 'Chat not found');
   if (chat.is_resolved) throw createError(409, 'Chat is already resolved');
+  if (chat.deleted_for_expert) throw createError(404, 'Chat not found');
 
   chat.is_resolved = true;
   await chat.save();
   return chat;
+}
+
+async function deleteChat(chatId, role, profileId) {
+  if (!chatId) throw createError(400, 'chatId is required');
+  const chat = await Chat.findById(chatId);
+  if (!chat) throw createError(404, 'Chat not found');
+
+  _assertParticipant(chat, role, profileId);
+
+  const now = new Date();
+  if (role === 'farmer') {
+    chat.deleted_for_farmer = true;
+    chat.deleted_for_farmer_at = now;
+  } else if (role === 'expert') {
+    chat.deleted_for_expert = true;
+    chat.deleted_for_expert_at = now;
+  }
+
+  // If both parties deleted, delete permanently.
+  const permanentlyDeleted = Boolean(chat.deleted_for_farmer && chat.deleted_for_expert);
+  if (permanentlyDeleted) {
+    await Message.deleteMany({ chat_id: chatId });
+    await Chat.deleteOne({ _id: chatId });
+    await ExpertNotification.deleteMany({ related_conversation_id: chatId }).catch(() => null);
+    return { deleted: true, permanentlyDeleted: true, chatId };
+  }
+
+  await chat.save();
+  return { deleted: true, permanentlyDeleted: false, chatId };
+}
+
+async function _getUnreadCounts(chats, role, profileId) {
+  if (!chats.length) return {};
+  
+  const results = {};
+  
+  for (const chat of chats) {
+    const count = await Message.countDocuments({
+      chat_id: chat._id,
+      is_read: false,
+      sender_role: { $ne: role },
+    });
+    results[String(chat._id)] = count;
+  }
+  
+  return results;
 }
 
 function _assertParticipant(chat, role, profileId) {
@@ -222,6 +296,12 @@ function _assertParticipant(chat, role, profileId) {
     (role === 'expert' && expertId === id);
 
   if (!isParticipant) throw createError(403, 'Access denied');
+}
+
+function _assertVisibleToParticipant(chat, role, profileId) {
+  _assertParticipant(chat, role, profileId);
+  if (role === 'farmer' && chat.deleted_for_farmer) throw createError(404, 'Chat not found');
+  if (role === 'expert' && chat.deleted_for_expert) throw createError(404, 'Chat not found');
 }
 
 function _formatMessage(message) {
@@ -256,7 +336,7 @@ function _formatMessage(message) {
   };
 }
 
-function _formatChat(chat) {
+function _formatChat(chat, unreadCount = 0) {
   const obj = chat.toObject ? chat.toObject() : chat;
   const farmer = obj.farmer_id || {};
   const farmerUser = farmer.user_id || {};
@@ -277,6 +357,7 @@ function _formatChat(chat) {
 
   return {
     ...obj,
+    unreadCount,
     farmerName: farmerUser.full_name || 'Farmer',
     farmerAvatar,
     expertName: expertUser.full_name || 'Expert',
@@ -299,4 +380,4 @@ function _formatChat(chat) {
   };
 }
 
-module.exports = { getChats, getChatById, getMessages, sendMessage, markRead, resolveChat };
+module.exports = { getChats, getChatById, getMessages, sendMessage, markRead, resolveChat, deleteChat };

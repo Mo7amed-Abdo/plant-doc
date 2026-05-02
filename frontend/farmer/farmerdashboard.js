@@ -41,7 +41,9 @@ async function loadRecentDiagnoses() {
       <tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer" onclick="window.location.href='recendiagnoses.html'">
         <td class="px-6 py-4">
           <div class="w-10 h-10 rounded-lg bg-surface-container border border-surface-variant flex items-center justify-center">
-            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">grass</span>
+            ${getPlantImageSrc(d)
+              ? `<img src="${getPlantImageSrc(d)}" alt="Plant" class="w-full h-full rounded-lg object-cover" loading="lazy" />`
+              : `<span class="material-symbols-outlined text-on-surface-variant text-[18px]">grass</span>`}
           </div>
         </td>
         <td class="px-6 py-4 font-semibold text-on-surface">${d.crop_type||'Unknown crop'}</td>
@@ -59,8 +61,8 @@ async function loadRecentDiagnoses() {
       d.is_recovered
         ? `<span class="text-green-600">Recovered</span>`
         : d.ai_result?.severity?.toLowerCase() === 'low'
-          ? `<button onclick="handleRecoverClick(event, '${d.id}', this)" class="text-xs bg-green-600 text-white px-3 py-1 rounded">Mark as Recovered</button>`
-          : `<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-xl">chevron_right</span></button>`
+        ? `<button onclick="handleRecoverClick(event, '${d.id}', this)" class="text-xs bg-green-600 text-white px-3 py-1 rounded">Mark as Recovered</button>`
+          : `<button class="w-8 h-8 rounded-full bg-surface-container border border-surface-variant text-on-surface-variant hover:text-primary hover:border-primary/40 transition-colors flex items-center justify-center" aria-label="View diagnosis details"><span class="material-symbols-outlined text-[18px]">visibility</span></button>`
   }
 </td>
 
@@ -191,6 +193,14 @@ function rowClick(event) {
 }
 
 function setText(sel, val) { document.querySelectorAll(sel).forEach(el => el.textContent = val??''); }
+function getPlantImageSrc(diagnosis) {
+  if (!diagnosis) return '';
+  if (typeof diagnosis.plant_image === 'string') return diagnosis.plant_image;
+  if (typeof diagnosis.plant_image_url === 'string') return diagnosis.plant_image_url;
+  if (typeof diagnosis.image === 'string') return diagnosis.image;
+  if (typeof diagnosis.image_url === 'string') return diagnosis.image_url;
+  return '';
+}
 async function applyFilter(severity) {
   const res = await fetch(`/diagnoses?severity=${severity}`);
   const data = await res.json();

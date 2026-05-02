@@ -22,6 +22,10 @@ const chatSchema = new mongoose.Schema(
     },
     last_message_at: { type: Date, default: null },
     is_resolved: { type: Boolean, default: false },
+    deleted_for_farmer: { type: Boolean, default: false },
+    deleted_for_expert: { type: Boolean, default: false },
+    deleted_for_farmer_at: { type: Date, default: null },
+    deleted_for_expert_at: { type: Date, default: null },
     deleted_at: { type: Date, default: null },
   },
   {

@@ -145,7 +145,12 @@
             <!-- Page Heading -->
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-on-surface font-headline">Recent Diagnoses</h1>
+                    <h1 class="text-2xl font-bold text-on-surface font-headline">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700">
+                            <span class="material-symbols-outlined text-[18px]">biotech</span>
+                            <span>Recent Diagnoses</span>
+                        </span>
+                    </h1>
                 </div>
                 <div class="flex items-center gap-3">
                     <!-- Mini stats -->
@@ -176,12 +181,6 @@
                     <button data-filter
                         class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
                         <span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
-                    </button>
-                    <button id="newScanBtn" class="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-lg text-sm font-semibold
-                                hover:opacity-90 transition-all duration-200 shadow-sm active:scale-[0.98]">
-
-                        <span class="material-symbols-outlined text-[18px]">add</span>
-                        New Scan
                     </button>
                 </div>
             </div>

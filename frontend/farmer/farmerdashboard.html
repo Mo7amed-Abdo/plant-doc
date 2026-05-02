@@ -6,6 +6,7 @@
     <title>PlantDoc - Farmer Dashboard</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script id="tailwind-config">
         tailwind.config = {
@@ -40,6 +41,76 @@
         body { font-family: 'Inter', sans-serif; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .brand-logo-text {
+            font-family: 'Baloo 2', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            animation: brandLogoIn 560ms ease-out both, brandFloat 2.8s ease-in-out infinite;
+            display: inline-block;
+        }
+        .brand-logo-plant {
+            color: #047a43;
+            animation: plantPulse 2.2s ease-in-out infinite;
+        }
+        .brand-logo-doc {
+            color: #67b689;
+            animation: docPulse 2.2s ease-in-out infinite;
+        }
+        .brand-logo-text:hover {
+            transform: translateY(-1px) scale(1.02);
+            filter: drop-shadow(0 3px 10px rgba(3, 122, 67, 0.26));
+        }
+        @keyframes brandFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        @keyframes plantPulse {
+            0%, 100% { color: #047a43; filter: brightness(1); }
+            50% { color: #06a15a; filter: brightness(1.08); }
+        }
+        @keyframes docPulse {
+            0%, 100% { color: #67b689; filter: brightness(1); }
+            50% { color: #8bdeb0; filter: brightness(1.1); }
+        }
+        @keyframes brandLogoIn {
+            from { opacity: 0; transform: translateY(6px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .hero-tagline {
+            position: relative;
+            overflow: hidden;
+            animation: taglineIn 650ms cubic-bezier(.2, .8, .2, 1) both;
+        }
+        .hero-tagline::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(110deg, rgba(0, 106, 57, 0), rgba(0, 106, 57, 0.18), rgba(0, 106, 57, 0));
+            transform: translateX(-130%);
+            animation: taglineShimmer 3.2s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .hero-tagline-text {
+            background: linear-gradient(90deg, #005c31 0%, #008649 45%, #2f9c62 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: glowPulse 2.8s ease-in-out infinite;
+        }
+        @keyframes taglineIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes taglineShimmer {
+            0% { transform: translateX(-130%); }
+            55% { transform: translateX(130%); }
+            100% { transform: translateX(130%); }
+        }
+        @keyframes glowPulse {
+            0%, 100% { text-shadow: 0 0 0 rgba(0, 106, 57, 0); }
+            50% { text-shadow: 0 0 12px rgba(0, 106, 57, 0.16); }
+        }
     </style>
 </head>
 <body class="bg-background text-on-background min-h-screen flex font-body">
@@ -51,7 +122,7 @@
             <div class="flex items-center">
                 <img src="logo dark.png" alt="" class="w-26 h-28">
             </div>
-            <span class="text-lg font-bold text-green-700">PlantDoc</span>
+            <span class="text-[1.36rem] leading-none brand-logo-text"><span class="brand-logo-plant">Plant</span><span class="brand-logo-doc">Doc</span></span>
         </div>
         <div class="flex-1 flex flex-col gap-1 px-4">
             <a class="bg-green-700 text-white rounded-xl px-4 py-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="#">
@@ -89,7 +160,7 @@
 
     <!-- Mobile Header -->
     <header class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-slate-50 border-b border-slate-200 shadow-sm">
-        <span class="text-xl font-black text-green-700">PlantDoc</span>
+        <span class="text-[1.52rem] leading-none brand-logo-text"><span class="brand-logo-plant">Plant</span><span class="brand-logo-doc">Doc</span></span>
         <div class="flex items-center gap-2">
             <button class="p-2 text-slate-500 hover:text-green-600 transition-colors rounded-full">
                 <span class="material-symbols-outlined">notifications</span>
@@ -101,17 +172,22 @@
 
     <!-- Main Content -->
     <main class="flex-1 md:ml-64 w-full">
-        <div class="p-6 md:p-8 flex flex-col gap-8 mx-auto w-full">
+        <div class="px-6 md:px-8 pt-4 pb-8 flex flex-col gap-6 mx-auto w-full">
 
             <!-- Page Heading -->
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
-                    <h1 class="text-2xl font-bold text-on-surface font-headline">Welcome back, <span data-user-name>User</span> 👋</h1>
+                    <h1 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-green-200 bg-white shadow-sm text-xl font-extrabold text-on-surface font-headline">Welcome back, <span data-user-name>User</span> <span class="align-middle text-[21px]">👨‍🌾</span></h1>
                 </div>
-                <button class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:translate-y-[-2px] transition-all duration-200 border border-primary hover:shadow-lg hover:bg-white hover:text-primary shadow-sm active:scale-[0.98] w-fit">
-                    <span class="material-symbols-outlined text-[18px]">add</span>
-                    New Batch
-                </button>
+                <div class="flex items-center gap-3">
+                    <div class="hero-tagline hidden lg:flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm">
+                        <span class="material-symbols-outlined text-[18px] text-green-700">eco</span>
+                        <p class="hero-tagline-text text-sm font-semibold tracking-[0.01em]">Catch plant issues before they spread 🌱</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-full border-2 border-white shadow-md overflow-hidden bg-surface-container-lowest">
+                        <img src="" alt="Farmer profile" data-user-avatar class="w-full h-full object-cover" />
+                    </div>
+                </div>
             </div>
 
             <!-- Bento Grid: Upload + Stats -->

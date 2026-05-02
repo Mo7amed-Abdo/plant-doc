@@ -41,10 +41,13 @@ function diagCard(d) {
   const canAsk  = d.status==='ai_only' && ['high','critical'].includes(d.ai_result?.severity);
   const isPend  = d.status==='pending_expert';
   const isReviewed = d.status==='expert_reviewed';
+  const plantImage = getPlantImageSrc(d);
   return `
   <article class="bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col">
     <div class="h-40 bg-surface-container flex items-center justify-center relative overflow-hidden">
-      <span class="material-symbols-outlined text-5xl text-primary/20">grass</span>
+      ${plantImage
+      ? `<img src="${plantImage}" alt="Plant" class="w-full h-full object-cover" loading="lazy" />`
+      : `<span class="material-symbols-outlined text-5xl text-primary/20">grass</span>`}
       <div class="absolute top-3 right-3">${severityBadge(d.ai_result?.severity)}</div>
       ${isPend?`<div class="absolute top-3 left-3"><span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-secondary-container text-on-secondary-container"><span class="material-symbols-outlined text-[12px]">pending</span>Pending Review</span></div>`:''}
       ${isReviewed?`<div class="absolute top-3 left-3"><span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary-fixed/30 text-primary"><span class="material-symbols-outlined text-[12px]">verified</span>Expert Reviewed</span></div>`:''}
@@ -134,6 +137,15 @@ function _filterDiag(f) {
   return _allDiag;
 }
 
+function getPlantImageSrc(diagnosis) {
+  if (!diagnosis) return '';
+  if (typeof diagnosis.plant_image === 'string') return diagnosis.plant_image;
+  if (typeof diagnosis.plant_image_url === 'string') return diagnosis.plant_image_url;
+  if (typeof diagnosis.image === 'string') return diagnosis.image;
+  if (typeof diagnosis.image_url === 'string') return diagnosis.image_url;
+  return '';
+}
+
 function promptMsg() {
   return new Promise(resolve => {
     const m = document.createElement('div');
@@ -180,6 +192,9 @@ document.getElementById('apply-filters').addEventListener('click', async () => {
     showToast('Failed to load diagnoses', 'error');
   }
 });
-document.getElementById("newScanBtn").addEventListener("click", () => {
-  window.location.href = "/frontend/farmer/farmerdashboard.html#upload";
-});
+const newScanBtn = document.getElementById('newScanBtn');
+if (newScanBtn) {
+  newScanBtn.addEventListener('click', () => {
+    window.location.href = '/frontend/farmer/farmerdashboard.html#upload';
+  });
+}

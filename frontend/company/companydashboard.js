@@ -424,6 +424,7 @@ function dedupeById(items) {
 }
 
 function notifyAboutIncomingDashboardNotification(notification) {
+  if (typeof playNotificationTone === 'function') playNotificationTone();
   showToast(notification.title || 'New notification', 'info');
   showBrowserNotification(notification);
 }

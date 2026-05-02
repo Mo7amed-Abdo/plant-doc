@@ -87,6 +87,19 @@ async function markExpertChatNotificationsRead(expertId, conversationId) {
   );
 }
 
+async function markFarmerChatNotificationsRead(farmerId, conversationId) {
+  return FarmerNotification.updateMany(
+    {
+      farmer_id: farmerId,
+      type: 'expert_reply',
+      related_type: 'chat',
+      related_id: conversationId,
+      is_read: false,
+    },
+    { is_read: true }
+  );
+}
+
 async function markPendingCaseNotificationsResolved(caseId) {
   return ExpertNotification.updateMany(
     {
@@ -105,5 +118,6 @@ module.exports = {
   markExpertNotificationRead,
   markAllExpertNotificationsRead,
   markExpertChatNotificationsRead,
+  markFarmerChatNotificationsRead,
   markPendingCaseNotificationsResolved,
 };

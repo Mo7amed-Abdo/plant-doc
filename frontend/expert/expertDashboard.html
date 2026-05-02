@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en">
 
@@ -95,6 +95,45 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        .hero-tagline {
+            position: relative;
+            overflow: hidden;
+            animation: taglineIn 650ms cubic-bezier(.2, .8, .2, 1) both;
+        }
+        .hero-tagline::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(110deg, rgba(0, 106, 57, 0), rgba(0, 106, 57, 0.18), rgba(0, 106, 57, 0));
+            transform: translateX(-130%);
+            animation: taglineShimmer 3.2s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .hero-tagline-text {
+            background: linear-gradient(90deg, #005c31 0%, #008649 45%, #2f9c62 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: glowPulse 2.8s ease-in-out infinite;
+        }
+        @keyframes taglineIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes taglineShimmer {
+            0% { transform: translateX(-130%); }
+            55% { transform: translateX(130%); }
+            100% { transform: translateX(130%); }
+        }
+        @keyframes glowPulse {
+            0%, 100% { text-shadow: 0 0 0 rgba(0, 106, 57, 0); }
+            50% { text-shadow: 0 0 12px rgba(0, 106, 57, 0.16); }
+        }
+
+        /* Subtle inset separators between validated cases rows */
+        .validated-cases-table tbody tr:not(:last-child) td {
+            box-shadow: inset 0 -1px 0 rgba(25, 28, 29, 0.10);
+        }
     </style>
 </head>
 
@@ -143,16 +182,16 @@
             </a>
         </div>
         <!-- Bottom profile section -->
-        <div class="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800 px-4">
-            <div data-profile-nav class="flex items-center gap-3 px-2 pb-3 cursor-pointer rounded-xl hover:bg-slate-100 transition-colors">
-                <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant"
+        <div class="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800 px-4 pb-4">
+            <div data-profile-nav class="flex items-center gap-3 px-3 py-3 cursor-pointer rounded-2xl border border-emerald-200 bg-emerald-50/70 shadow-sm hover:bg-emerald-50 transition-colors">
+                <img src="" alt="Profile" class="w-11 h-11 rounded-full object-cover border-2 border-white shadow-sm"
                     data-user-avatar />
-                <div class="flex flex-col">
-                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
-                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+                <div class="flex flex-col leading-tight">
+                    <span class="font-bold text-emerald-900 text-sm" data-user-name>Loading...</span>
+                    <span class="text-emerald-700 text-xs" data-user-role>Loading...</span>
                 </div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
-                    <span class="material-symbols-outlined text-lg">logout</span>
+                <button class="ml-auto text-emerald-700 hover:text-emerald-900 transition-colors">
+                    <span class="material-symbols-outlined text-xl">logout</span>
                 </button>
             </div>
         </div>
@@ -162,27 +201,36 @@
     </nav>
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col md:ml-64 w-full">
-        <!-- TopNavBar -->
         <header
-            class="bg-gray-50 dark:bg-slate-900/90 backdrop-blur-md text-green-600 dark:text-green-400 font-inter antialiased docked full-width top-5 z-40 flex justify-between items-center w-full px-8 h-16 sticky relative">
-            <div class="flex items-center gap-4">
-                <button class="md:hidden text-on-surface">
-                    <span class="material-symbols-outlined">menu</span>
-                </button>
-                <h1 class="text-2xl font-bold text-on-surface hidden md:block">Overview</h1>
+            class="bg-gray-50 dark:bg-slate-900/90 backdrop-blur-md text-green-600 dark:text-green-400 font-inter antialiased docked full-width z-40 w-full px-6 md:px-8 py-4 relative border-b border-surface-variant/50">
+            <div class="grid grid-cols-[1fr_auto] items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-on-surface">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm mb-2">
+                        <span class="material-symbols-outlined text-[18px] text-green-700">space_dashboard</span>
+                        <h1 class="text-xl md:text-2xl font-headline font-bold text-on-surface">Overview</h1>
+                    </div>
+                    <p class="text-sm text-on-surface-variant font-body hidden md:block">Track cases, reviews, and expert activity in one place.</p>
+                </div>
+                <div class="flex items-center gap-2 justify-self-end">
+                    <div class="hero-tagline hidden xl:flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm">
+                        <span class="material-symbols-outlined text-[18px] text-green-700">fact_check</span>
+                        <p class="hero-tagline-text text-sm font-semibold tracking-[0.01em]">You're the difference between loss and healthy growth</p>
+                    </div>
+                    <button data-notif-toggle
+                        class="w-11 h-11 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-300 transition-colors active:scale-95 duration-200 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-surface-container-highest relative">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span data-notif-count class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-on-error text-[10px] rounded-full flex items-center justify-center font-bold">0</span>
+                    </button>
+                    <button type="button" onclick="window.location.href='/frontend/expert/expertProfile.html'"
+                        class="w-11 h-11 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-300 transition-colors active:scale-95 duration-200 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-surface-container-highest">
+                        <span class="material-symbols-outlined">settings</span>
+                    </button>
+                </div>
             </div>
-            <div class="flex items-center gap-2 mt-2">
-                <button data-notif-toggle
-                    class="p-2 text-slate-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-300 transition-colors active:scale-95 duration-200 rounded-full hover:bg-surface-container-highest relative">
-                    <span class="material-symbols-outlined">notifications</span>
-                    <span data-notif-count class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-on-error text-[10px] rounded-full flex items-center justify-center font-bold">0</span>
-                </button>
-                <button type="button" onclick="window.location.href='/frontend/expert/expertProfile.html'"
-                    class="p-2 text-slate-500 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-300 transition-colors active:scale-95 duration-200 rounded-full hover:bg-surface-container-highest">
-                    <span class="material-symbols-outlined">settings</span>
-                </button>
-            </div>
-            <div data-notif-dropdown class="hidden absolute right-8 top-16 w-[360px] max-w-[calc(100vw-2rem)] bg-white border border-surface-variant rounded-2xl shadow-xl z-50 overflow-hidden">
+            <div data-notif-dropdown class="hidden absolute right-8 top-full mt-2 w-[360px] max-w-[calc(100vw-2rem)] bg-white border border-surface-variant rounded-2xl shadow-xl z-50 overflow-hidden">
                 <div class="px-4 py-3 border-b border-surface-variant flex items-center justify-between">
                     <div>
                         <p class="font-bold text-on-surface text-sm">Notifications</p>
@@ -270,7 +318,7 @@
                     </button>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="validated-cases-table w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-surface-variant text-sm text-on-surface-variant font-medium">
                                 <th class="pb-3 pl-2 font-medium">Image</th>

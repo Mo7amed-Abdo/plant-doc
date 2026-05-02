@@ -67,16 +67,16 @@
             </a>
         </div>
         <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
-            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all" href="expertProfile.html">
-                <img src="" class="w-8 h-8 rounded-full object-cover border border-outline-variant shrink-0" alt="Profile" data-user-avatar />
-                <div class="flex flex-col">
-                    <span class="font-bold text-on-surface text-sm" data-user-name>Loading...</span>
-                    <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
+            <div class="flex items-center gap-3 px-3 py-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 shadow-sm hover:bg-emerald-50 transition-colors">
+                <img src="" class="w-11 h-11 rounded-full object-cover border-2 border-white shadow-sm shrink-0" alt="Profile" data-user-avatar />
+                <div class="flex flex-col leading-tight">
+                    <span class="font-bold text-emerald-900 text-sm" data-user-name>Loading...</span>
+                    <span class="text-emerald-700 text-xs" data-user-role>Loading...</span>
                 </div>
-                <button class="ml-auto text-on-surface-variant hover:text-error transition-colors">
-                    <span class="material-symbols-outlined text-lg">logout</span>
+                <button class="ml-auto text-emerald-700 hover:text-emerald-900 transition-colors">
+                    <span class="material-symbols-outlined text-xl">logout</span>
                 </button>
-            </a>
+            </div>
         </div>
     </nav>
 
@@ -94,7 +94,12 @@
         <div class="bg-white border-b border-slate-100 px-6 md:px-10 py-5 hidden md:block">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-on-surface font-headline">Notifications</h1>
+                    <h1 class="text-2xl font-bold text-on-surface font-headline">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700">
+                            <span class="material-symbols-outlined text-[18px]">notifications</span>
+                            <span>Notifications</span>
+                        </span>
+                    </h1>
                     <p class="text-sm text-on-surface-variant mt-0.5">Stay updated on pending cases and farmer messages</p>
                 </div>
                 <button onclick="markAllRead()" class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">

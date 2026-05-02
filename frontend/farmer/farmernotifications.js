@@ -91,6 +91,10 @@ function notifCard(n) {
     system:          { icon: 'notifications',     bg: 'bg-slate-50',  color: 'text-slate-500',  ring: 'border-slate-200' },
   };
   const style  = iconMap[n.type] || iconMap.system;
+  const normalizedTitle =
+    n.type === 'expert_reply' && (n.title || '').trim() === 'الخبير بعتلك رسالة'
+      ? 'New message from expert'
+      : (n.title || 'Notification');
 
   // Link map per related type
   const linkMap = {
@@ -125,7 +129,7 @@ function notifCard(n) {
     <!-- Content -->
     <div class="notif-content flex-1 min-w-0">
       <div class="flex items-start justify-between gap-3">
-        <p class="text-sm font-bold text-on-surface leading-snug">${escapeHtml(n.title)}</p>
+        <p class="text-sm font-bold text-on-surface leading-snug">${escapeHtml(normalizedTitle)}</p>
         <div class="flex items-center gap-2 shrink-0">
           <span class="text-[11px] font-medium text-slate-400 whitespace-nowrap">${timeAgo(n.created_at)}</span>
           ${!isRead ? `<div class="unread-dot w-2 h-2 bg-primary rounded-full shrink-0 mt-0.5"></div>` : ''}
