@@ -2,6 +2,15 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (Auth.isLoggedIn()) { redirectToDashboard(Auth.getRole()); return; }
 
+  const guestBtn = document.getElementById('continue-guest');
+  if (guestBtn) {
+    guestBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      Auth.setGuest();
+      window.location.href = '/frontend/farmer/farmerdashboard.html';
+    });
+  }
+
   const form    = document.querySelector('form');
   const emailEl = document.getElementById('email');
   const passEl  = document.getElementById('password');

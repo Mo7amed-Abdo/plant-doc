@@ -135,19 +135,19 @@
         </div>
 
         <!-- Profile card -->
-        <div class="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800 px-4 pb-5">
-            <div class="flex items-center gap-3 px-2">
-                <a href="companyprofile.html" class="flex items-center gap-3 flex-1 min-w-0">
-                    <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
-                    <div class="flex flex-col min-w-0">
-                        <span class="font-bold text-on-surface text-sm truncate" data-user-name>Loading...</span>
-                        <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
-                    </div>
-                </a>
-                <button class="text-on-surface-variant hover:text-error transition-colors shrink-0">
+        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
+            <a class="rounded-xl px-3 py-2.5 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-50 border border-green-200 hover:from-green-200 hover:to-emerald-100 transition-all active:scale-[0.98] shadow-sm"
+                href="companyprofile.html">
+                <img src="" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm shrink-0" alt="Profile"
+                    data-user-avatar />
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold text-green-900 text-sm truncate" data-user-name>Loading...</span>
+                    <span class="text-xs text-green-700 truncate" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-green-700 hover:text-green-900 transition-colors">
                     <span class="material-symbols-outlined text-lg">logout</span>
                 </button>
-            </div>
+            </a>
         </div>
     </nav>
 
@@ -158,25 +158,28 @@
         <div class="p-6 md:p-8 flex-1 overflow-y-auto">
 
             <!-- Page heading + CTA -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-on-surface flex items-center gap-2">
-                        <span>Business</span>
                         <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700 text-base md:text-lg">
                             <span class="material-symbols-outlined text-[16px]">space_dashboard</span>
-                            <span>Overview</span>
+                            <span>Business Overview</span>
                         </span>
                     </h2>
-                    <p class="text-on-surface-variant text-sm mt-1">Track your pharmaceutical supply chain metrics.</p>
+                    <p class="text-on-surface-variant text-sm mt-0.5">Track your pharmaceutical supply chain metrics.</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button data-notif-toggle class="relative p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-full transition-all duration-200 active:scale-95">
-                        <span class="material-symbols-outlined">notifications</span>
+                <div class="flex items-center gap-2.5">
+                    <button data-notif-toggle
+                        class="relative w-10 h-10 inline-flex items-center justify-center text-green-700 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 border border-green-200/80 rounded-full shadow-sm hover:shadow-md hover:border-green-300 transition-all duration-200 active:scale-95"
+                        title="Notifications">
+                        <span class="material-symbols-outlined text-[20px]">notifications</span>
                         <span data-notif-count class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-error text-white text-[10px] font-bold leading-[18px] text-center shadow-sm">0</span>
                     </button>
-                    <button data-export-report class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
-                        <span class="material-symbols-outlined text-[18px]">download</span>
-                        Export Report
+                    <button data-export-report
+                        class="group inline-flex items-center gap-2.5 px-5 py-2.5 bg-green-700 text-white rounded-full text-sm font-semibold shadow-sm hover:shadow-md hover:bg-green-800 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-green-500/30"
+                        title="Export report">
+                        <span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-y-0.5">download</span>
+                        <span>Export Report</span>
                     </button>
                 </div>
             </div>

@@ -167,6 +167,22 @@
                 <span>Profile</span>
             </a>
         </div>
+
+        <!-- Profile card -->
+        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
+            <a class="rounded-xl px-3 py-2.5 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-50 border border-green-200 hover:from-green-200 hover:to-emerald-100 transition-all active:scale-[0.98] shadow-sm"
+                href="deliveryprofile.html">
+                <img src="" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm shrink-0" alt="Profile"
+                    data-user-avatar />
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold text-green-900 text-sm truncate" data-user-name>Loading...</span>
+                    <span class="text-xs text-green-700 truncate" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-green-700 hover:text-green-900 transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </a>
+        </div>
     </nav>
 
     <!-- Main Content -->
@@ -195,7 +211,12 @@
 
                 <!-- Left: title + subtitle -->
                 <div class="shrink-0">
-                    <h2 class="text-2xl font-bold text-on-surface">Active Deliveries</h2>
+                    <h2 class="text-2xl font-bold text-on-surface">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700">
+                            <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+                            <span>Active Orders</span>
+                        </span>
+                    </h2>
                 </div>
 
                 <!-- Center: search -->
@@ -207,9 +228,11 @@
 
                 <!-- Right: notification + filter -->
                 <div class="flex items-center gap-3 shrink-0">
-                    <button data-filter class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
-                        <span class="material-symbols-outlined text-[18px]">filter_list</span>
-                        Filter
+                    <button data-filter class="group inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700 text-sm font-bold hover:shadow-md hover:from-green-100 hover:to-emerald-100 transition-all active:scale-[0.98]">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-lowest border border-green-200/70 shadow-sm group-hover:border-green-300/80 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        </span>
+                        <span>Filter</span>
                     </button>
                 </div>
             </div>

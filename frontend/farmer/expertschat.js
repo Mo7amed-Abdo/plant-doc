@@ -13,6 +13,7 @@ let _selectedChatIds = new Set();
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('farmer')) return;
   populateSidebarUser();
+  lockSidebarAvatar();
   setupLogout(_socket);
   await loadChats();
   setupChatSearch();
@@ -22,6 +23,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupInput();
   setupQuickReplies();
 });
+
+function lockSidebarAvatar() {
+  // Farmer chat page: keep the sidebar avatar static and non-clickable.
+  document.querySelectorAll('[data-user-avatar]').forEach((img) => {
+    try {
+      // Replace the node to drop any "Change photo" handlers bound by api.js
+      const fixed = img.cloneNode(true);
+      fixed.src = 'logo.png';
+      fixed.alt = 'PlantDoc';
+      fixed.removeAttribute('title');
+      fixed.setAttribute('draggable', 'false');
+      fixed.style.cursor = 'default';
+      fixed.addEventListener(
+        'click',
+        (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        },
+        true
+      );
+      img.parentNode?.replaceChild(fixed, img);
+    } catch (_) {}
+  });
+}
 
 async function loadChats() {
   try {

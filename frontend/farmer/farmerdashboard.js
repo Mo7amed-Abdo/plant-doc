@@ -2,9 +2,74 @@
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('farmer')) return;
   populateSidebarUser(); setupLogout();
+
+  if (Auth.isGuest()) {
+    enableGuestLockdown();
+    return;
+  }
+
   await Promise.all([loadStats(), loadRecentDiagnoses()]);
   setupUpload(); setupNotifBell();
 });
+
+function enableGuestLockdown() {
+  // Top banner
+  const banner = document.createElement('div');
+  banner.className = 'fixed top-0 left-0 right-0 z-[9999] bg-primary text-on-primary';
+  banner.innerHTML = `
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+      <div class="flex items-center gap-2 text-sm font-semibold">
+        <span class="material-symbols-outlined text-[18px]">lock</span>
+        <span>Guest mode: sign up to upload images, place orders, or use any actions.</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/frontend/register.html" class="px-4 py-2 rounded-full bg-white text-primary text-sm font-bold shadow-sm hover:bg-gray-100 transition-colors">Register</a>
+        <a href="/frontend/login.html" class="px-4 py-2 rounded-full border border-white/60 text-white text-sm font-bold hover:bg-white/10 transition-colors">Login</a>
+      </div>
+    </div>`;
+  document.body.appendChild(banner);
+  document.body.classList.add('pt-14');
+
+  // Disable upload zone
+  const zone = document.getElementById('uploadZone');
+  if (zone) {
+    zone.classList.add('relative', 'opacity-60');
+    zone.style.pointerEvents = 'none';
+    const overlay = document.createElement('div');
+    overlay.className = 'absolute inset-0 flex items-center justify-center';
+    overlay.innerHTML = `
+      <div class="mx-4 px-4 py-2 rounded-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-semibold shadow-sm">
+        Sign up to upload a plant image
+      </div>`;
+    zone.appendChild(overlay);
+  }
+
+  // Replace dynamic sections with safe placeholders
+  setText('[data-stat="recovered-crops"]', '—');
+  setText('[data-stat="total-crops"]', '—');
+  setText('[data-stat="fields-count"]', 'Sign up to see your fields');
+  setText('[data-stat="active-diseases"]', '—');
+  setText('[data-stat="active-orders"]', '—');
+
+  const tbody = document.getElementById('diagnoses-table-body') || document.querySelector('table tbody');
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-on-surface-variant text-sm">Guest mode: register to view your diagnoses history.</td></tr>`;
+  }
+
+  // Block navigation/actions within farmer area
+  const block = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showToast('Guest mode: please register to continue', 'info');
+  };
+
+  document.querySelectorAll('a[href$=\".html\"]').forEach((a) => {
+    const href = (a.getAttribute('href') || '').toLowerCase();
+    if (href.includes('login.html') || href.includes('register.html') || href.includes('landing.html')) return;
+    a.addEventListener('click', block);
+    a.classList.add('opacity-80');
+  });
+}
 
 async function loadStats() {
   try {

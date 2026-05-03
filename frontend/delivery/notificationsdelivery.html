@@ -32,6 +32,22 @@
       <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200"
         href="deliveryprofile.html"><span class="material-symbols-outlined">person</span><span>Profile</span></a>
     </div>
+
+    <!-- Profile card -->
+    <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
+      <a class="rounded-xl px-3 py-2.5 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-50 border border-green-200 hover:from-green-200 hover:to-emerald-100 transition-all active:scale-[0.98] shadow-sm"
+        href="deliveryprofile.html">
+        <img src="" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm shrink-0" alt="Profile"
+          data-user-avatar />
+        <div class="flex flex-col min-w-0">
+          <span class="font-bold text-green-900 text-sm truncate" data-user-name>Loading...</span>
+          <span class="text-xs text-green-700 truncate" data-user-role>Loading...</span>
+        </div>
+        <button class="ml-auto text-green-700 hover:text-green-900 transition-colors">
+          <span class="material-symbols-outlined text-lg">logout</span>
+        </button>
+      </a>
+    </div>
   </nav>
 
   <main class="flex-1 md:ml-64 w-full p-6 md:p-8">
@@ -43,8 +59,12 @@
         </span>
       </h1>
       <button id="mark-all-btn"
-        class="px-4 py-2 rounded-lg bg-green-100 text-green-700 text-sm font-semibold hover:bg-green-200">Mark all as
-        read</button>
+        class="group inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700 text-sm font-bold hover:shadow-md hover:from-green-100 hover:to-emerald-100 transition-all active:scale-[0.98]">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/80 border border-green-200/70 shadow-sm group-hover:border-green-300/80 transition-colors">
+          <span class="material-symbols-outlined text-[18px]">done_all</span>
+        </span>
+        <span>Mark all as read</span>
+      </button>
     </div>
 
     <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-2">

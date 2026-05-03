@@ -77,8 +77,11 @@ function applyBrandLogoText() {
 document.addEventListener('DOMContentLoaded', () => {
   ensureBrandLogoTheme();
   applyBrandLogoText();
-  setupFarmerChatBadge().catch(() => null);
-  setupFarmerNotificationBadge().catch(() => null);
+  // Guest users should not hit authenticated APIs.
+  if (!Auth.isGuest?.()) {
+    setupFarmerChatBadge().catch(() => null);
+    setupFarmerNotificationBadge().catch(() => null);
+  }
 });
 
 async function setupFarmerChatBadge() {
@@ -174,13 +177,22 @@ const Auth = {
   getToken:    ()     => localStorage.getItem('plantdoc_token'),
   getUser:     ()     => JSON.parse(localStorage.getItem('plantdoc_user')    || 'null'),
   getProfile:  ()     => JSON.parse(localStorage.getItem('plantdoc_profile') || 'null'),
+  isGuest:     ()     => localStorage.getItem('plantdoc_guest') === '1',
+  setGuest:    ()     => {
+    localStorage.setItem('plantdoc_guest', '1');
+    // Minimal identity for UI rendering (no token).
+    localStorage.setItem('plantdoc_user', JSON.stringify({ role: 'farmer', full_name: 'Guest' }));
+    localStorage.removeItem('plantdoc_profile');
+    localStorage.removeItem('plantdoc_token');
+  },
   setSession:  (data) => {
+    localStorage.removeItem('plantdoc_guest');
     localStorage.setItem('plantdoc_token',   data.token);
     localStorage.setItem('plantdoc_user',    JSON.stringify(data.user));
     if (data.profile) localStorage.setItem('plantdoc_profile', JSON.stringify(data.profile));
   },
   clearSession: () => {
-    ['plantdoc_token','plantdoc_user','plantdoc_profile'].forEach(k => localStorage.removeItem(k));
+    ['plantdoc_token','plantdoc_user','plantdoc_profile','plantdoc_guest'].forEach(k => localStorage.removeItem(k));
   },
   isLoggedIn: () => !!localStorage.getItem('plantdoc_token'),
   getRole:    () => JSON.parse(localStorage.getItem('plantdoc_user') || 'null')?.role || null,
@@ -188,6 +200,9 @@ const Auth = {
 
 // ── Core fetch ────────────────────────────────────────────────────────────────
 async function apiFetch(path, options = {}) {
+  if (Auth.isGuest()) {
+    throw Object.assign(new Error('Guest mode: please register to use this feature.'), { status: 401, data: {} });
+  }
   const token   = Auth.getToken();
   const headers = { ...(options.headers || {}) };
   if (!(options.body instanceof FormData)) headers['Content-Type'] = 'application/json';
@@ -219,7 +234,11 @@ const ROLE_DASHBOARDS = {
 };
 
 function requireAuth(allowedRole = null) {
-  if (!Auth.isLoggedIn()) { window.location.href = '/frontend/login.html'; return false; }
+  if (!Auth.isLoggedIn()) {
+    if (allowedRole === 'farmer' && Auth.isGuest()) return true;
+    window.location.href = '/frontend/login.html';
+    return false;
+  }
   if (allowedRole && Auth.getRole() !== allowedRole) {
     window.location.href = ROLE_DASHBOARDS[Auth.getRole()] || '/frontend/login.html';
     return false;
@@ -360,6 +379,11 @@ function initialsAvatarDataUrl(initials) {
 }
 
 function enableSidebarAvatarUpload({ role, initials }) {
+  // Farmer dashboard: keep avatar static (no "Change photo" tooltip / upload).
+  if (role === 'farmer' && String(window.location?.pathname || '').toLowerCase().includes('farmerdashboard.html')) {
+    return;
+  }
+
   const endpoint = profileEndpointForRole(role);
   if (!endpoint) return;
 

@@ -154,19 +154,19 @@
         </div>
 
         <!-- Profile -->
-        <div class="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800 px-4 pb-5">
-            <div class="flex items-center gap-3 px-2">
-                <a href="companyprofile.html" class="flex items-center gap-3 flex-1 min-w-0">
-                    <img src="" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-user-avatar />
-                    <div class="flex flex-col min-w-0">
-                        <span class="font-bold text-on-surface text-sm truncate" data-user-name>Loading...</span>
-                        <span class="text-xs text-on-surface-variant" data-user-role>Loading...</span>
-                    </div>
-                </a>
-                <button class="text-on-surface-variant hover:text-error transition-colors shrink-0">
+        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
+            <a class="rounded-xl px-3 py-2.5 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-50 border border-green-200 hover:from-green-200 hover:to-emerald-100 transition-all active:scale-[0.98] shadow-sm"
+                href="companyprofile.html">
+                <img src="" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm shrink-0" alt="Profile"
+                    data-user-avatar />
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold text-green-900 text-sm truncate" data-user-name>Loading...</span>
+                    <span class="text-xs text-green-700 truncate" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-green-700 hover:text-green-900 transition-colors">
                     <span class="material-symbols-outlined text-lg">logout</span>
                 </button>
-            </div>
+            </a>
         </div>
     </nav>
 
@@ -194,15 +194,22 @@
         <div class="p-6 md:p-8 flex-1 overflow-y-auto">
 
             <!-- Page heading + CTA -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
                 <div>
-                    <h2 class="text-2xl font-bold text-on-surface">Treatment Requests</h2>
-                    <p class="text-on-surface-variant text-sm mt-1">Review and manage incoming agricultural disease reports.</p>
+                    <h2 class="text-2xl font-bold text-on-surface flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700 text-base md:text-lg">
+                            <span class="material-symbols-outlined text-[16px]">medical_services</span>
+                            <span>Treatment Requests</span>
+                        </span>
+                    </h2>
+                    <p class="text-on-surface-variant text-sm mt-0.5">Review and manage incoming agricultural disease reports.</p>
                 </div>
-                <div class="flex gap-3">
-                    <button data-filter class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container transition-colors shadow-sm active:scale-[0.98]">
-                        <span class="material-symbols-outlined text-[18px]">filter_list</span>
-                        Filter
+                <div class="flex gap-2.5">
+                    <button data-filter
+                        class="group inline-flex items-center gap-2.5 px-5 py-2.5 bg-green-700 text-white rounded-full text-sm font-semibold shadow-sm hover:shadow-md hover:bg-green-800 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-green-500/30"
+                        title="Filter requests">
+                        <span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-y-0.5">tune</span>
+                        <span>Filter</span>
                     </button>
                 </div>
             </div>
@@ -213,16 +220,21 @@
     </main>
 
     <!-- Filter Modal -->
-    <div id="filter-modal" class="hidden fixed z-50 bg-surface-container-lowest rounded-[16px] shadow-xl border border-surface-variant w-80 p-5 flex flex-col gap-5"
+    <div id="filter-modal" class="hidden fixed z-50 bg-surface-container-lowest rounded-[20px] shadow-xl border border-surface-variant w-80 p-5 flex flex-col gap-5 ring-1 ring-green-500/10"
          style="top: 0; left: 0;">
 
         <!-- Header -->
         <div class="flex items-center justify-between">
-            <h3 class="font-semibold text-on-surface font-headline flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px] text-primary">tune</span>
-                Filter Requests
-            </h3>
-            <button id="close-filter" class="p-1 pb-0 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors active:scale-[0.95]">
+            <div class="flex items-center gap-2">
+                <span class="w-9 h-9 rounded-full bg-green-100 border border-green-200 flex items-center justify-center text-green-700 shadow-sm">
+                    <span class="material-symbols-outlined text-[18px]">tune</span>
+                </span>
+                <div class="leading-tight">
+                    <h3 class="font-semibold text-on-surface font-headline">Filter Requests</h3>
+                    <p class="text-xs text-on-surface-variant mt-0.5">Narrow down by priority and status.</p>
+                </div>
+            </div>
+            <button id="close-filter" class="w-9 h-9 inline-flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-colors active:scale-[0.95]">
                 <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
