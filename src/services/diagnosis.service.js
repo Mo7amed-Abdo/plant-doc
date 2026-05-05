@@ -4,10 +4,104 @@ const Diagnosis = require('../models/Diagnosis');
 const Farmer = require('../models/Farmer');
 const { createError } = require('../middleware/error.middleware');
 const { toMongoImage, toDataUri, toImageMeta } = require('../utils/image');
+const { pathToFileURL } = require('url');
 
 // ─── Mock AI Service ──────────────────────────────────────────────────────────
 // Replace the body of `callAI` with your real model call in ~3 days.
 // The contract: receives a Buffer + mimeType, returns the ai_result shape.
+
+// ── HuggingFace (Gradio) AI Service ───────────────────────────────────────────
+// Contract: receives a Buffer + mimeType, returns ai_result = { disease_name, confidence, severity, analyzed_at }.
+// Uses @gradio/client (ESM) via dynamic import (CommonJS-friendly).
+
+const HF_SPACE = 'MRAdmin10/osama_test';
+const HF_ENDPOINT = '/predict_pipeline';
+const AI_TIMEOUT_MS = 25000;
+
+let _gradioAppPromise = null;
+
+async function importGradioClient() {
+  const modulePath = require.resolve('@gradio/client');
+  const moduleUrl = pathToFileURL(modulePath).href;
+  return await import(moduleUrl);
+}
+
+async function getGradioApp() {
+  if (_gradioAppPromise) return _gradioAppPromise;
+
+  _gradioAppPromise = (async () => {
+    const mod = await importGradioClient();
+    const { Client } = mod;
+    return await Client.connect(HF_SPACE);
+  })().catch((err) => {
+    _gradioAppPromise = null;
+    throw err;
+  });
+
+  return _gradioAppPromise;
+}
+
+function withTimeout(promise, ms, label = 'TIMEOUT') {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      const e = Object.assign(new Error(label), { code: label });
+      setTimeout(() => reject(e), ms);
+    }),
+  ]);
+}
+
+function extractOutputText(result) {
+  const data = result?.data;
+
+  if (typeof data === 'string') return data.trim();
+  if (Array.isArray(data) && typeof data[0] === 'string') return data[0].trim();
+  if (Array.isArray(data) && Array.isArray(data[0]) && typeof data[0][0] === 'string') return data[0][0].trim();
+  if (data && typeof data === 'object' && typeof data.text === 'string') return data.text.trim();
+
+  return '';
+}
+
+function parseAI(outputText) {
+  const text = String(outputText || '').trim();
+
+  const isNotPlant = /does not look like a plant|not a plant/i.test(text);
+  const isOutOfScope = /out of scope|image not defined|not defined/i.test(text);
+  const isMissingImage = /please upload an image/i.test(text);
+
+  if (!text || isNotPlant || isOutOfScope || isMissingImage) {
+    return { disease_name: text || 'Unknown', confidence: 0, severity: 'normal', analyzed_at: new Date(), _invalid_image: true };
+  }
+
+  const match = text.match(/Result:\s*(.*?)\s*\(Confidence:\s*([\d.]+)%\)/i);
+  if (!match) {
+    return { disease_name: text, confidence: 0, severity: 'normal', analyzed_at: new Date() };
+  }
+
+  const disease_name = match[1].trim();
+  const confidence = Number(match[2]);
+  const severity = /\bhealthy\b/i.test(disease_name) ? 'normal' : 'high';
+
+  return {
+    disease_name,
+    confidence: Number.isFinite(confidence) ? confidence : 0,
+    severity,
+    analyzed_at: new Date(),
+  };
+}
+
+function deriveCropTypeFromDiseaseName(diseaseName) {
+  const name = String(diseaseName || '').trim();
+  if (!name) return null;
+
+  // Expected format from your HF model: "<Crop> - <Class>" after cleaning.
+  if (name.includes(' - ')) {
+    const crop = name.split(' - ')[0].trim();
+    return crop || null;
+  }
+
+  return null;
+}
 
 const MOCK_DISEASES = [
   {
@@ -47,7 +141,7 @@ const MOCK_DISEASES = [
   },
 ];
 
-async function callAI(imageBuffer, mimeType) {
+async function callAIMock(imageBuffer, mimeType) {
   // ── MOCK ─────────────────────────────────────────────────────────────────────
   // Simulates network latency from a real model call
   await new Promise((resolve) => setTimeout(resolve, 600));
@@ -84,7 +178,33 @@ async function callAI(imageBuffer, mimeType) {
 }
 
 // ─── Map AI severity → treatment request priority ─────────────────────────────
-const SEVERITY_TO_PRIORITY = { low: 'low', medium: 'medium', high: 'high', critical: 'urgent' };
+async function callAI(imageBuffer, mimeType = 'image/jpeg') {
+  try {
+    const mod = await importGradioClient();
+    const { handle_file } = mod;
+
+    const app = await getGradioApp();
+
+    const BlobClass = globalThis.Blob || require('buffer').Blob;
+    const blob = new BlobClass([imageBuffer], { type: mimeType });
+
+    const predictionPromise = app.predict(HF_ENDPOINT, {
+      image: handle_file(blob),
+    });
+
+    const result = await withTimeout(predictionPromise, AI_TIMEOUT_MS, 'AI_TIMEOUT');
+    const outputText = extractOutputText(result);
+    return parseAI(outputText);
+  } catch (err) {
+    const msg =
+      err?.code === 'AI_TIMEOUT'
+        ? 'AI service timeout'
+        : `AI service unavailable: ${err?.message || 'unknown error'}`;
+    throw createError(502, msg);
+  }
+}
+
+const SEVERITY_TO_PRIORITY = { normal: 'low', low: 'low', medium: 'medium', high: 'high', critical: 'urgent' };
 
 // ─── Service Methods ──────────────────────────────────────────────────────────
 
@@ -96,11 +216,18 @@ async function createDiagnosis(userId, profileId, body, file) {
   // Run AI analysis
   const ai_result = await callAI(file.buffer, file.mimetype);
 
+  if (ai_result?._invalid_image) {
+    // Don't save non-plant / out-of-scope images.
+    throw createError(400, ai_result.disease_name || 'Invalid image');
+  }
+
+  const derivedCropType = deriveCropTypeFromDiseaseName(ai_result?.disease_name);
+
   const diagnosis = await Diagnosis.create({
     farmer_id: profileId,
     field_id: field_id || null,
     plant_image: toMongoImage(file),
-    crop_type: crop_type || null,
+    crop_type: crop_type || derivedCropType || null,
     ai_result,
     status: 'ai_only',
   });

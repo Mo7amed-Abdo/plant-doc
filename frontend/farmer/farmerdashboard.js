@@ -116,7 +116,7 @@ async function loadRecentDiagnoses() {
         <td class="px-6 py-4 hidden md:table-cell">
           <div class="flex items-center gap-2">
             <div class="w-16 h-2 bg-surface-variant rounded-full overflow-hidden"><div class="h-full bg-primary rounded-full" style="width:${d.ai_result?.confidence||0}%"></div></div>
-            <span class="text-xs text-on-surface-variant">${(d.ai_result?.confidence||0).toFixed(0)}%</span>
+            <span class="text-xs text-on-surface-variant">${formatConfidence(d.ai_result?.confidence)}</span>
           </div>
         </td>
         <td class="px-6 py-4">${severityBadge(d.ai_result?.severity)}</td>
@@ -125,7 +125,7 @@ async function loadRecentDiagnoses() {
   ${
       d.is_recovered
         ? `<span class="text-green-600">Recovered</span>`
-        : d.ai_result?.severity?.toLowerCase() === 'low'
+        : d.ai_result?.severity?.toLowerCase() === 'high'
         ? `<button onclick="handleRecoverClick(event, '${d.id}', this)" class="text-xs bg-green-600 text-white px-3 py-1 rounded">Mark as Recovered</button>`
           : `<button class="w-8 h-8 rounded-full bg-surface-container border border-surface-variant text-on-surface-variant hover:text-primary hover:border-primary/40 transition-colors flex items-center justify-center" aria-label="View diagnosis details"><span class="material-symbols-outlined text-[18px]">visibility</span></button>`
   }
@@ -160,10 +160,8 @@ async function handleUpload(file, zone) {
   // Preview
   if (zone) { const r=new FileReader(); r.onload=e=>{zone.style.backgroundImage=`url(${e.target.result})`;zone.style.backgroundSize='cover';zone.style.backgroundPosition='center';}; r.readAsDataURL(file); }
 
-  const cropType = await promptInput('What crop is this?', 'e.g. Tomato, Wheat, Corn…');
   const fd = new FormData();
   fd.append('plant_image', file);
-  if (cropType) fd.append('crop_type', cropType);
 
   showToast('Analysing…', 'info');
   try {
@@ -189,7 +187,7 @@ function showResultModal(d) {
       </div>
       <div class="bg-surface-container rounded-xl p-4 mb-4 space-y-2.5">
         <div class="flex justify-between"><span class="text-sm text-on-surface-variant">Disease</span><span class="text-sm font-bold text-on-surface">${d.ai_result?.disease_name||'—'}</span></div>
-        <div class="flex justify-between"><span class="text-sm text-on-surface-variant">Confidence</span><span class="text-sm font-bold text-on-surface">${(d.ai_result?.confidence||0).toFixed(1)}%</span></div>
+        <div class="flex justify-between"><span class="text-sm text-on-surface-variant">Confidence</span><span class="text-sm font-bold text-on-surface">${formatConfidence(d.ai_result?.confidence)}</span></div>
         <div class="flex justify-between items-center"><span class="text-sm text-on-surface-variant">Severity</span>${severityBadge(d.ai_result?.severity)}</div>
       </div>
       ${d.ai_result?.suggested_action ? `<div class="bg-primary-fixed/20 rounded-xl p-4 mb-4"><p class="text-xs font-semibold text-primary uppercase tracking-wider mb-1">Suggested Action</p><p class="text-sm text-on-surface">${d.ai_result.suggested_action}</p></div>` : ''}
@@ -265,6 +263,12 @@ function getPlantImageSrc(diagnosis) {
   if (typeof diagnosis.image === 'string') return diagnosis.image;
   if (typeof diagnosis.image_url === 'string') return diagnosis.image_url;
   return '';
+}
+
+function formatConfidence(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '—';
+  return `${String(value)}%`;
 }
 async function applyFilter(severity) {
   const res = await fetch(`/diagnoses?severity=${severity}`);

@@ -587,7 +587,7 @@ function escapeHtml(str) {
 }
 
 // ── Badges ────────────────────────────────────────────────────────────────────
-const SEVERITY_CLS = { low:'bg-primary-fixed/30 text-primary', medium:'bg-secondary-container text-on-secondary-container', high:'bg-error-container text-on-error-container', critical:'bg-error text-white' };
+const SEVERITY_CLS = { normal:'bg-primary-fixed/25 text-primary', low:'bg-primary-fixed/30 text-primary', medium:'bg-secondary-container text-on-secondary-container', high:'bg-error-container text-on-error-container', critical:'bg-error text-white' };
 const ORDER_STATUS_CLS = { pending:'bg-secondary-container text-on-secondary-container', processing:'bg-primary-fixed/30 text-primary', shipped:'bg-secondary-container text-on-secondary-container', on_the_way:'bg-primary-fixed/30 text-primary', arriving:'bg-primary-fixed/40 text-primary', delivered:'bg-primary text-on-primary', delivery_failed:'bg-error-container text-on-error-container', cancelled:'bg-error-container text-on-error-container' };
 const DELIVERY_STATUS_CLS = { picked_up:'bg-primary-fixed/30 text-primary', on_the_way:'bg-secondary-container text-on-secondary-container', arriving:'bg-primary-fixed/40 text-primary', delivered:'bg-primary text-on-primary', failed:'bg-error-container text-on-error-container' };
 const PRIORITY_CLS = { low:'bg-surface-container text-on-surface-variant', medium:'bg-secondary-container text-on-secondary-container', high:'bg-error-container text-on-error-container', urgent:'bg-error text-white' };

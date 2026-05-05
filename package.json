@@ -9,6 +9,7 @@
     "test": "jest --forceExit --detectOpenHandles"
   },
   "dependencies": {
+    "@gradio/client": "^1.19.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

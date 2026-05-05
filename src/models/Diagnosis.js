@@ -16,7 +16,7 @@ const aiResultSchema = new mongoose.Schema(
     confidence: { type: Number, min: 0, max: 100, default: null },
     severity: {
       type: String,
-      enum: ['low', 'medium', 'high', 'critical', null],
+      enum: ['normal', 'low', 'medium', 'high', 'critical', null],
       default: null,
     },
     symptoms: { type: [String], default: [] },
