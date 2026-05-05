@@ -7,6 +7,7 @@ const env = require('./config/env');
 const connectDB = require('./config/db');
 const app = require('./app');
 const { initSocketService } = require('./services/socket.service');
+const { importDiseaseGuidesOnStartup } = require('./startup/importDiseaseGuides');
 
 // ─── HTTP Server ──────────────────────────────────────────────────────────────
 const server = http.createServer(app);
@@ -30,6 +31,9 @@ initSocketService(io);
 // ─── Startup ──────────────────────────────────────────────────────────────────
 async function start() {
   await connectDB();
+  await importDiseaseGuidesOnStartup().catch((e) => {
+    console.error('[DiseaseGuides] Auto-import failed:', e?.message || e);
+  });
 
   server.listen(env.PORT, () => {
     console.log(`\n🌿 PlantDoc API`);

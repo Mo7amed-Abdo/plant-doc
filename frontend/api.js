@@ -200,7 +200,12 @@ const Auth = {
 
 // ── Core fetch ────────────────────────────────────────────────────────────────
 async function apiFetch(path, options = {}) {
-  if (Auth.isGuest()) {
+  // Allow guest users to authenticate (login/register) so they can exit guest mode.
+  const isAuthPublic =
+    path === '/auth/login' ||
+    path === '/auth/register';
+
+  if (Auth.isGuest() && !isAuthPublic) {
     throw Object.assign(new Error('Guest mode: please register to use this feature.'), { status: 401, data: {} });
   }
   const token   = Auth.getToken();

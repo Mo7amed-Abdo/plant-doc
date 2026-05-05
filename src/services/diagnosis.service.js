@@ -2,8 +2,10 @@
 
 const Diagnosis = require('../models/Diagnosis');
 const Farmer = require('../models/Farmer');
+const DiseaseGuide = require('../models/DiseaseGuide');
 const { createError } = require('../middleware/error.middleware');
 const { toMongoImage, toDataUri, toImageMeta } = require('../utils/image');
+const { normalizeDiseaseKey } = require('../utils/diseaseGuides');
 const { pathToFileURL } = require('url');
 
 // ─── Mock AI Service ──────────────────────────────────────────────────────────
@@ -101,6 +103,29 @@ function deriveCropTypeFromDiseaseName(diseaseName) {
   }
 
   return null;
+}
+
+async function enrichAiResultFromGuides(ai_result) {
+  if (!ai_result || !ai_result.disease_name) return ai_result;
+
+  const key = normalizeDiseaseKey(ai_result.disease_name);
+  if (!key) return ai_result;
+
+  // Backwards compatible lookup: older imports might have stored 4+ underscores (buggy key normalization).
+  const legacyKey = key.replace(/___/g, '____');
+
+  const guide = await DiseaseGuide.findOne({ disease_key: { $in: [key, legacyKey] } }).lean();
+  if (!guide) return ai_result;
+
+  const treatment = guide.treatment || null;
+  const recommendation = guide.recommendation || null;
+
+  return {
+    ...ai_result,
+    treatment,
+    recommendation,
+    suggested_action: recommendation || treatment || ai_result.suggested_action || null,
+  };
 }
 
 const MOCK_DISEASES = [
@@ -214,7 +239,8 @@ async function createDiagnosis(userId, profileId, body, file) {
   const { crop_type, field_id } = body;
 
   // Run AI analysis
-  const ai_result = await callAI(file.buffer, file.mimetype);
+  let ai_result = await callAI(file.buffer, file.mimetype);
+  ai_result = await enrichAiResultFromGuides(ai_result);
 
   if (ai_result?._invalid_image) {
     // Don't save non-plant / out-of-scope images.
@@ -264,13 +290,15 @@ async function getDiagnoses(profileId, query) {
     Diagnosis.countDocuments(filter),
   ]);
 
-  return { items: items.map((d) => _formatDiagnosis(d, true)), total, page: Number(page), limit: Number(limit) };
+  const enriched = await enrichDiagnosesForResponse(items);
+  return { items: enriched.map((d) => _formatDiagnosis(d, true)), total, page: Number(page), limit: Number(limit) };
 }
 
 async function getDiagnosisById(profileId, diagnosisId) {
   const diagnosis = await Diagnosis.findOne({ _id: diagnosisId, farmer_id: profileId });
   if (!diagnosis) throw createError(404, 'Diagnosis not found');
-  return _formatDiagnosis(diagnosis, true); // Include image as data URI
+  const [enriched] = await enrichDiagnosesForResponse([diagnosis]);
+  return _formatDiagnosis(enriched || diagnosis, true); // Include image as data URI
 }
 
 async function deleteDiagnosis(profileId, diagnosisId) {
@@ -310,6 +338,81 @@ function _formatDiagnosis(doc, includeImage) {
       ? { plant_image: toDataUri(obj.plant_image) }
       : { plant_image: toImageMeta(obj.plant_image) }),
   };
+}
+
+async function enrichDiagnosesForResponse(docs) {
+  if (!Array.isArray(docs) || docs.length === 0) return docs || [];
+
+  const byKey = new Map();
+  const keys = [];
+
+  for (const d of docs) {
+    const name = d?.ai_result?.disease_name;
+    if (!name) continue;
+    const key = normalizeDiseaseKey(name);
+    if (!key) continue;
+    if (!byKey.has(key)) {
+      byKey.set(key, []);
+      keys.push(key);
+    }
+    byKey.get(key).push(d);
+  }
+
+  if (!keys.length) return docs;
+
+  const legacyKeys = keys.map((k) => k.replace(/___/g, '____'));
+  const guides = await DiseaseGuide.find({ disease_key: { $in: [...keys, ...legacyKeys] } }).lean();
+  const guideMap = new Map(guides.map((g) => [g.disease_key, g]));
+
+  const updates = [];
+
+  for (const key of keys) {
+    const guide = guideMap.get(key) || guideMap.get(key.replace(/___/g, '____'));
+    if (!guide) continue;
+
+    const treatment = guide.treatment || null;
+    const recommendation = guide.recommendation || null;
+
+    const list = byKey.get(key) || [];
+    for (const doc of list) {
+      const cur = doc.ai_result || {};
+      const nextSuggested = recommendation || treatment || cur.suggested_action || null;
+
+      const changed =
+        (cur.treatment || null) !== treatment ||
+        (cur.recommendation || null) !== recommendation ||
+        (cur.suggested_action || null) !== nextSuggested;
+
+      if (changed) {
+        doc.ai_result = {
+          ...cur,
+          treatment,
+          recommendation,
+          suggested_action: nextSuggested,
+        };
+
+        // Best-effort persistence so old diagnoses start showing the fields without re-scan.
+        updates.push(
+          Diagnosis.updateOne(
+            { _id: doc._id },
+            {
+              $set: {
+                'ai_result.treatment': treatment,
+                'ai_result.recommendation': recommendation,
+                'ai_result.suggested_action': nextSuggested,
+              },
+            }
+          )
+        );
+      }
+    }
+  }
+
+  if (updates.length) {
+    await Promise.allSettled(updates);
+  }
+
+  return docs;
 }
 
 /////////////////////edit of diagnosis

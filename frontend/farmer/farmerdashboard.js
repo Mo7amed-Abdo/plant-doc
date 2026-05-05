@@ -71,6 +71,8 @@ function enableGuestLockdown() {
   });
 }
 
+
+
 async function loadStats() {
   try {
     const [sRes, fRes, oRes] = await Promise.all([
@@ -177,6 +179,11 @@ async function handleUpload(file, zone) {
 }
 
 function showResultModal(d) {
+  const escapeHtml = (s) =>
+    String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const treatment = d.ai_result?.treatment || null;
+  const recommendation = d.ai_result?.recommendation || d.ai_result?.suggested_action || null;
+
   const m = document.createElement('div');
   m.className = 'fixed inset-0 bg-black/50 z-[9998] flex items-center justify-center p-4';
   m.innerHTML = `
@@ -190,7 +197,8 @@ function showResultModal(d) {
         <div class="flex justify-between"><span class="text-sm text-on-surface-variant">Confidence</span><span class="text-sm font-bold text-on-surface">${formatConfidence(d.ai_result?.confidence)}</span></div>
         <div class="flex justify-between items-center"><span class="text-sm text-on-surface-variant">Severity</span>${severityBadge(d.ai_result?.severity)}</div>
       </div>
-      ${d.ai_result?.suggested_action ? `<div class="bg-primary-fixed/20 rounded-xl p-4 mb-4"><p class="text-xs font-semibold text-primary uppercase tracking-wider mb-1">Suggested Action</p><p class="text-sm text-on-surface">${d.ai_result.suggested_action}</p></div>` : ''}
+      ${treatment ? `<div class="bg-secondary-container/35 rounded-xl p-4 mb-4"><p class="text-xs font-semibold text-on-secondary-container uppercase tracking-wider mb-1">Treatment</p><p class="text-sm text-on-surface">${escapeHtml(treatment)}</p></div>` : ''}
+      ${recommendation ? `<div class="bg-surface-container rounded-xl p-4 mb-4"><p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Recommendation</p><p class="text-sm text-on-surface">${escapeHtml(recommendation)}</p></div>` : ''}
       <div class="flex gap-3">
         <button onclick="this.closest('.fixed').remove()" class="flex-1 py-2.5 border border-outline-variant rounded-xl text-sm font-medium text-on-surface-variant">Close</button>
         <a href="recendiagnoses.html" class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold text-center hover:opacity-90">View All</a>

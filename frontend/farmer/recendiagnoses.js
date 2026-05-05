@@ -25,6 +25,13 @@ function updateMiniStats() {
   document.querySelectorAll('[data-stat="pending"]').forEach(el=>el.textContent=pending);
 }
 
+function formatConfidence(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '—';
+  // Preserve the model's original percentage string (e.g. 99.5)
+  return `${String(value)}%`;
+}
+
 function render(list, container) {
   if (!container) return;
   if (!list.length) {
@@ -42,6 +49,8 @@ function diagCard(d) {
   const isPend  = d.status==='pending_expert';
   const isReviewed = d.status==='expert_reviewed';
   const plantImage = getPlantImageSrc(d);
+  const confNum = Number(d.ai_result?.confidence);
+  const confWidth = Number.isFinite(confNum) ? Math.max(0, Math.min(100, confNum)) : 0;
   return `
   <article class="bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col">
     <div class="h-40 bg-surface-container flex items-center justify-center relative overflow-hidden">
@@ -56,10 +65,9 @@ function diagCard(d) {
       <div><h3 class="font-bold text-on-surface">${d.ai_result?.disease_name||'Unknown Disease'}</h3>
         <p class="text-sm text-on-surface-variant mt-0.5">${d.crop_type||'Unknown crop'} · ${formatDate(d.created_at)}</p></div>
       <div class="flex items-center gap-2">
-        <div class="flex-1 h-2 bg-surface-variant rounded-full overflow-hidden"><div class="h-full bg-primary rounded-full" style="width:${d.ai_result?.confidence||0}%"></div></div>
-        <span class="text-xs font-semibold text-on-surface-variant">${(d.ai_result?.confidence||0).toFixed(0)}%</span>
+        <div class="flex-1 h-2 bg-surface-variant rounded-full overflow-hidden"><div class="h-full bg-primary rounded-full" style="width:${confWidth}%"></div></div>
+        <span class="text-xs font-semibold text-on-surface-variant">${formatConfidence(d.ai_result?.confidence)}</span>
       </div>
-      ${d.ai_result?.suggested_action?`<p class="text-xs text-on-surface-variant line-clamp-2">${d.ai_result.suggested_action}</p>`:''}
       <div class="flex gap-2 mt-auto pt-2 border-t border-surface-variant">
         <button data-view-diag="${d.id||d._id}" class="flex-1 py-2 border border-outline-variant rounded-xl text-xs font-medium text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span>Details</button>
         ${canAsk?`<button data-ask-expert="${d.id||d._id}" class="flex-1 py-2 bg-primary text-on-primary rounded-xl text-xs font-semibold hover:opacity-90 flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[14px]">support_agent</span>Ask Expert</button>`
@@ -74,6 +82,10 @@ function diagCard(d) {
 async function viewDiag(id) {
   try {
     const d = (await api.get(`/diagnoses/${id}`)).data;
+    const escapeHtml = (s) =>
+      String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const treatment = d.ai_result?.treatment || null;
+    const recommendation = d.ai_result?.recommendation || d.ai_result?.suggested_action || null;
     const m = document.createElement('div');
     m.className = 'fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 overflow-y-auto';
     m.innerHTML = `<div class="bg-surface rounded-2xl w-full max-w-lg shadow-xl my-auto">
@@ -83,11 +95,12 @@ async function viewDiag(id) {
       </div>
       <div class="p-5 space-y-4">
         <div class="grid grid-cols-2 gap-3">
-          <div class="bg-surface-container rounded-xl p-3"><p class="text-xs text-on-surface-variant mb-1">Confidence</p><p class="font-bold text-on-surface">${(d.ai_result?.confidence||0).toFixed(1)}%</p></div>
+          <div class="bg-surface-container rounded-xl p-3"><p class="text-xs text-on-surface-variant mb-1">Confidence</p><p class="font-bold text-on-surface">${formatConfidence(d.ai_result?.confidence)}</p></div>
           <div class="bg-surface-container rounded-xl p-3"><p class="text-xs text-on-surface-variant mb-1">Severity</p>${severityBadge(d.ai_result?.severity)}</div>
         </div>
         ${d.ai_result?.symptoms?.length?`<div><p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Symptoms</p><ul class="space-y-1">${d.ai_result.symptoms.map(s=>`<li class="flex items-center gap-2 text-sm"><span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>${s}</li>`).join('')}</ul></div>`:''}
-        ${d.ai_result?.suggested_action?`<div class="bg-primary-fixed/20 rounded-xl p-4"><p class="text-xs font-semibold text-primary uppercase tracking-wider mb-1">Suggested Action</p><p class="text-sm text-on-surface">${d.ai_result.suggested_action}</p></div>`:''}
+        ${treatment ? `<div class="bg-secondary-container/35 rounded-xl p-4"><p class="text-xs font-semibold text-on-secondary-container uppercase tracking-wider mb-1">Treatment</p><p class="text-sm text-on-surface">${escapeHtml(treatment)}</p></div>` : ''}
+        ${recommendation ? `<div class="bg-surface-container rounded-xl p-4"><p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Recommendation</p><p class="text-sm text-on-surface">${escapeHtml(recommendation)}</p></div>` : ''}
         <div class="flex items-center justify-between bg-surface-container rounded-xl p-3"><p class="text-sm text-on-surface-variant">Status</p><span class="text-sm font-semibold text-on-surface capitalize">${(d.status||'').replace(/_/g,' ')}</span></div>
       </div>
       <div class="p-5 pt-0 flex gap-3">

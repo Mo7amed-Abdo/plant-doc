@@ -21,6 +21,8 @@ const aiResultSchema = new mongoose.Schema(
     },
     symptoms: { type: [String], default: [] },
     suggested_action: { type: String, default: null },
+    treatment: { type: String, default: null },
+    recommendation: { type: String, default: null },
     analyzed_at: { type: Date, default: Date.now },
   },
   { _id: false }

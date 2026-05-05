@@ -29,6 +29,9 @@ module.exports = {
   AI_SERVICE_URL: process.env.AI_SERVICE_URL || 'http://localhost:8000/predict',
   AI_SERVICE_TIMEOUT: parseInt(process.env.AI_SERVICE_TIMEOUT, 10) || 10000,
 
+  // Optional path to a .txt file containing disease treatments & recommendations for auto-import on startup.
+  DISEASE_GUIDES_PATH: process.env.DISEASE_GUIDES_PATH || null,
+
   isDev() {
     return this.NODE_ENV === 'development';
   },

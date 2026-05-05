@@ -69,6 +69,7 @@ app.use('/api/expert',             require('./routes/expert.routes'));
 app.use('/api/company',            require('./routes/company.routes'));
 app.use('/api/company',            require('./routes/companyOps.routes'));
 app.use('/api/diagnoses',          require('./routes/diagnosis.routes'));
+app.use('/api/disease-guides',     require('./routes/diseaseGuide.routes'));
 app.use('/api/treatment-requests', require('./routes/treatmentRequest.routes'));
 app.use('/api/cases',              require('./routes/case.routes'));
 app.use('/api/chats',              require('./routes/chat.routes'));
