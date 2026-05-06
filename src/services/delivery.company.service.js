@@ -2,9 +2,52 @@
 
 const DeliveryCompany = require('../models/DeliveryCompany');
 const Delivery = require('../models/Delivery');
+const Rating = require('../models/Rating');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 const { createError } = require('../middleware/error.middleware');
 const { toMongoImage, toDataUri } = require('../utils/image');
+
+function serializeFarmerAvatar(delivery) {
+  const order = delivery?.order_id;
+  const farmerUser = order?.farmer_id?.user_id;
+  // Ensure avatar is always a browser-usable string (data URI or http URL).
+  // Some code paths might already provide a string; toDataUri handles only the Mongo image shape.
+  if (farmerUser && farmerUser.avatar && typeof farmerUser.avatar !== 'string') {
+    farmerUser.avatar = toDataUri(farmerUser.avatar);
+  }
+  return delivery;
+}
+
+async function attachDeliveryRatings(deliveryCompanyId, deliveries) {
+  const companyObjectId =
+    mongoose.Types.ObjectId.isValid(deliveryCompanyId)
+      ? new mongoose.Types.ObjectId(deliveryCompanyId)
+      : deliveryCompanyId;
+  const orderIds = (deliveries || [])
+    .map((d) => d?.order_id?._id)
+    .filter(Boolean);
+  if (!orderIds.length) return deliveries;
+
+  const ratings = await Rating.find({
+    order_id: { $in: orderIds },
+    target_type: 'delivery_company',
+    target_id: companyObjectId,
+  })
+    .select('order_id stars review')
+    .lean();
+
+  const byOrder = new Map(ratings.map((r) => [String(r.order_id), r]));
+  (deliveries || []).forEach((d) => {
+    const key = String(d?.order_id?._id || '');
+    const r = byOrder.get(key);
+    if (!r) return;
+    // Frontend expects farmer_rating / farmer_feedback
+    d.farmer_rating = r.stars || 0;
+    d.farmer_feedback = r.review || null;
+  });
+  return deliveries;
+}
 
 async function getProfile(userId) {
   const user = await User.findById(userId);
@@ -64,15 +107,18 @@ async function getAssignedOrders(companyId, query) {
       populate: {
         path: 'farmer_id',
         select: 'user_id location',
-        populate: { path: 'user_id', select: 'full_name phone' },
+        populate: { path: 'user_id', select: 'full_name phone avatar' },
       },
     })
     .populate('company_id', 'name phone email')
     .sort({ created_at: -1 })
     .skip(skip)
-    .limit(Number(limit));
+    .limit(Number(limit))
+    .lean();
 
   items = items.filter((delivery) => delivery.order_id);
+  items.forEach(serializeFarmerAvatar);
+  await attachDeliveryRatings(companyId, items);
   if (search) {
     const q = String(search).trim().toLowerCase();
     items = items.filter((delivery) => {
@@ -109,15 +155,18 @@ async function getCompletedOrders(companyId, query) {
       populate: {
         path: 'farmer_id',
         select: 'user_id location',
-        populate: { path: 'user_id', select: 'full_name phone' },
+        populate: { path: 'user_id', select: 'full_name phone avatar' },
       },
     })
     .populate('company_id', 'name phone email')
     .sort({ delivered_at: -1 })
     .skip(skip)
-    .limit(Number(limit));
+    .limit(Number(limit))
+    .lean();
 
   items = items.filter((delivery) => delivery.order_id);
+  items.forEach(serializeFarmerAvatar);
+  await attachDeliveryRatings(companyId, items);
   if (search) {
     const q = String(search).trim().toLowerCase();
     items = items.filter((delivery) => {

@@ -2,6 +2,7 @@
 
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
+const { toDataUri } = require('./image');
 
 /**
  * Signs a JWT token.
@@ -42,6 +43,9 @@ function buildAuthResponse(user, profileId) {
 
   const token = signToken(payload);
 
+  // Normalize avatar for the frontend (data URI) so UI code can safely render it everywhere.
+  const avatar = user.avatar ? toDataUri(user.avatar) : null;
+
   return {
     token,
     user: {
@@ -50,7 +54,7 @@ function buildAuthResponse(user, profileId) {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      avatar: user.avatar || null,
+      avatar,
       is_active: user.is_active,
     },
   };

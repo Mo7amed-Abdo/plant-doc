@@ -130,6 +130,7 @@ function orderRow(o) {
   const farmer     = o.farmer_id || {};
   const farmerName = farmer.user_id?.full_name || farmer.location || 'Farmer';
   const initials   = farmerName.substring(0, 2).toUpperCase();
+  const farmerAvatar = farmer.user_id?.avatar || farmer.avatar || '';
 
   return `
     <tr data-order-id="${o._id}"
@@ -143,10 +144,9 @@ function orderRow(o) {
       <!-- Farmer -->
       <td class="px-6 py-4">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-full bg-primary-fixed/20 text-primary
-                      flex items-center justify-center font-bold text-xs shrink-0">
-            ${initials}
-          </div>
+          ${farmerAvatar
+            ? `<img src="${_esc(farmerAvatar)}" alt="${_esc(farmerName)}" class="w-8 h-8 rounded-full object-cover border border-primary/15 shadow-sm shrink-0" />`
+            : `<div class="w-8 h-8 rounded-full bg-primary-fixed/20 text-primary flex items-center justify-center font-bold text-xs shrink-0">${initials}</div>`}
           <div class="min-w-0">
             <p class="font-medium text-on-surface truncate">${_esc(farmerName)}</p>
             ${farmer.location

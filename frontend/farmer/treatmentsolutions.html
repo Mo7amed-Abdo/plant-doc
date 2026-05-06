@@ -727,6 +727,33 @@
         ───────────────────────────────────── */
         let cart = [];
 
+        function getServerCartListingId(item) {
+            const listing = item?.product_listing_id;
+            if (!listing) return '';
+            return String(listing._id || listing.id || listing);
+        }
+
+        async function syncServerCartExact(localItems) {
+            if (typeof api === 'undefined') return;
+
+            const apiItems = localItems.filter(i => i.isApi);
+            const serverCart = (await api.get('/cart')).data || {};
+            const serverItems = serverCart.items || [];
+
+            await Promise.all(serverItems.map((item) => {
+                const listingId = getServerCartListingId(item);
+                return listingId ? api.delete(`/cart/items/${listingId}`).catch(() => null) : null;
+            }));
+
+            await Promise.all(apiItems.map(item =>
+                api.post('/cart/items', {
+                    product_listing_id: item.id,
+                    quantity: item.qty,
+                    price_snapshot: item.price
+                })
+            ));
+        }
+
         /* ─────────────────────────────────────
            Add to Cart
         ───────────────────────────────────── */
@@ -959,13 +986,7 @@
                     // ── Real API products: sync then checkout ──
 
                     // Step 1: push every item to server cart (await all)
-                    await Promise.all(apiItems.map(item =>
-                        api.post('/cart/items', {
-                            product_listing_id: item.id,
-                            quantity:           item.qty,
-                            price_snapshot:     item.price
-                        }).catch(() => {})
-                    ));
+                    await syncServerCartExact(cart);
 
                     // Step 2: checkout
                     const res = await api.post('/cart/checkout', {

@@ -588,7 +588,13 @@ function timeAgo(iso) {
   return formatDate(iso);
 }
 function escapeHtml(str) {
-  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // Some API fields may arrive as non-strings (e.g. objects when not serialized).
+  // Coerce safely so UI never crashes.
+  return String(str ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
 }
 
 // ── Badges ────────────────────────────────────────────────────────────────────

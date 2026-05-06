@@ -170,9 +170,28 @@ async function syncCart() {
   catch(_) {}
 }
 
+function cartListingId(item) {
+  const listing = item?.product_listing_id;
+  if (!listing) return '';
+  return String(listing._id || listing.id || listing);
+}
+
+async function syncServerCartExact(items) {
+  const serverItems = (await api.get('/cart')).data?.items || [];
+  await Promise.all(serverItems.map((item) => {
+    const listingId = cartListingId(item);
+    return listingId ? api.delete(`/cart/items/${listingId}`).catch(() => null) : null;
+  }));
+  await Promise.all(items.map((item) => api.post('/cart/items', {
+    product_listing_id: cartListingId(item),
+    quantity: item.quantity,
+    price_snapshot: item.price_snapshot || 0,
+  })));
+}
+
 async function addToCart(listingId, name, price) {
   const cleanPrice = parseFloat(price) || 0;
-  const ex = _cart.find(i => i.product_listing_id === listingId);
+  const ex = _cart.find(i => cartListingId(i) === String(listingId));
   if (ex) ex.quantity += 1;
   else _cart.push({ product_listing_id: listingId, quantity: 1, price_snapshot: cleanPrice, _name: name });
 
@@ -197,13 +216,13 @@ async function addToCart(listingId, name, price) {
 }
 
 async function removeFromCart(id) {
-  _cart = _cart.filter(i=>i.product_listing_id!==id); updateBadge(); renderCart();
+  _cart = _cart.filter(i=>cartListingId(i)!==String(id)); updateBadge(); renderCart();
   try { await api.delete(`/cart/items/${id}`); } catch(_) { await syncCart(); }
 }
 
 async function updateQty(id, qty) {
   if (qty<1) { removeFromCart(id); return; }
-  const item = _cart.find(i=>i.product_listing_id===id);
+  const item = _cart.find(i=>cartListingId(i)===String(id));
   if (item) item.quantity=qty; updateBadge(); renderCart();
   try { await api.put(`/cart/items/${id}`,{quantity:qty}); } catch(_) {}
 }
@@ -237,11 +256,11 @@ function renderCart() {
     <div class="flex items-center gap-3 bg-surface-container rounded-xl p-3">
       <div class="flex-1 min-w-0"><p class="text-sm font-semibold text-on-surface truncate">${i._name||'Product'}</p><p class="text-xs text-on-surface-variant">$${(i.price_snapshot||0).toFixed(2)} each</p></div>
       <div class="flex items-center gap-1">
-        <button onclick="updateQty('${i.product_listing_id}',${i.quantity-1})" class="w-7 h-7 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-variant text-lg font-bold">−</button>
+        <button onclick="updateQty('${cartListingId(i)}',${i.quantity-1})" class="w-7 h-7 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-variant text-lg font-bold">−</button>
         <span class="w-8 text-center text-sm font-bold text-on-surface">${i.quantity}</span>
-        <button onclick="updateQty('${i.product_listing_id}',${i.quantity+1})" class="w-7 h-7 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-variant text-lg font-bold">+</button>
+        <button onclick="updateQty('${cartListingId(i)}',${i.quantity+1})" class="w-7 h-7 rounded-lg border border-outline-variant flex items-center justify-center text-on-surface hover:bg-surface-variant text-lg font-bold">+</button>
       </div>
-      <button onclick="removeFromCart('${i.product_listing_id}')" class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+      <button onclick="removeFromCart('${cartListingId(i)}')" class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-[18px]">delete</span></button>
     </div>`).join('');
 }
 
@@ -274,6 +293,7 @@ async function startCheckout() {
     if (!street||!city||!country) { showToast('Please fill required fields','error'); return; }
     const btn=m.querySelector('#place-btn'); btn.disabled=true; btn.textContent='Placing…';
     try {
+      await syncServerCartExact(_cart);
       const res = await api.post('/cart/checkout',{shipping_address:{street,city,country,state:'',zip:''},contact_phone:m.querySelector('#sh-phone').value.trim()||null,notes:m.querySelector('#sh-notes').value.trim()||null});
       m.remove(); _cart=[]; updateBadge(); renderCart(); if(_cartOpen) toggleCart();
       showToast(`${res.data.length} order(s) placed!`,'success');

@@ -91,6 +91,24 @@
             color: #ffffff;
             border-color: #006a39;
         }
+
+        /* Completed order card */
+        @keyframes cardFadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .order-card {
+            animation: cardFadeUp 0.38s cubic-bezier(.22,.68,0,1.2) both;
+        }
+        .order-card:hover {
+            box-shadow: 0 12px 36px -8px rgba(0,106,57,0.15), 0 4px 12px -4px rgba(0,0,0,0.06);
+        }
+        .icon-chip {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+        }
+        .star-filled { color: #f59e0b; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .star-empty  { color: #d1d5db; font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
     </style>
 </head>
 
@@ -173,7 +191,6 @@
                 </div>
 
                 <div class="flex items-center gap-3 flex-wrap">
-
                     <div class="flex items-center gap-2 bg-surface-container-lowest border border-surface-variant rounded-[12px] p-1.5">
                         <span class="text-xs font-medium text-on-surface-variant px-2 hidden sm:block">Date:</span>
                         <button class="date-pill active px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 active:scale-[0.97]" data-period="7">
