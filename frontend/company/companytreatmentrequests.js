@@ -1,10 +1,10 @@
-// companytreatmentrequests.js
+﻿// companytreatmentrequests.js
 //
 // Treatment Requests = pending orders waiting for company acceptance.
 // Flow:
-//   Farmer checks out → order.status = 'pending' → appears here
-//   Company ACCEPTS  → PUT /orders/:id/status { status: 'processing' } → moves to Orders page
-//   Company REJECTS  → PUT /orders/:id/reject  { rejection_reason }    → cancelled + farmer notified
+//   Farmer checks out â†’ order.status = 'pending' â†’ appears here
+//   Company ACCEPTS  â†’ PUT /orders/:id/status { status: 'processing' } â†’ moves to Orders page
+//   Company REJECTS  â†’ PUT /orders/:id/reject  { rejection_reason }    â†’ cancelled + farmer notified
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('company')) return;
@@ -61,19 +61,22 @@ async function loadRequests() {
   }
 }
 
-// ─── Card rendering ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Card rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function reqCard(o) {
   const farmer      = o.farmer_id || {};
-  const farmerName  = farmer.user_id?.full_name || farmer.location || 'Farmer';
+  const farmerUser  = farmer.user_id || {};
+  const farmerName  = farmerUser.full_name || farmer.location || 'Farmer';
   const farmerLoc   = farmer.location || '';
+  const farmerAvatar = extractAvatarUrl(farmerUser.avatar);
+  const farmerInitials = getInitials(farmerName);
   const items       = o.items || [];
   const addr        = o.shipping_address || {};
 
   const itemNames   = items.slice(0, 2).map(i => i.product_name_snapshot).filter(Boolean);
   const itemPreview = itemNames.length
     ? escapeHtml(itemNames.join(', ') + (items.length > 2 ? ` +${items.length - 2} more` : ''))
-    : '—';
+    : 'â€”';
   const addrLine = [addr.city, addr.state, addr.country].filter(Boolean).join(', ');
 
   const status = o.status || 'pending';
@@ -82,33 +85,29 @@ function reqCard(o) {
     : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant">${escapeHtml(status)}</span>`;
 
   return `
-    <div class="bg-surface-container-lowest rounded-[16px] border border-surface-variant
-                shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
-      <!-- Header -->
-      <div class="p-5 border-b border-surface-variant/50 flex items-start justify-between gap-3">
+    <div class="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col">
+      <div class="h-1 bg-gradient-to-r from-emerald-400 via-green-500 to-teal-500 rounded-t-2xl"></div>
+      <div class="px-5 pt-4 pb-4 flex items-start justify-between gap-3 border-b border-surface-variant/50">
         <div class="flex items-center gap-3 min-w-0">
-          <div class="w-11 h-11 rounded-xl bg-primary-fixed/20 text-primary font-bold text-sm
-                      flex items-center justify-center shrink-0">
-            ${farmerName.substring(0, 2).toUpperCase()}
-          </div>
+          ${isRenderableAvatar(farmerAvatar)
+            ? `<img src="${escapeHtml(farmerAvatar)}" alt="${escapeHtml(farmerName)}" class="w-11 h-11 rounded-full object-cover border-2 border-white shadow-md shrink-0">`
+            : avatarFallbackMarkup(farmerInitials, farmerName)}
           <div class="min-w-0">
-            <p class="font-bold text-on-surface truncate">${escapeHtml(farmerName)}</p>
+            <p class="text-sm font-bold text-on-surface truncate">${escapeHtml(farmerName)}</p>
             ${farmerLoc
               ? `<p class="text-xs text-on-surface-variant truncate">${escapeHtml(farmerLoc)}</p>`
               : ''}
           </div>
         </div>
         <div class="flex flex-col items-end gap-2 shrink-0">
-          <span class="text-xs font-semibold text-on-surface-variant bg-surface-container
-                       px-2.5 py-1 rounded-full">
-            ${o.order_code}
+          <span class="text-xs font-semibold text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full">
+            ${escapeHtml(o.order_code)}
           </span>
           ${statusBadge}
         </div>
       </div>
-      <!-- Body -->
-      <div class="p-5 space-y-3 flex-1">
-        <div class="bg-surface-container rounded-xl p-3">
+      <div class="p-5 space-y-3.5 flex-1">
+        <div class="bg-surface-container rounded-2xl p-4">
           <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">
             Requested Products (${items.length})
           </p>
@@ -119,13 +118,14 @@ function reqCard(o) {
           <span class="text-base font-bold text-on-surface">$${(o.total || 0).toFixed(2)}</span>
         </div>
         ${addrLine
-          ? `<div class="flex items-center gap-1.5 text-xs text-on-surface-variant">
-               <span class="material-symbols-outlined text-[14px]">location_on</span>
+          ? `<div class="flex items-center gap-2 text-xs text-on-surface-variant">
+               <span class="w-7 h-7 rounded-lg bg-rose-50 inline-flex items-center justify-center shrink-0">
+                 <span class="material-symbols-outlined text-rose-400 text-[14px]">location_on</span>
+               </span>
                <span class="truncate">${escapeHtml(addrLine)}</span>
              </div>`
           : ''}
       </div>
-      <!-- Actions -->
        <div class="px-5 pb-5 flex gap-2">
          <button data-view-req="${o._id}"
                  class="flex-1 py-2.5 border border-outline-variant rounded-xl text-sm font-medium
@@ -154,13 +154,16 @@ function reqCard(o) {
      </div>`;
 }
 
-// ─── Details modal ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Details modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function viewDetails(orderId) {
   try {
     const { order: o, items } = (await api.get(`/company/orders/${orderId}`)).data;
     const farmer     = o.farmer_id || {};
-    const farmerName = farmer.user_id?.full_name || farmer.location || 'Farmer';
+    const farmerUser = farmer.user_id || {};
+    const farmerName = farmerUser.full_name || farmer.location || 'Farmer';
+    const farmerAvatar = extractAvatarUrl(farmerUser.avatar);
+    const farmerInitials = getInitials(farmerName);
     const addr       = o.shipping_address || {};
 
     const status = o.status || 'pending';
@@ -189,10 +192,9 @@ async function viewDetails(orderId) {
         <div class="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
           <!-- Farmer info -->
           <div class="bg-surface-container rounded-xl p-4 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container
-                        flex items-center justify-center font-bold shrink-0">
-              ${farmerName.substring(0, 2).toUpperCase()}
-            </div>
+            ${isRenderableAvatar(farmerAvatar)
+              ? `<img src="${escapeHtml(farmerAvatar)}" alt="${escapeHtml(farmerName)}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md shrink-0">`
+              : `<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold shrink-0">${escapeHtml(farmerInitials)}</div>`}
             <div>
               <p class="text-sm font-semibold text-on-surface">${escapeHtml(farmerName)}</p>
               ${farmer.location
@@ -209,15 +211,19 @@ async function viewDetails(orderId) {
               Requested Products (${items?.length || 0})
             </p>
             <div class="space-y-2">
-              ${(items || []).map(i => `
+              ${(items || []).map(i => {
+                const productImage = extractProductImageUrl(i);
+                const productName = i.product_name_snapshot || i.product_id?.name || 'Product';
+                return `
                 <div class="flex items-center gap-3 bg-surface-container rounded-xl p-3">
-                  <div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center
-                              justify-center shrink-0">
-                    <span class="material-symbols-outlined text-on-surface-variant text-[18px]">science</span>
-                  </div>
+                  ${
+                    isRenderableAvatar(productImage)
+                      ? `<img src="${escapeHtml(productImage)}" alt="${escapeHtml(productName)}" class="w-9 h-9 rounded-lg object-cover border border-surface-variant/50 bg-surface-container-high shrink-0">`
+                      : `<div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-surface-variant text-[18px]">science</span></div>`
+                  }
                   <div class="flex-1">
                     <p class="text-sm font-semibold text-on-surface">
-                      ${escapeHtml(i.product_name_snapshot)}
+                      ${escapeHtml(productName)}
                     </p>
                     <p class="text-xs text-on-surface-variant">
                       ${i.quantity} × $${(i.unit_price || 0).toFixed(2)}
@@ -226,7 +232,8 @@ async function viewDetails(orderId) {
                   </div>
                   <span class="font-bold text-sm text-on-surface">$${(i.subtotal || 0).toFixed(2)}</span>
                 </div>
-              `).join('')}
+              `;
+            }).join('')}
             </div>
           </div>
           <!-- Shipping address -->
@@ -234,9 +241,9 @@ async function viewDetails(orderId) {
             <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">
               Shipping Address
             </p>
-            <p class="text-sm text-on-surface">${addr.street || '—'}</p>
+            <p class="text-sm text-on-surface">${addr.street || 'â€”'}</p>
             <p class="text-sm text-on-surface-variant">
-              ${[addr.city, addr.state, addr.country].filter(Boolean).join(', ') || '—'}
+              ${[addr.city, addr.state, addr.country].filter(Boolean).join(', ') || 'â€”'}
             </p>
           </div>
           <!-- Totals -->
@@ -286,10 +293,10 @@ async function viewDetails(orderId) {
   }
 }
 
-// ─── Accept ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Accept â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function acceptRequest(orderId, btn) {
-  if (btn) { btn.disabled = true; btn.textContent = 'Accepting…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Acceptingâ€¦'; }
   try {
     await api.put(`/company/orders/${orderId}/status`, { status: 'processing' });
     showToast('Order accepted! Now processing.', 'success');
@@ -300,7 +307,7 @@ async function acceptRequest(orderId, btn) {
   }
 }
 
-// ─── Reject modal ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ Reject modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function openRejectModal(orderId) {
   const m = document.createElement('div');
@@ -319,7 +326,7 @@ function openRejectModal(orderId) {
           <span class="text-on-surface-variant font-normal ml-1">(optional)</span>
         </label>
         <textarea id="reject-reason" rows="3"
-                  placeholder="e.g. Product out of stock, unable to fulfil at this time…"
+                  placeholder="e.g. Product out of stock, unable to fulfil at this timeâ€¦"
                   class="w-full px-4 py-3 border border-outline-variant rounded-xl text-sm
                          focus:ring-1 focus:ring-primary resize-none bg-surface-container-lowest">
         </textarea>
@@ -345,7 +352,7 @@ function openRejectModal(orderId) {
     const reason = m.querySelector('#reject-reason').value.trim();
     const btn    = m.querySelector('#confirm-reject');
     btn.disabled    = true;
-    btn.textContent = 'Rejecting…';
+    btn.textContent = 'Rejectingâ€¦';
     try {
       await api.put(`/company/orders/${orderId}/reject`, {
         rejection_reason: reason || undefined,
@@ -361,7 +368,7 @@ function openRejectModal(orderId) {
   });
 }
 
-// ─── Private helpers ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Private helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function _findContainer() {
   return (
@@ -386,6 +393,91 @@ function _wireButtons(container) {
 
 const setText = (sel, val) =>
   document.querySelectorAll(sel).forEach(el => (el.textContent = val ?? ''));
+
+function getInitials(name) {
+  return String(name || 'FA')
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0] || '')
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'FA';
+}
+
+function avatarFallbackMarkup(initials, farmerName) {
+  return `<div class="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary text-sm font-bold border-2 border-white shadow-md shrink-0" aria-label="${escapeHtml(farmerName)}">${escapeHtml(initials)}</div>`;
+}
+
+function isRenderableAvatar(value) {
+  const s = String(value || '').trim();
+  if (!s) return false;
+  return s.startsWith('data:image/') || s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/');
+}
+
+function extractAvatarUrl(avatar) {
+  if (!avatar) return '';
+  if (typeof avatar === 'string') return resolveAssetUrl(avatar);
+
+  // Handle Mongo image object on frontend if backend sends raw object.
+  const contentType = avatar.content_type || avatar.contentType || 'image/jpeg';
+  const raw = avatar.data;
+  if (!raw) return '';
+
+  try {
+    if (Array.isArray(raw)) {
+      return toDataUriFromBytes(raw, contentType);
+    }
+    if (raw && raw.type === 'Buffer' && Array.isArray(raw.data)) {
+      return toDataUriFromBytes(raw.data, contentType);
+    }
+    if (raw && typeof raw === 'object') {
+      const values = Object.values(raw).filter(v => Number.isFinite(Number(v))).map(v => Number(v));
+      if (values.length) return toDataUriFromBytes(values, contentType);
+    }
+  } catch (_) {
+    return '';
+  }
+
+  return '';
+}
+
+function extractProductImageUrl(item) {
+  if (!item || !item.product_id) return '';
+  const image = item.product_id.default_image;
+  if (!image) return '';
+  if (typeof image === 'string') return resolveAssetUrl(image);
+
+  const contentType = image.content_type || image.contentType || 'image/jpeg';
+  const raw = image.data;
+  if (!raw) return '';
+
+  try {
+    if (Array.isArray(raw)) {
+      return toDataUriFromBytes(raw, contentType);
+    }
+    if (raw && raw.type === 'Buffer' && Array.isArray(raw.data)) {
+      return toDataUriFromBytes(raw.data, contentType);
+    }
+    if (raw && typeof raw === 'object') {
+      const values = Object.values(raw).filter(v => Number.isFinite(Number(v))).map(v => Number(v));
+      if (values.length) return toDataUriFromBytes(values, contentType);
+    }
+  } catch (_) {
+    return '';
+  }
+
+  return '';
+}
+
+function toDataUriFromBytes(bytes, contentType) {
+  const uint8 = new Uint8Array(bytes);
+  let binary = '';
+  for (let i = 0; i < uint8.length; i += 1) {
+    binary += String.fromCharCode(uint8[i]);
+  }
+  const base64 = btoa(binary);
+  return `data:${contentType};base64,${base64}`;
+}
 
 function setupFilterUI() {
   const filterBtn = document.querySelector('button[data-filter]');
@@ -529,3 +621,4 @@ function showNotifDot(on) {
     el.classList.toggle('hidden', !on);
   });
 }
+

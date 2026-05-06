@@ -501,6 +501,7 @@ function renderRecentOrders(orders) {
     const farmer     = o.farmer_id || {};
     const farmerName = farmer.user_id?.full_name || farmer.location || 'Farmer';
     const initials   = farmerName.substring(0, 2).toUpperCase();
+    const farmerAvatar = extractAvatarUrl(farmer.user_id?.avatar || farmer.avatar || '');
 
     return `
       <tr class="hover:bg-surface-container-low/50 transition-colors cursor-pointer group"
@@ -514,10 +515,9 @@ function renderRecentOrders(orders) {
         <!-- Farmer -->
         <td class="px-6 py-4">
           <div class="flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-full bg-primary-fixed/20 text-primary font-bold text-xs
-                        flex items-center justify-center shrink-0">
-              ${initials}
-            </div>
+            ${isRenderableAvatar(farmerAvatar)
+              ? `<img src="${_esc(farmerAvatar)}" alt="${_esc(farmerName)}" class="w-7 h-7 rounded-full object-cover border border-primary/15 shadow-sm shrink-0" />`
+              : `<div class="w-7 h-7 rounded-full bg-primary-fixed/20 text-primary font-bold text-xs flex items-center justify-center shrink-0">${initials}</div>`}
             <span class="font-medium text-on-surface text-sm truncate max-w-[130px]">
               ${_esc(farmerName)}
             </span>
@@ -649,3 +649,37 @@ function _esc(str) {
 
 const setText = (sel, val) =>
   document.querySelectorAll(sel).forEach(el => (el.textContent = val ?? ''));
+
+function isRenderableAvatar(value) {
+  const s = String(value || '').trim();
+  if (!s) return false;
+  return s.startsWith('data:image/') || s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/');
+}
+
+function extractAvatarUrl(avatar) {
+  if (!avatar) return '';
+  if (typeof avatar === 'string') {
+    return typeof resolveAssetUrl === 'function' ? resolveAssetUrl(avatar) : avatar;
+  }
+  const contentType = avatar.content_type || avatar.contentType || 'image/jpeg';
+  const raw = avatar.data;
+  if (!raw) return '';
+  try {
+    if (Array.isArray(raw)) return toDataUriFromBytes(raw, contentType);
+    if (raw && raw.type === 'Buffer' && Array.isArray(raw.data)) return toDataUriFromBytes(raw.data, contentType);
+    if (raw && typeof raw === 'object') {
+      const values = Object.values(raw).filter(v => Number.isFinite(Number(v))).map(v => Number(v));
+      if (values.length) return toDataUriFromBytes(values, contentType);
+    }
+  } catch (_) {
+    return '';
+  }
+  return '';
+}
+
+function toDataUriFromBytes(bytes, contentType) {
+  const uint8 = new Uint8Array(bytes);
+  let binary = '';
+  for (let i = 0; i < uint8.length; i += 1) binary += String.fromCharCode(uint8[i]);
+  return `data:${contentType};base64,${btoa(binary)}`;
+}

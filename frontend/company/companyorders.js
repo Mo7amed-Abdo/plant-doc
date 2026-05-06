@@ -130,7 +130,7 @@ function orderRow(o) {
   const farmer     = o.farmer_id || {};
   const farmerName = farmer.user_id?.full_name || farmer.location || 'Farmer';
   const initials   = farmerName.substring(0, 2).toUpperCase();
-  const farmerAvatar = farmer.user_id?.avatar || farmer.avatar || '';
+  const farmerAvatar = extractAvatarUrl(farmer.user_id?.avatar || farmer.avatar || '');
 
   return `
     <tr data-order-id="${o._id}"
@@ -144,7 +144,7 @@ function orderRow(o) {
       <!-- Farmer -->
       <td class="px-6 py-4">
         <div class="flex items-center gap-3">
-          ${farmerAvatar
+          ${isRenderableAvatar(farmerAvatar)
             ? `<img src="${_esc(farmerAvatar)}" alt="${_esc(farmerName)}" class="w-8 h-8 rounded-full object-cover border border-primary/15 shadow-sm shrink-0" />`
             : `<div class="w-8 h-8 rounded-full bg-primary-fixed/20 text-primary flex items-center justify-center font-bold text-xs shrink-0">${initials}</div>`}
           <div class="min-w-0">
@@ -225,6 +225,7 @@ async function openModal(orderId) {
 
     const farmer     = o.farmer_id || {};
     const farmerName = farmer.user_id?.full_name || farmer.location || 'Farmer';
+    const farmerAvatar = extractAvatarUrl(farmer.user_id?.avatar || farmer.avatar || '');
     const farmerPhone = farmer.user_id?.phone || o.contact_phone || null;
     const addr       = o.shipping_address || {};
     const addrLine   = [addr.street, addr.city, addr.state, addr.country].filter(Boolean).join(', ');
@@ -269,10 +270,9 @@ async function openModal(orderId) {
 
             <!-- Farmer info card -->
             <div class="bg-surface-container rounded-xl p-4 flex items-center gap-3">
-              <div class="w-11 h-11 rounded-full bg-primary-fixed/20 text-primary font-bold text-sm
-                          flex items-center justify-center shrink-0">
-                ${farmerName.substring(0, 2).toUpperCase()}
-              </div>
+              ${isRenderableAvatar(farmerAvatar)
+                ? `<img src="${_esc(farmerAvatar)}" alt="${_esc(farmerName)}" class="w-11 h-11 rounded-full object-cover border border-primary/15 shadow-sm shrink-0" />`
+                : `<div class="w-11 h-11 rounded-full bg-primary-fixed/20 text-primary font-bold text-sm flex items-center justify-center shrink-0">${farmerName.substring(0, 2).toUpperCase()}</div>`}
               <div class="min-w-0">
                 <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-0.5">
                   Farmer
@@ -317,18 +317,22 @@ async function openModal(orderId) {
 
             <!-- Product rows -->
             <div class="divide-y divide-surface-variant/60">
-              ${(items || []).map(i => `
+              ${(items || []).map(i => {
+                const productImage = extractProductImageUrl(i);
+                const productName = i.product_name_snapshot || i.product_id?.name || '—';
+                return `
                 <div class="grid grid-cols-12 items-center py-3 px-3 hover:bg-surface-container/50
                             rounded-lg transition-colors">
                   <!-- Name + category -->
                   <div class="col-span-5 flex items-center gap-3 min-w-0">
-                    <div class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center
-                                justify-center shrink-0">
-                      <span class="material-symbols-outlined text-primary text-[18px]">science</span>
-                    </div>
+                    ${
+                      isRenderableAvatar(productImage)
+                        ? `<img src="${_esc(productImage)}" alt="${_esc(productName)}" class="w-9 h-9 rounded-lg object-cover border border-primary/15 shadow-sm shrink-0" />`
+                        : `<div class="w-9 h-9 rounded-lg bg-primary-fixed/20 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-primary text-[18px]">science</span></div>`
+                    }
                     <div class="min-w-0">
                       <p class="text-sm font-semibold text-on-surface truncate">
-                        ${_esc(i.product_name_snapshot || i.product_id?.name || '—')}
+                        ${_esc(productName)}
                       </p>
                       ${i.product_id?.category
                         ? `<p class="text-xs text-on-surface-variant capitalize">${_esc(i.product_id.category)}</p>`
@@ -350,7 +354,8 @@ async function openModal(orderId) {
                   <div class="col-span-3 text-right">
                     <span class="text-sm font-bold text-on-surface">$${(i.subtotal || 0).toFixed(2)}</span>
                   </div>
-                </div>`).join('')}
+                </div>`;
+              }).join('')}
             </div>
           </div>
 
@@ -650,3 +655,63 @@ function openShipModal(companies, isReassign = false) {
 
 const setText = (sel, val) =>
   document.querySelectorAll(sel).forEach(el => (el.textContent = val ?? ''));
+
+function isRenderableAvatar(value) {
+  const s = String(value || '').trim();
+  if (!s) return false;
+  return s.startsWith('data:image/') || s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/');
+}
+
+function extractAvatarUrl(avatar) {
+  if (!avatar) return '';
+  if (typeof avatar === 'string') {
+    return typeof resolveAssetUrl === 'function' ? resolveAssetUrl(avatar) : avatar;
+  }
+  const contentType = avatar.content_type || avatar.contentType || 'image/jpeg';
+  const raw = avatar.data;
+  if (!raw) return '';
+
+  try {
+    if (Array.isArray(raw)) return toDataUriFromBytes(raw, contentType);
+    if (raw && raw.type === 'Buffer' && Array.isArray(raw.data)) return toDataUriFromBytes(raw.data, contentType);
+    if (raw && typeof raw === 'object') {
+      const values = Object.values(raw).filter(v => Number.isFinite(Number(v))).map(v => Number(v));
+      if (values.length) return toDataUriFromBytes(values, contentType);
+    }
+  } catch (_) {
+    return '';
+  }
+  return '';
+}
+
+function toDataUriFromBytes(bytes, contentType) {
+  const uint8 = new Uint8Array(bytes);
+  let binary = '';
+  for (let i = 0; i < uint8.length; i += 1) binary += String.fromCharCode(uint8[i]);
+  return `data:${contentType};base64,${btoa(binary)}`;
+}
+
+function extractProductImageUrl(item) {
+  if (!item || !item.product_id) return '';
+  const image = item.product_id.default_image;
+  if (!image) return '';
+  if (typeof image === 'string') {
+    return typeof resolveAssetUrl === 'function' ? resolveAssetUrl(image) : image;
+  }
+
+  const contentType = image.content_type || image.contentType || 'image/jpeg';
+  const raw = image.data;
+  if (!raw) return '';
+
+  try {
+    if (Array.isArray(raw)) return toDataUriFromBytes(raw, contentType);
+    if (raw && raw.type === 'Buffer' && Array.isArray(raw.data)) return toDataUriFromBytes(raw.data, contentType);
+    if (raw && typeof raw === 'object') {
+      const values = Object.values(raw).filter(v => Number.isFinite(Number(v))).map(v => Number(v));
+      if (values.length) return toDataUriFromBytes(values, contentType);
+    }
+  } catch (_) {
+    return '';
+  }
+  return '';
+}

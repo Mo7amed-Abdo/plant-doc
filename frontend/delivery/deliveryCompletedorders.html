@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./delivery-sidebar.css" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -114,7 +115,7 @@
 
 <body class="bg-background text-on-background min-h-screen flex font-body">
 
-    <nav class="bg-slate-50 text-green-600 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
+    <nav class="delivery-sidebar bg-slate-50 text-green-600 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
         <div class="flex items-center gap-1">
             <div class="flex items-center">
                 <img src="logo dark.png" alt="" class="w-26 h-28">
@@ -131,7 +132,7 @@
                 <span class="material-symbols-outlined">local_shipping</span>
                 <span>Active Orders</span>
             </a>
-            <a class="bg-green-700 text-white rounded-xl p-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="#">
+            <a class="bg-green-700 text-white rounded-xl p-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="deliveryCompletedorders.html">
                 <span class="material-symbols-outlined fill">task_alt</span>
                 <span>Completed Orders</span>
             </a>
@@ -232,6 +233,7 @@
     </script>
 
     <script src="../api.js"></script>
+    <script src="./delivery-sidebar.js"></script>
     <script src="./deliverycompletedorders.js"></script>
 </body>
 </html>

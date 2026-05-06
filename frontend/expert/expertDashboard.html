@@ -134,6 +134,8 @@
         .validated-cases-table tbody tr:not(:last-child) td {
             box-shadow: inset 0 -1px 0 rgba(25, 28, 29, 0.10);
         }
+        .stat-card { transition: transform .25s ease, box-shadow .25s ease; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -16px rgba(0,106,57,.35); }
     </style>
 </head>
 
@@ -249,9 +251,9 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <!-- Stat Card 1 -->
                 <div
-                    class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group">
+                    class="stat-card bg-amber-50/60 rounded-[16px] p-6 shadow-sm border border-amber-100 relative overflow-hidden group">
                     <div
-                        class="absolute -right-4 -top-4 w-24 h-24 bg-tertiary-container/20 rounded-full blur-2xl group-hover:bg-tertiary-container/30 transition-all">
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-amber-200/45 rounded-full blur-2xl group-hover:bg-amber-200/60 transition-all">
                     </div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
                         <div class="p-3 bg-tertiary-container/10 rounded-lg text-tertiary">
@@ -269,9 +271,9 @@
                 </div>
                 <!-- Stat Card 2 -->
                 <div
-                    class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group">
+                    class="stat-card bg-emerald-50/60 rounded-[16px] p-6 shadow-sm border border-emerald-100 relative overflow-hidden group">
                     <div
-                        class="absolute -right-4 -top-4 w-24 h-24 bg-primary-container/20 rounded-full blur-2xl group-hover:bg-primary-container/30 transition-all">
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-200/45 rounded-full blur-2xl group-hover:bg-emerald-200/60 transition-all">
                     </div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
                         <div class="p-3 bg-primary-container/10 rounded-lg text-primary">
@@ -289,9 +291,9 @@
                 </div>
                 <!-- Stat Card 3 -->
                 <div
-                    class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group">
+                    class="stat-card bg-cyan-50/55 rounded-[16px] p-6 shadow-sm border border-cyan-100 relative overflow-hidden group">
                     <div
-                        class="absolute -right-4 -top-4 w-24 h-24 bg-secondary-container/20 rounded-full blur-2xl group-hover:bg-secondary-container/30 transition-all">
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-cyan-200/45 rounded-full blur-2xl group-hover:bg-cyan-200/60 transition-all">
                     </div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
                         <div class="p-3 bg-secondary-container/10 rounded-lg text-secondary">

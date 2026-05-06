@@ -57,7 +57,7 @@ async function getDashboard(companyId) {
   const FARMER_POPULATE = {
     path: 'farmer_id',
     select: 'user_id location',
-    populate: { path: 'user_id', select: 'full_name' },
+    populate: { path: 'user_id', select: 'full_name avatar' },
   };
 
   const [
@@ -102,6 +102,12 @@ async function getDashboard(companyId) {
   ]);
 
   const revenue = deliveredOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+  recentOrders.forEach((order) => {
+    const farmerUser = order?.farmer_id?.user_id;
+    if (farmerUser?.avatar && typeof farmerUser.avatar !== 'string') {
+      farmerUser.avatar = toDataUri(farmerUser.avatar);
+    }
+  });
 
   return {
     active_listings:       activeListings,

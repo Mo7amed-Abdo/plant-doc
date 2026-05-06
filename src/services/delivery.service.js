@@ -20,8 +20,16 @@ const notificationService = require('./notification.service');
 const FARMER_POPULATE = {
   path: 'farmer_id',
   select: 'user_id location',
-  populate: { path: 'user_id', select: 'full_name phone' },
+  populate: { path: 'user_id', select: 'full_name phone avatar' },
 };
+
+function serializeFarmerAvatar(order) {
+  const farmerUser = order?.farmer_id?.user_id;
+  if (farmerUser && farmerUser.avatar && typeof farmerUser.avatar !== 'string') {
+    farmerUser.avatar = toDataUri(farmerUser.avatar);
+  }
+  return order;
+}
 
 // ─── Farmer: own orders ───────────────────────────────────────────────────────
 
@@ -56,6 +64,7 @@ async function getFarmerOrders(farmerId, query) {
     });
     orders.forEach(order => {
       order.items = byOrder[order._id.toString()] || [];
+      serializeFarmerAvatar(order);
     });
   }
 
@@ -130,6 +139,7 @@ async function getTreatmentRequests(companyId, query) {
     });
     orders.forEach(order => {
       order.items = byOrder[order._id.toString()] || [];
+      serializeFarmerAvatar(order);
     });
   }
 
@@ -216,7 +226,14 @@ async function getCompanyOrderById(companyId, orderId) {
   if (!order) throw createError(404, 'Order not found');
 
   const items = await OrderItem.find({ order_id: orderId })
-    .populate('product_id', 'name category unit');
+    .populate('product_id', 'name category unit default_image');
+
+  items.forEach((item) => {
+    const product = item?.product_id;
+    if (product?.default_image && typeof product.default_image !== 'string') {
+      product.default_image = toDataUri(product.default_image);
+    }
+  });
   return { order, items };
 }
 

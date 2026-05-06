@@ -40,36 +40,47 @@ function deliveryCard(d) {
   const addr = o.shipping_address || {};
   const NEXT = { picked_up: 'on_the_way', on_the_way: 'arriving', arriving: 'delivered' };
   const NEXT_LABEL = { picked_up: 'Mark In Transit', on_the_way: 'Mark Arriving', arriving: 'Mark Delivered' };
+  const NEXT_CFG = {
+    picked_up: { cls: 'from-primary to-emerald-700', icon: 'route' },
+    on_the_way: { cls: 'from-sky-600 to-cyan-600', icon: 'pin_drop' },
+    arriving: { cls: 'from-violet-600 to-fuchsia-600', icon: 'task_alt' },
+  };
   const next = NEXT[d.status];
   const steps = ['picked_up', 'on_the_way', 'arriving', 'delivered'];
   const ci = steps.indexOf(d.status);
+  const farmer = o.farmer_id || {};
+  const ownerName = farmer.user_id?.full_name || farmer.full_name || 'Farmer';
+  const nextCfg = NEXT_CFG[d.status] || NEXT_CFG.picked_up;
 
-  return `<div class="order-card bg-surface-container-lowest rounded-[16px] border border-surface-variant shadow-sm p-5 hover:shadow-md transition-all cursor-pointer" data-delivery-id="${d._id}">
-    <div class="flex items-start justify-between mb-3">
+  return `<div class="order-card bg-surface-container-lowest/95 backdrop-blur-sm rounded-[18px] border border-surface-variant shadow-sm p-5 cursor-pointer" data-delivery-id="${d._id}">
+    <div class="flex items-start justify-between mb-4">
       <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-primary-fixed/20 text-primary flex items-center justify-center shrink-0">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-100 to-green-50 text-primary flex items-center justify-center shrink-0 border border-emerald-200/80 shadow-sm">
           <span class="material-symbols-outlined fill">local_shipping</span>
         </div>
         <div>
-          <p class="font-bold text-on-surface">${o.order_code || d._id?.slice(-8)}</p>
-          <p class="text-sm text-on-surface-variant">${formatDate(o.placed_at || d.created_at)}</p>
+          <p class="font-extrabold text-on-surface tracking-tight text-[1.06rem]">${o.order_code || d._id?.slice(-8)}</p>
+          <p class="text-sm text-on-surface-variant font-medium">${formatDate(o.placed_at || d.created_at)}</p>
+          <p class="text-xs text-on-surface-variant mt-0.5">Owner: <span class="font-semibold text-on-surface">${escapeHtml(ownerName)}</span></p>
         </div>
       </div>
       ${deliveryStatusBadge(d.status)}
     </div>
-    ${addr.street ? `<div class="flex items-start gap-2 bg-surface-container rounded-xl p-3 mb-3">
-      <span class="material-symbols-outlined text-on-surface-variant text-[18px] mt-0.5 shrink-0">location_on</span>
-      <div><p class="text-sm font-medium text-on-surface">${addr.street}</p><p class="text-xs text-on-surface-variant">${[addr.city, addr.country].filter(Boolean).join(', ')}</p></div>
+    ${addr.street ? `<div class="flex items-start gap-2.5 bg-surface-container/80 rounded-2xl p-3.5 mb-3 border border-surface-variant/70">
+      <span class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 inline-flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-rose-500 text-[17px]">location_on</span>
+      </span>
+      <div><p class="text-sm font-semibold text-on-surface">${addr.street}</p><p class="text-xs text-on-surface-variant">${[addr.city, addr.country].filter(Boolean).join(', ')}</p></div>
     </div>` : ''}
-    <div class="flex items-center gap-1 mb-4">
+    <div class="status-track flex items-center gap-1.5 mb-4">
       ${steps.map((_, i) => `<div class="flex-1 h-1.5 rounded-full ${i <= ci ? 'bg-primary' : 'bg-surface-variant'} transition-all"></div>`).join('')}
     </div>
-    <div class="flex gap-2">
-      <button type="button" onclick="openDeliveryModal('${d._id}')" class="flex-1 py-2.5 border border-outline-variant rounded-xl text-sm font-medium text-on-surface hover:bg-surface-container flex items-center justify-center gap-1">
+    <div class="flex gap-2.5">
+      <button type="button" onclick="openDeliveryModal('${d._id}')" class="flex-1 py-2.5 border border-outline-variant rounded-xl text-sm font-semibold text-on-surface hover:bg-surface-container flex items-center justify-center gap-1 transition-colors">
         <span class="material-symbols-outlined text-[16px]">visibility</span>Details
       </button>
-      ${next ? `<button type="button" data-update-status="${d._id}" data-new-status="${next}" class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:opacity-90 flex items-center justify-center gap-1 active:scale-[0.98]">
-        <span class="material-symbols-outlined text-[16px]">update</span>${NEXT_LABEL[d.status]}
+      ${next ? `<button type="button" data-update-status="${d._id}" data-new-status="${next}" class="flex-1 py-2.5 bg-gradient-to-r ${nextCfg.cls} text-on-primary rounded-xl text-sm font-bold hover:opacity-90 flex items-center justify-center gap-1 active:scale-[0.98] shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">${nextCfg.icon}</span>${NEXT_LABEL[d.status]}
       </button>` : `<span class="flex-1 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold text-center flex items-center justify-center gap-1">
         <span class="material-symbols-outlined text-[16px]">check_circle</span>Delivered
       </span>`}

@@ -85,6 +85,69 @@
         .material-symbols-outlined.fill {
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+        .stat-card {
+            position: relative;
+            isolation: isolate;
+            animation: statCardIn 700ms cubic-bezier(.2,.8,.2,1) both;
+        }
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: 16px;
+            background: linear-gradient(120deg, rgba(0,106,57,.0), rgba(100,221,145,.35), rgba(0,106,57,.0));
+            opacity: 0;
+            z-index: -1;
+            filter: blur(10px);
+            animation: statGlow 3.2s ease-in-out infinite;
+        }
+        .stat-card:hover::before { opacity: .9; }
+        .stat-card:hover { transform: translateY(-3px) scale(1.01); }
+        .stat-icon {
+            animation: iconFloat 2.6s ease-in-out infinite;
+            transform-origin: center;
+        }
+        .stat-badge {
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+        .stat-value {
+            background: linear-gradient(90deg, #191c1d 0%, #006a39 50%, #191c1d 100%);
+            background-size: 220% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: valueShine 3.5s linear infinite;
+        }
+        .stat-card:nth-child(1) { animation-delay: 0ms; }
+        .stat-card:nth-child(2) { animation-delay: 120ms; }
+        .stat-card:nth-child(3) { animation-delay: 240ms; }
+        .stat-card:nth-child(4) { animation-delay: 360ms; }
+        @keyframes statCardIn {
+            from { opacity: 0; transform: translateY(18px) scale(.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes statGlow {
+            0%, 100% { opacity: 0; transform: translateX(-10%) scale(.98); }
+            50% { opacity: .7; transform: translateX(8%) scale(1.02); }
+        }
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,106,57,.0); }
+            50% { box-shadow: 0 0 0 6px rgba(0,106,57,.08); }
+        }
+        @keyframes valueShine {
+            0% { background-position: 200% 0; }
+            100% { background-position: -20% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .stat-card, .stat-card::before, .stat-icon, .stat-badge, .stat-value {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -189,73 +252,73 @@
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 border-t-2 border-primary rounded-xl pt-2">
 
                 <!-- Stat 1 — Active Deliveries -->
-                <div class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary-container/30 rounded-full blur-2xl group-hover:bg-secondary-container/40 transition-all"></div>
+                <div class="stat-card bg-cyan-50/55 rounded-[16px] p-6 shadow-sm border border-cyan-100 relative overflow-hidden group hover:shadow-md transition-shadow duration-300">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-cyan-200/45 rounded-full blur-2xl group-hover:bg-cyan-200/60 transition-all"></div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div class="p-3 bg-secondary-container/30 rounded-lg text-secondary">
+                        <div class="stat-icon p-3 bg-secondary-container/30 rounded-lg text-secondary">
                             <span class="material-symbols-outlined fill">local_shipping</span>
                         </div>
-                        <span class="text-xs font-semibold text-primary bg-primary-fixed/30 px-2 py-1 rounded-full flex items-center gap-1">
+                        <span class="stat-badge text-xs font-semibold text-primary bg-primary-fixed/30 px-2 py-1 rounded-full flex items-center gap-1">
                             <span class="material-symbols-outlined text-[12px]">trending_up</span> +12%
                         </span>
                     </div>
                     <div class="relative z-10">
                         <h3 class="text-on-surface-variant text-sm font-medium mb-1">Active Deliveries</h3>
-                        <p class="text-3xl font-bold text-on-surface font-headline" data-stat="active-deliveries">--</p>
+                        <p class="stat-value text-3xl font-bold font-headline" data-stat="active-deliveries">--</p>
                         <p class="text-xs text-on-surface-variant mt-1">vs yesterday</p>
                     </div>
                 </div>
 
                 <!-- Stat 2 — Completed Today -->
-                <div class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-fixed/20 rounded-full blur-2xl group-hover:bg-primary-fixed/30 transition-all"></div>
+                <div class="stat-card bg-emerald-50/60 rounded-[16px] p-6 shadow-sm border border-emerald-100 relative overflow-hidden group hover:shadow-md transition-shadow duration-300">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-200/45 rounded-full blur-2xl group-hover:bg-emerald-200/60 transition-all"></div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div class="p-3 bg-primary-container/10 rounded-lg text-primary">
+                        <div class="stat-icon p-3 bg-primary-container/10 rounded-lg text-primary">
                             <span class="material-symbols-outlined fill">task_alt</span>
                         </div>
-                        <span class="text-xs font-semibold text-primary bg-primary-fixed/30 px-2 py-1 rounded-full flex items-center gap-1">
+                        <span class="stat-badge text-xs font-semibold text-primary bg-primary-fixed/30 px-2 py-1 rounded-full flex items-center gap-1">
                             <span class="material-symbols-outlined text-[12px]">trending_up</span> +8%
                         </span>
                     </div>
                     <div class="relative z-10">
                         <h3 class="text-on-surface-variant text-sm font-medium mb-1">Completed Today</h3>
-                        <p class="text-3xl font-bold text-on-surface font-headline" data-stat="completed-today">--</p>
+                        <p class="stat-value text-3xl font-bold font-headline" data-stat="completed-today">--</p>
                         <p class="text-xs text-on-surface-variant mt-1">vs yesterday</p>
                     </div>
                 </div>
 
                 <!-- Stat 3 — Failed Deliveries -->
-                <div class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-tertiary-fixed/30 rounded-full blur-2xl group-hover:bg-tertiary-fixed/40 transition-all"></div>
+                <div class="stat-card bg-rose-50/50 rounded-[16px] p-6 shadow-sm border border-rose-100 relative overflow-hidden group hover:shadow-md transition-shadow duration-300">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-rose-200/45 rounded-full blur-2xl group-hover:bg-rose-200/60 transition-all"></div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div class="p-3 bg-tertiary-container/10 rounded-lg text-tertiary">
+                        <div class="stat-icon p-3 bg-tertiary-container/10 rounded-lg text-tertiary">
                             <span class="material-symbols-outlined fill">pending_actions</span>
                         </div>
-                        <span class="text-xs font-semibold text-error bg-error-container/50 px-2 py-1 rounded-full flex items-center gap-1">
+                        <span class="stat-badge text-xs font-semibold text-error bg-error-container/50 px-2 py-1 rounded-full flex items-center gap-1">
                             <span class="material-symbols-outlined text-[12px]">trending_down</span> -3%
                         </span>
                     </div>
                     <div class="relative z-10">
                         <h3 class="text-on-surface-variant text-sm font-medium mb-1">Failed Deliveries</h3>
-                        <p class="text-3xl font-bold text-on-surface font-headline" data-stat="pending-orders">--</p>
+                        <p class="stat-value text-3xl font-bold font-headline" data-stat="pending-orders">--</p>
                         <p class="text-xs text-on-surface-variant mt-1">vs yesterday</p>
                     </div>
                 </div>
 
                 <!-- Stat 4 — Total Weekly -->
-                <div class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary-container/30 rounded-full blur-2xl group-hover:bg-secondary-container/40 transition-all"></div>
+                <div class="stat-card bg-violet-50/50 rounded-[16px] p-6 shadow-sm border border-violet-100 relative overflow-hidden group hover:shadow-md transition-shadow duration-300">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-violet-200/45 rounded-full blur-2xl group-hover:bg-violet-200/60 transition-all"></div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div class="p-3 bg-secondary-container/30 rounded-lg text-secondary">
+                        <div class="stat-icon p-3 bg-secondary-container/30 rounded-lg text-secondary">
                             <span class="material-symbols-outlined fill">bar_chart</span>
                         </div>
-                        <span class="text-xs font-semibold text-primary bg-primary-fixed/30 px-2 py-1 rounded-full flex items-center gap-1">
+                        <span class="stat-badge text-xs font-semibold text-primary bg-primary-fixed/30 px-2 py-1 rounded-full flex items-center gap-1">
                             <span class="material-symbols-outlined text-[12px]">trending_up</span> +24%
                         </span>
                     </div>
                     <div class="relative z-10">
                         <h3 class="text-on-surface-variant text-sm font-medium mb-1">Total Weekly</h3>
-                        <p class="text-3xl font-bold text-on-surface font-headline" data-stat="total-weekly">--</p>
+                        <p class="stat-value text-3xl font-bold font-headline" data-stat="total-weekly">--</p>
                         <p class="text-xs text-on-surface-variant mt-1">vs last week</p>
                     </div>
                 </div>
@@ -272,12 +335,9 @@
                             <span class="material-symbols-outlined text-[20px] text-primary">inbox</span>
                             Incoming Deliveries
                         </h3>
-                        <button class="text-primary text-sm font-medium hover:underline flex items-center gap-1 active:scale-[0.98]">
-                            View All <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                        </button>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse" data-deliveries-table>
                             <thead>
                                 <tr class="bg-surface-container-low text-on-surface-variant text-xs uppercase tracking-wider">
                                     <th class="px-6 py-4 font-medium">Order ID</th>

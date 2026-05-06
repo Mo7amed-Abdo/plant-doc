@@ -56,6 +56,69 @@ function ensureBrandLogoTheme() {
         from { opacity: 0; transform: translateY(6px) scale(0.98); }
         to { opacity: 1; transform: translateY(0) scale(1); }
       }
+
+      /* Global sidebar premium polish */
+      .sidebar-elevated {
+        background: linear-gradient(180deg, #f9fbfc 0%, #f3f6f8 100%) !important;
+        box-shadow:
+          8px 0 28px -18px rgba(15, 23, 42, 0.35),
+          2px 0 0 rgba(255,255,255,0.85) inset !important;
+      }
+      .sidebar-link {
+        position: relative;
+        border-radius: 14px !important;
+        transition: transform .2s ease, background-color .2s ease, color .2s ease, box-shadow .2s ease !important;
+      }
+      .sidebar-link:hover {
+        transform: translateX(3px);
+        background: rgba(22, 163, 74, 0.10) !important;
+        color: #0b6b3a !important;
+        box-shadow: 0 8px 20px -16px rgba(0, 106, 57, 0.55);
+      }
+      .sidebar-link-no-motion:hover {
+        transform: none !important;
+        box-shadow: none !important;
+      }
+      .sidebar-link-active {
+        box-shadow:
+          0 12px 24px -18px rgba(0, 106, 57, 0.85),
+          0 0 0 1px rgba(255,255,255,.2) inset !important;
+      }
+      .sidebar-link-active::before {
+        content: "";
+        position: absolute;
+        left: -8px;
+        top: 18%;
+        height: 64%;
+        width: 4px;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #86efac, #22c55e);
+        box-shadow: 0 0 12px rgba(34,197,94,.55);
+      }
+      .sidebar-badge-pulse {
+        animation: sidebarPulse 2.2s ease-in-out infinite;
+        transform-origin: center;
+      }
+      .sidebar-profile-card {
+        background: linear-gradient(135deg, #cfeee0 0%, #b7e5d0 100%) !important;
+        border-color: #8fd8b2 !important;
+        box-shadow:
+          0 10px 22px -18px rgba(0, 106, 57, 0.45),
+          0 0 0 1px rgba(255,255,255,.35) inset !important;
+        animation: none !important;
+        transform: none !important;
+        transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease !important;
+      }
+      .sidebar-profile-card:hover {
+        background: linear-gradient(135deg, #bfe8d2 0%, #a8dcc2 100%) !important;
+        border-color: #79cc9f !important;
+      }
+      .sidebar-profile-card [data-user-name] { color: #0a3d27 !important; }
+      .sidebar-profile-card [data-user-role] { color: #1b6b45 !important; }
+      @keyframes sidebarPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,.0); transform: scale(1); }
+        50% { box-shadow: 0 0 0 7px rgba(34,197,94,.12); transform: scale(1.03); }
+      }
     `;
     document.head.appendChild(style);
   }
@@ -77,12 +140,51 @@ function applyBrandLogoText() {
 document.addEventListener('DOMContentLoaded', () => {
   ensureBrandLogoTheme();
   applyBrandLogoText();
+  applyGlobalSidebarPolish();
   // Guest users should not hit authenticated APIs.
   if (!Auth.isGuest?.()) {
     setupFarmerChatBadge().catch(() => null);
     setupFarmerNotificationBadge().catch(() => null);
   }
 });
+
+function applyGlobalSidebarPolish() {
+  const sidebar = document.querySelector('nav.fixed.h-screen.w-64');
+  if (!sidebar) return;
+
+  sidebar.classList.add('sidebar-elevated');
+
+  const navLinks = Array.from(sidebar.querySelectorAll('a'));
+  navLinks.forEach((link) => {
+    link.classList.add('sidebar-link');
+    const cls = (link.className || '').toLowerCase();
+    const isActive = cls.includes('bg-green-700') || cls.includes('dark:bg-green-900/30');
+    if (isActive) link.classList.add('sidebar-link-active');
+    const href = (link.getAttribute('href') || '').toLowerCase();
+    const isBottomProfileCard = Boolean(link.querySelector('[data-user-avatar]'));
+    if (!isBottomProfileCard && href.includes('profile.html')) {
+      link.classList.add('sidebar-link-no-motion');
+    }
+  });
+
+  const profileCard = Array.from(sidebar.querySelectorAll('a'))
+    .find((a) => Boolean(a.querySelector('[data-user-avatar]')));
+  if (profileCard) {
+    profileCard.classList.add('sidebar-profile-card');
+    profileCard.classList.remove('sidebar-badge-pulse');
+    profileCard.style.animation = 'none';
+    profileCard.style.transform = 'none';
+    const wrap = profileCard.closest('div');
+    if (wrap) {
+      wrap.classList.remove('border-t', 'pt-4');
+      wrap.style.borderTop = '0';
+      wrap.style.paddingTop = '0.5rem';
+    }
+  }
+
+  const badges = sidebar.querySelectorAll('[data-chat-unread-count], [data-notif-unread-count], [data-notif-count], [data-chat-badge]');
+  badges.forEach((badge) => badge.classList.add('sidebar-badge-pulse'));
+}
 
 async function setupFarmerChatBadge() {
   // Adds/updates an unread badge on the "Chat with Expert" nav item (farmer only).
