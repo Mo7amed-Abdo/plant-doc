@@ -3,10 +3,11 @@
 const Rating = require('../models/Rating');
 const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
+const Delivery = require('../models/Delivery');
 const { createError } = require('../middleware/error.middleware');
 
 /**
- * Farmer submits up to 2 ratings per order: one for the product, one for the company.
+ * Farmer submits up to 3 ratings per order: product, company, and delivery company.
  * The unique compound index (order_id, target_type, target_id) is the hard guard.
  */
 async function createRating(farmerId, orderId, body) {
@@ -15,8 +16,8 @@ async function createRating(farmerId, orderId, body) {
   if (!target_type || !target_id || !stars) {
     throw createError(400, 'target_type, target_id, and stars are required');
   }
-  if (!['product', 'company'].includes(target_type)) {
-    throw createError(400, 'target_type must be "product" or "company"');
+  if (!['product', 'company', 'delivery_company'].includes(target_type)) {
+    throw createError(400, 'target_type must be "product", "company", or "delivery_company"');
   }
 
   // Confirm this order belongs to the farmer
@@ -36,6 +37,15 @@ async function createRating(farmerId, orderId, body) {
   if (target_type === 'company') {
     if (order.company_id.toString() !== target_id.toString()) {
       throw createError(400, 'This company did not fulfil this order');
+    }
+  }
+
+  // If rating a delivery company, verify this order's delivery record matches
+  if (target_type === 'delivery_company') {
+    const delivery = await Delivery.findOne({ order_id: orderId }).lean();
+    if (!delivery) throw createError(400, 'Delivery record not found for this order yet');
+    if (delivery.delivery_company_id.toString() !== target_id.toString()) {
+      throw createError(400, 'This delivery company did not deliver this order');
     }
   }
 

@@ -18,7 +18,7 @@ const ratingSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: {
-        values: ['product', 'company'],
+        values: ['product', 'company', 'delivery_company'],
         message: '{VALUE} is not a valid target type',
       },
     },
