@@ -2,6 +2,7 @@
 
 const authService = require('../services/auth.service');
 const { success } = require('../utils/apiResponse');
+const env = require('../config/env');
 
 /**
  * POST /api/auth/register
@@ -75,4 +76,57 @@ async function me(req, res, next) {
   }
 }
 
-module.exports = { register, login, changePassword, me };
+/**
+ * POST /api/auth/password-reset/request
+ * Body: { email }
+ */
+async function passwordResetRequest(req, res, next) {
+  try {
+    const { email } = req.body;
+    const result = await authService.requestPasswordReset(email);
+    return success(res, 200, 'If the email exists, a reset code has been issued', result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/auth/password-reset/confirm
+ * Body: { email, code, new_password }
+ */
+async function passwordResetConfirm(req, res, next) {
+  try {
+    const { email, code, new_password } = req.body;
+    const result = await authService.confirmPasswordReset(email, code, new_password);
+    return success(res, 200, 'Password reset successful', result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/auth/google
+ * Body: { credential, role? }
+ */
+async function google(req, res, next) {
+  try {
+    const { credential, role } = req.body;
+    const result = await authService.googleAuth({ credential, role });
+    return success(res, 200, 'Google auth successful', result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/auth/google/client-id
+ * Public. Returns Google Web Client ID configured on the server.
+ */
+function googleClientId(req, res) {
+  // In dev, allow reloading .env without forcing a server restart.
+  try { require('dotenv').config(); } catch (_) {}
+  const clientId = process.env.GOOGLE_CLIENT_ID || env.GOOGLE_CLIENT_ID || '';
+  return success(res, 200, 'Google client id', { client_id: clientId });
+}
+
+module.exports = { register, login, changePassword, me, passwordResetRequest, passwordResetConfirm, google, googleClientId };

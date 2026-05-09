@@ -24,6 +24,17 @@ const userSchema = new mongoose.Schema(
     },
     phone: { type: String, trim: true, default: null },
     password_hash: { type: String, required: [true, 'Password is required'], select: false },
+    auth_provider: {
+      type: String,
+      enum: {
+        values: ['local', 'google'],
+        message: '{VALUE} is not a valid auth provider',
+      },
+      default: 'local',
+    },
+    google_sub: { type: String, default: null },
+    password_reset_code_hash: { type: String, default: null, select: false },
+    password_reset_expires_at: { type: Date, default: null },
     role: {
       type: String,
       required: true,
@@ -45,6 +56,7 @@ const userSchema = new mongoose.Schema(
 // ─── Indexes ──────────────────────────────────────────────────────────────────
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1 });
+userSchema.index({ google_sub: 1 }, { unique: true, sparse: true });
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
 // Hash password before saving

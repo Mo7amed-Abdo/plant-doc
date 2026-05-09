@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!Auth.isGuest?.()) {
     setupFarmerChatBadge().catch(() => null);
     setupFarmerNotificationBadge().catch(() => null);
+    setupDeliveryNotificationBadge().catch(() => null);
   }
 });
 
@@ -739,4 +740,62 @@ function confirmDialog(message) {
     modal.querySelector('#cd-cancel').addEventListener('click',  () => { modal.remove(); resolve(false); });
     modal.addEventListener('click', e => { if (e.target === modal) { modal.remove(); resolve(false); } });
   });
+}
+
+async function setupDeliveryNotificationBadge() {
+  // Adds/updates an unread count badge on the "Notifications" nav item (delivery only).
+  if (Auth.getRole() !== 'delivery') return;
+
+  const links = Array.from(document.querySelectorAll('nav.fixed.h-screen.w-64 a'));
+  if (!links.length) return;
+
+  const isNotificationsLink = (a) => {
+    const iconText = (a.querySelector('.material-symbols-outlined')?.textContent || '').trim().toLowerCase();
+    const label = (a.textContent || '').trim().toLowerCase();
+    return iconText === 'notifications' || label.includes('notifications');
+  };
+
+  const targets = links.filter(isNotificationsLink);
+  if (!targets.length) return;
+
+  let unread = 0;
+  try {
+    const res = await api.get('/delivery/notifications?is_read=false&limit=1');
+    unread = Number(res.meta?.total ?? (res.data || []).length ?? 0);
+  } catch (_) {
+    unread = 0;
+  }
+
+  targets.forEach((a) => {
+    if (a.dataset._deliveryNotifBadgeBound === '1') {
+      const badge = a.querySelector('[data-notif-unread-count]');
+      if (badge) {
+        badge.textContent = unread > 99 ? '99+' : String(unread);
+        badge.classList.toggle('hidden', unread === 0);
+      }
+      return;
+    }
+
+    // Ensure flex so badge can sit at far edge on wide sidebars
+    if (!a.classList.contains('flex')) a.classList.add('flex');
+    a.classList.add('items-center');
+
+    const badge = document.createElement('span');
+    badge.dataset.notifUnreadCount = '1';
+    badge.className =
+      'hidden ml-auto min-w-[18px] h-[18px] px-1.5 rounded-full bg-error text-white text-[10px] font-bold inline-flex items-center justify-center';
+    badge.textContent = unread > 99 ? '99+' : String(unread);
+    badge.classList.toggle('hidden', unread === 0);
+    a.appendChild(badge);
+    a.dataset._deliveryNotifBadgeBound = '1';
+  });
+}
+
+// â”€â”€ Brand meta â”€â”€
+function getBrandMeta() {
+  return {
+    name: 'PlantDoc',
+    logoDark: '/frontend/logo dark.png',
+    logoLight: '/frontend/logo.png',
+  };
 }

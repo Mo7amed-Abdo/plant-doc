@@ -105,35 +105,79 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+
+        /* Navbar-only polish */
+        .pd-nav-link {
+            position: relative;
+            padding: 0.25rem 0.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            transition: color 220ms ease;
+        }
+        .pd-nav-link::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -0.35rem;
+            height: 2px;
+            width: 100%;
+            transform: scaleX(0);
+            transform-origin: left;
+            background: linear-gradient(90deg, rgba(0,106,57,1), rgba(0,134,73,1));
+            border-radius: 999px;
+            transition: transform 220ms ease, opacity 220ms ease;
+            opacity: 0.0;
+        }
+        .pd-nav-link:hover::after { transform: scaleX(1); opacity: 0.75; }
+        .pd-nav-link.pd-active::after { transform: scaleX(1); opacity: 1; }
+        .pd-nav-link.pd-active { color: #006a39 !important; }
+        .pd-nav-glow:hover { filter: drop-shadow(0 10px 22px rgba(0,106,57,0.18)); }
     </style>
 </head>
 
 <body class="bg-background text-on-background font-body antialiased overflow-x-hidden">
     <!-- TopNavBar -->
     <nav
-        class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 dark:border-slate-800/50 shadow-lg shadow-green-900/5 docked full-width top-0 sticky z-50">
+        class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-white/20 dark:border-slate-800/50 shadow-lg shadow-green-900/5 docked full-width top-0 sticky z-50 ring-1 ring-white/30">
         <div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
             <div class="flex items-center gap-3">
-                <img src="logo.png" alt="PlantDoc" class="w-10 h-10 rounded-xl object-contain" />
+                <img src="logo.png" alt="PlantDoc" class="w-11 h-11 rounded-2xl object-contain pd-nav-glow" />
                 <div class="text-2xl font-black text-green-700 dark:text-green-500 tracking-tighter font-headline">PlantDoc</div>
             </div>
             <div class="hidden md:flex items-center gap-8">
-                <a class="text-slate-600 dark:text-slate-400 font-medium font-sans Inter tracking-tight hover:text-green-500 transition-colors duration-200"
+                <a class="text-slate-600 dark:text-slate-400 font-sans Inter tracking-tight hover:text-green-500 pd-nav-link"
                     href="#aboutus">About us</a>
-                <a class="text-slate-600 dark:text-slate-400 font-medium font-sans Inter tracking-tight hover:text-green-500 transition-colors duration-200"
-                    href="#aitool">AI Tool</a>
-                <a class="text-slate-600 dark:text-slate-400 font-medium font-sans Inter tracking-tight hover:text-green-500 transition-colors duration-200"
+                <a class="text-slate-600 dark:text-slate-400 font-sans Inter tracking-tight hover:text-green-500 pd-nav-link"
+                    href="#aitool">Diagnose</a>
+                <a class="text-slate-600 dark:text-slate-400 font-sans Inter tracking-tight hover:text-green-500 pd-nav-link"
                     href="#opinions">Reviews</a>
             </div>
             <div class="flex items-center gap-4">
                 <a href="/frontend/login.html"
-                    class="text-slate-600 dark:text-slate-400 font-medium active:scale-95 transition-transform duration-150 hover:text-green-500">Login</a>
+                    class="text-slate-600 dark:text-slate-400 font-semibold active:scale-95 transition-transform duration-150 hover:text-green-500 pd-nav-link">Login</a>
                 <a href="/frontend/register.html"
-                    class="bg-primary hover:translate-y-[-2px] hover:shadow-md hover:shadow-primary/40 text-on-primary px-6 py-2.5 rounded-full font-bold active:scale-95 transition-all shadow-md shadow-primary/20">Get
+                    class="bg-primary text-on-primary px-6 py-2.5 rounded-full font-bold shadow-md shadow-primary/20 transition-all duration-200 active:scale-95 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-primary/45 hover:scale-[1.02]">Get
                     Started</a>
             </div>
         </div>
     </nav>
+    <script>
+        // Navbar active-state (hash-based) — navbar only.
+        (function () {
+            const links = Array.from(document.querySelectorAll('nav a.pd-nav-link[href^="#"]'));
+            if (!links.length) return;
+
+            function setActive(hash) {
+                links.forEach((a) => a.classList.remove('pd-active'));
+                const target = links.find((a) => a.getAttribute('href') === hash);
+                if (target) target.classList.add('pd-active');
+            }
+
+            setActive(window.location.hash || '#aboutus');
+            window.addEventListener('hashchange', () => setActive(window.location.hash));
+            links.forEach((a) => a.addEventListener('click', () => setActive(a.getAttribute('href'))));
+        })();
+    </script>
     <!-- Hero Section -->
     <header class="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32 hero-gradient">
         <div
@@ -334,11 +378,11 @@
                         </div>
                         <div class="flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-white/5">
                             <span class="material-symbols-outlined text-primary">check_circle</span>
-                            <span>Supports 40+ languages</span>
+                            <span>Expert-validated AI diagnosis &amp; smart treatment recommendations</span>
                         </div>
                         <div class="flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-white/5">
                             <span class="material-symbols-outlined text-primary">check_circle</span>
-                            <span>No internet required (Offline Mode)</span>
+                            <span>Real-time crop monitoring with direct access to agricultural experts</span>
                         </div>
                     </div>
                 </div>
@@ -351,69 +395,69 @@
             <h2 class="text-4xl font-extrabold font-headline text-center mb-16">The Farmer's Choice</h2>
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Testimonial 1 -->
-                <div class="p-8 rounded-2xl bg-surface-container shadow-sm border border-outline-variant/30 relative">
-                    <div class="flex text-primary mb-4">
+                <div class="p-8 rounded-2xl bg-surface-container shadow-sm border border-outline-variant/30 relative" data-pd-review="0">
+                    <div class="flex text-primary mb-4" data-pd-stars data-stars-color="text-primary">
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                     </div>
-                    <p class="text-on-surface-variant italic mb-8 leading-relaxed">"PlantDoc saved my entire potato
+                    <p class="text-on-surface-variant italic mb-8 leading-relaxed" data-pd-quote>"PlantDoc saved my entire potato
                         harvest this year. The AI detected Early Blight two weeks before it became visible to my naked
                         eye."</p>
                     <div class="flex items-center gap-4">
-                        <img alt="Farmer" class="w-14 h-14 rounded-full object-cover"
+                        <img alt="Farmer" class="w-14 h-14 rounded-full object-cover" data-pd-avatar
                             data-alt="portrait of a weathered but smiling middle-aged farmer in denim overalls standing in a sunlit field"
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJrnGGTYM-DkI1lW49e1AJQc4d9w_8bdXnDXj_lvsASHDMMu3YrSpPVDyP_S_PNJ1FJ9p_ng70-BwpPS03mV_vnZUlb4EOj7WICsuhc7U-iEkHbH5I92Og-cNz1bdQL3MAhRDvqV4prxTFERsdfKpoLFqt1cBcUGa_hljRJJQl2GARmF5W6iki2jjjQQ8I64qzoj0kdcbCog9735MOjGoAxSbghbgyz4s94oBuHdnNpjjCuWtXopevkn69azxGKWcBKO0FgIRhbJ0" />
                         <div>
-                            <h4 class="font-bold">David Henderson</h4>
+                            <h4 class="font-bold" data-pd-author>David Henderson</h4>
                             <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">Heritage Farms, IA</p>
                         </div>
                     </div>
                 </div>
                 <!-- Testimonial 2 -->
                 <div
-                    class="p-8 rounded-2xl bg-primary text-on-primary shadow-xl shadow-primary/20 relative md:-translate-y-4">
-                    <div class="flex text-yellow-300 mb-4">
+                    class="p-8 rounded-2xl bg-primary text-on-primary shadow-xl shadow-primary/20 relative md:-translate-y-4" data-pd-review="1">
+                    <div class="flex text-yellow-300 mb-4" data-pd-stars data-stars-color="text-yellow-300">
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                     </div>
-                    <p class="text-on-primary/90 italic mb-8 leading-relaxed">"The level of detail in the treatment
+                    <p class="text-on-primary/90 italic mb-8 leading-relaxed" data-pd-quote>"The level of detail in the treatment
                         recommendations is incredible. It doesn't just name the disease; it gives a full recovery plan."
                     </p>
                     <div class="flex items-center gap-4">
-                        <img alt="Researcher" class="w-14 h-14 rounded-full object-cover border-2 border-white/30"
+                        <img alt="Researcher" class="w-14 h-14 rounded-full object-cover border-2 border-white/30" data-pd-avatar
                             data-alt="headshot of a confident young woman agricultural researcher in an outdoor setting wearing a casual outdoor vest"
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiD41yc0D1NtXSC2LIusd2ZUBpdEW3L2Hv7eyHUWujs7zpcrjBoZ6e1UJ2lKzDx6otHCROfgwVL7VJaE1Ovxy16iKiQIoEcp4nYevq3cthDLIddeeE4WI2x0ZKw7kz7l_5Eip01ByI6DhmklqEqeSsEDU5tYz_29zK4WN65mEZ752hdaVxkHMcfx8RYW2dhDZxKLjI77Kk8g8XTpL3lmCzWveo4vv9iZxNx0Z9Y6wMZwYGGCN4k7GXw7F-_-mB8mPOQS487Gd_6cM" />
                         <div>
-                            <h4 class="font-bold">Sarah Chen</h4>
+                            <h4 class="font-bold" data-pd-author>Sarah Chen</h4>
                             <p class="text-xs text-on-primary/70 font-bold uppercase tracking-widest">AgroTech Solutions
                             </p>
                         </div>
                     </div>
                 </div>
                 <!-- Testimonial 3 -->
-                <div class="p-8 rounded-2xl bg-surface-container shadow-sm border border-outline-variant/30 relative">
-                    <div class="flex text-primary mb-4">
+                <div class="p-8 rounded-2xl bg-surface-container shadow-sm border border-outline-variant/30 relative" data-pd-review="2">
+                    <div class="flex text-primary mb-4" data-pd-stars data-stars-color="text-primary">
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
                     </div>
-                    <p class="text-on-surface-variant italic mb-8 leading-relaxed">"Minimal, fast, and extremely
+                    <p class="text-on-surface-variant italic mb-8 leading-relaxed" data-pd-quote>"Minimal, fast, and extremely
                         effective. We've integrated the PlantDoc API into our drone fleet for autonomous field
                         scanning."</p>
                     <div class="flex items-center gap-4">
-                        <img alt="Agronomist" class="w-14 h-14 rounded-full object-cover"
+                        <img alt="Agronomist" class="w-14 h-14 rounded-full object-cover" data-pd-avatar
                             data-alt="portrait of an older male agronomist in a blue shirt with glasses, blurred green greenhouse background"
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuAP9JVFVPTry26m3NEFiyYyi0xkGdX2_RM10mEuzpwE6NGNB-Pn8TZWEqFmwDRA5ESmCJIL2kEw0rVpnhi-mD41px-8MKIEpqNILAMY47g371RKU1sQ-hWS6tM-iMKy1KQincXPStvwwcbkrQUQjdMLzKlE8Oqaor5l2b5QRGncng5mFSNwsm9JZINPITQPGlJeFg6A3utG1TsLrBO0JySwXJ3chEVAP-lytVaAW_RM_YxLTVDEpExOmFMdauqEc2QvdOeQUSaLwaU" />
                         <div>
-                            <h4 class="font-bold">Mark Fletcher</h4>
+                            <h4 class="font-bold" data-pd-author>Mark Fletcher</h4>
                             <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">SkyView Agriculture
                             </p>
                         </div>
@@ -481,6 +525,7 @@
     </footer>
 
     <script src="api.js"></script>
+    <script src="landingReviews.js"></script>
 </body>
 
 </html>

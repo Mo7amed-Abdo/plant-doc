@@ -2,10 +2,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (Auth.isLoggedIn()) { redirectToDashboard(Auth.getRole()); return; }
 
-  const form      = document.querySelector('form');
-  const submitBtn = form.querySelector('button[type="submit"]');
+  const form = document.querySelector('form');
+  const submitBtn = form?.querySelector('button[type="submit"]');
 
-  form.addEventListener('submit', async e => {
+  form?.addEventListener('submit', async e => {
     e.preventDefault();
     const full_name = (document.getElementById('fullName') || document.getElementById('full_name'))?.value.trim();
     const email     = document.getElementById('email')?.value.trim();
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (password !== confirm) { showToast('Passwords do not match', 'error'); return; }
     if (password.length < 8)  { showToast('Password must be at least 8 characters', 'error'); return; }
 
-    submitBtn.disabled = true; submitBtn.textContent = 'Creating account…';
+    setLoading(true, 'Creating account...');
     try {
       const body = new FormData();
       body.append('full_name', full_name);
@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => redirectToDashboard(res.data.user.role), 700);
     } catch (err) {
       showToast(err.message || 'Registration failed', 'error');
-      submitBtn.disabled = false; submitBtn.textContent = 'Create Account';
+    } finally {
+      setLoading(false, 'Create Account');
     }
   });
 
@@ -44,10 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-icon="visibility"]').forEach(icon => {
     icon.style.cursor = 'pointer';
     icon.addEventListener('click', () => {
-      const inp = icon.closest('.relative').querySelector('input');
+      const inp = icon.closest('.relative')?.querySelector('input');
       if (!inp) return;
       inp.type = inp.type === 'password' ? 'text' : 'password';
       icon.textContent = inp.type === 'password' ? 'visibility' : 'visibility_off';
     });
   });
+
+  function setLoading(on, label) {
+    if (!submitBtn) return;
+    submitBtn.disabled = !!on;
+    submitBtn.style.opacity = on ? '0.7' : '1';
+    submitBtn.textContent = label;
+  }
 });

@@ -85,8 +85,102 @@
         .material-symbols-outlined.fill {
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        .stat-card { transition: transform .25s ease, box-shadow .25s ease; }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -16px rgba(0,106,57,.35); }
+
+        /* ── Medicine Bottle Mascot ── */
+        .med-wrap {
+            position: absolute;
+            top: 0; bottom: 0; left: 0; right: 0;
+            pointer-events: none; z-index: 1; overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .med-wrap { left: 222px; right: 212px; }
+        }
+        .med-road {
+            position: absolute; left: 0; right: 0; bottom: 4px;
+            border-bottom: 2px dashed rgba(76,175,80,0.32);
+        }
+        /* RAF drives translateX on this outer element */
+        .med-el {
+            position: absolute; bottom: 4px; left: 0;
+            will-change: transform; cursor: pointer;
+        }
+        /* Bounce: separate element, doesn't conflict with RAF */
+        .med-inner {
+            animation: medBounce 0.52s ease-in-out infinite alternate;
+        }
+        @keyframes medBounce {
+            from { transform: translateY(0); }
+            to   { transform: translateY(-4px); }
+        }
+
+        /* ── LEGS — pivot at top-center of each group (hip joint) ── */
+        .med-leg-l-g {
+            transform-box: fill-box;
+            transform-origin: 50% 0%;
+            animation: medLegL 0.52s ease-in-out infinite;
+        }
+        .med-leg-r-g {
+            transform-box: fill-box;
+            transform-origin: 50% 0%;
+            animation: medLegR 0.52s ease-in-out infinite;
+        }
+        @keyframes medLegL {
+            0%,100% { transform: rotate(24deg);  }
+            50%      { transform: rotate(-24deg); }
+        }
+        @keyframes medLegR {
+            0%,100% { transform: rotate(-24deg); }
+            50%      { transform: rotate(24deg);  }
+        }
+
+        /* ── ARMS — pivot at shoulder in SVG user coords ── */
+        /* Left arm: same phase as right leg (cross-body coordination) */
+        .med-arm-l-g {
+            transform-origin: 34px 40px;
+            animation: medArmL 0.52s ease-in-out infinite;
+        }
+        /* Right arm: same phase as left leg */
+        .med-arm-r-g {
+            transform-origin: 74px 40px;
+            animation: medArmR 0.52s ease-in-out infinite;
+        }
+        @keyframes medArmL {
+            0%,100% { transform: rotate(32deg);  }
+            50%      { transform: rotate(-32deg); }
+        }
+        @keyframes medArmR {
+            0%,100% { transform: rotate(-32deg); }
+            50%      { transform: rotate(32deg);  }
+        }
+        /* Hover: right arm waves */
+        .med-el:hover .med-arm-r-g {
+            animation: medArmWave 0.4s ease-in-out infinite !important;
+        }
+        @keyframes medArmWave {
+            0%,100% { transform: rotate(-32deg); }
+            45%      { transform: rotate(-68deg); }
+        }
+
+        /* Glow — bright green, matches new white+green design */
+        .med-glow {
+            animation: medGlow 2.8s ease-in-out infinite;
+        }
+        @keyframes medGlow {
+            0%,100% { filter: drop-shadow(0 2px 6px rgba(76,175,80,0.35)) drop-shadow(0 0 3px rgba(76,175,80,0.25)); }
+            50%      { filter: drop-shadow(0 3px 12px rgba(76,175,80,0.6)) drop-shadow(0 0 8px rgba(76,175,80,0.4)); }
+        }
+
+        /* Warning (low stock) */
+        .med-bottle--warning .med-b-body  { fill: #fff8f0 !important; }
+        .med-bottle--warning .med-b-cap   { fill: #e65100 !important; }
+        .med-bottle--warning .med-b-limb  { fill: #ef6c00 !important; }
+        .med-bottle--warning .med-b-limbs { stroke: #ef6c00 !important; }
+        .med-bottle--warning .med-b-badge { fill: #e65100 !important; }
+        .med-bottle--warning .med-glow    { animation: medGlowWarn 1.4s ease-in-out infinite; }
+        @keyframes medGlowWarn {
+            0%,100% { filter: drop-shadow(0 0 4px rgba(249,115,22,0.55)); }
+            50%      { filter: drop-shadow(0 0 12px rgba(249,115,22,0.9)); }
+        }
     </style>
 </head>
 
@@ -160,7 +254,111 @@
         <div class="p-6 md:p-8 flex-1 overflow-y-auto">
 
             <!-- Page heading + CTA -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6 relative min-h-[72px]">
+                <!-- ── Medicine Bottle Mascot (decorative) ── -->
+                <div class="med-wrap" aria-hidden="true">
+                    <div class="med-road"></div>
+                    <div class="med-el" id="medBottle">
+                        <div class="med-pulse">
+                            <div class="med-inner">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="68" height="65" viewBox="0 0 108 104" fill="none">
+
+                                    <!-- Speed trail lines (dashed, left of character) -->
+                                    <line x1="1" y1="74" x2="22" y2="74" stroke="rgba(76,175,80,0.55)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4,3"/>
+                                    <line x1="3" y1="81" x2="18" y2="81" stroke="rgba(76,175,80,0.38)" stroke-width="2" stroke-linecap="round" stroke-dasharray="3,3"/>
+                                    <line x1="1" y1="67" x2="13" y2="67" stroke="rgba(76,175,80,0.26)" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3,3"/>
+
+                                    <!-- Ground shadow -->
+                                    <ellipse cx="55" cy="102" rx="26" ry="4" fill="rgba(0,0,0,0.07)"/>
+
+                                    <!-- RIGHT LEG (back leg — drawn first, behind bottle) -->
+                                    <g class="med-leg-r-g">
+                                        <path d="M63,75 Q72,87 70,98"
+                                              stroke="#43a047" stroke-width="12" stroke-linecap="round" fill="none"/>
+                                        <ellipse cx="72" cy="99" rx="12" ry="5.5" fill="#f0f0f0"/>
+                                        <ellipse cx="72" cy="101" rx="12" ry="3.5" fill="#d9d9d9"/>
+                                    </g>
+
+                                    <!-- LEFT ARM (back arm — behind bottle) -->
+                                    <g class="med-arm-l-g">
+                                        <path d="M34,40 Q20,56 16,67"
+                                              class="med-b-limbs" stroke="#43a047"
+                                              stroke-width="12" stroke-linecap="round" fill="none"/>
+                                        <circle cx="16" cy="67" r="8" class="med-b-limb" fill="#43a047"/>
+                                    </g>
+
+                                    <!-- BOTTLE BODY (white, 3-D shaded) -->
+                                    <g class="med-glow">
+                                        <!-- Soft drop shadow behind body -->
+                                        <rect x="33" y="19" width="46" height="60" rx="16"
+                                              fill="rgba(76,175,80,0.14)" transform="translate(3,5)"/>
+                                        <!-- Main white body -->
+                                        <rect class="med-b-body" x="33" y="19" width="46" height="60" rx="16" fill="#f7fbf7"/>
+                                        <!-- Left highlight (bright) -->
+                                        <rect x="36" y="23" width="15" height="52" rx="11" fill="rgba(255,255,255,0.8)"/>
+                                        <!-- Right shadow (dark edge) -->
+                                        <rect x="64" y="23" width="12" height="52" rx="9" fill="rgba(0,0,0,0.045)"/>
+
+                                        <!-- CAP (green) -->
+                                        <rect class="med-b-cap" x="31" y="5" width="50" height="19" rx="9.5" fill="#4caf50"/>
+                                        <!-- Cap top highlight -->
+                                        <rect x="34" y="7" width="22" height="7" rx="3.5" fill="rgba(255,255,255,0.35)"/>
+                                        <!-- Cap safety ring -->
+                                        <rect x="31" y="21" width="50" height="4" rx="0" fill="rgba(0,0,0,0.1)"/>
+                                        <!-- Child-lock ridges -->
+                                        <rect x="37" y="21.5" width="5" height="2.5" rx="1" fill="rgba(255,255,255,0.18)"/>
+                                        <rect x="47" y="21.5" width="5" height="2.5" rx="1" fill="rgba(255,255,255,0.18)"/>
+                                        <rect x="57" y="21.5" width="5" height="2.5" rx="1" fill="rgba(255,255,255,0.18)"/>
+                                        <rect x="67" y="21.5" width="5" height="2.5" rx="1" fill="rgba(255,255,255,0.18)"/>
+
+                                        <!-- FACE -->
+                                        <!-- Left eye white -->
+                                        <circle cx="45" cy="35" r="5" fill="white"/>
+                                        <!-- Left eye pupil -->
+                                        <circle cx="45" cy="35" r="3.2" fill="#2d3436"/>
+                                        <!-- Left eye shine -->
+                                        <circle cx="46.5" cy="33.5" r="1.3" fill="white"/>
+                                        <!-- Right eye white -->
+                                        <circle cx="67" cy="35" r="5" fill="white"/>
+                                        <!-- Right eye pupil -->
+                                        <circle cx="67" cy="35" r="3.2" fill="#2d3436"/>
+                                        <!-- Right eye shine -->
+                                        <circle cx="68.5" cy="33.5" r="1.3" fill="white"/>
+                                        <!-- Smile -->
+                                        <path d="M45,45 Q56,54 69,45"
+                                              stroke="#2d3436" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+                                        <!-- CROSS BADGE (circle with white plus) -->
+                                        <circle class="med-b-badge" cx="56" cy="62" r="13" fill="#388e3c"/>
+                                        <circle cx="56" cy="62" r="13" fill="rgba(255,255,255,0.08)"/>
+                                        <!-- Cross vertical -->
+                                        <rect x="53" y="55" width="6" height="14" rx="2.5" fill="white"/>
+                                        <!-- Cross horizontal -->
+                                        <rect x="47" y="59.5" width="18" height="5.5" rx="2.2" fill="white"/>
+                                    </g>
+
+                                    <!-- LEFT LEG (front leg — in front of bottle) -->
+                                    <g class="med-leg-l-g">
+                                        <path d="M47,75 Q38,87 40,98"
+                                              stroke="#43a047" stroke-width="12" stroke-linecap="round" fill="none"/>
+                                        <ellipse cx="38" cy="99" rx="12" ry="5.5" fill="#f0f0f0"/>
+                                        <ellipse cx="38" cy="101" rx="12" ry="3.5" fill="#d9d9d9"/>
+                                    </g>
+
+                                    <!-- RIGHT ARM (front arm — in front of bottle) -->
+                                    <g class="med-arm-r-g">
+                                        <path d="M74,40 Q88,24 94,14"
+                                              class="med-b-limbs" stroke="#43a047"
+                                              stroke-width="12" stroke-linecap="round" fill="none"/>
+                                        <circle cx="94" cy="14" r="8" class="med-b-limb" fill="#43a047"/>
+                                    </g>
+
+                                </svg>
+                            </div><!-- /med-inner -->
+                        </div><!-- /med-pulse -->
+                    </div><!-- /med-el -->
+                </div><!-- /med-wrap -->
+
                 <div>
                     <h2 class="text-2xl font-bold text-on-surface flex items-center gap-2">
                         <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700 text-base md:text-lg">
@@ -168,7 +366,6 @@
                             <span>Business Overview</span>
                         </span>
                     </h2>
-                    <p class="text-on-surface-variant text-sm mt-0.5">Track your pharmaceutical supply chain metrics.</p>
                 </div>
                 <div class="flex items-center gap-2.5">
                     <button data-notif-toggle
@@ -190,8 +387,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 border-t-2 pt-2 rounded-xl border-primary">
 
                 <!-- Stat 1 — Active Products -->
-                <div class="stat-card bg-cyan-50/55 rounded-[16px] p-6 shadow-sm border border-cyan-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-cyan-200/45 rounded-full blur-2xl group-hover:bg-cyan-200/60 transition-all"></div>
+                <div class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group hover:shadow-md transition-shadow">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-fixed/20 rounded-full blur-2xl group-hover:bg-primary-fixed/30 transition-all"></div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
                         <div class="p-3 bg-primary-container/10 rounded-lg text-primary">
                             <span class="material-symbols-outlined fill">inventory_2</span>
@@ -208,8 +405,8 @@
                 </div>
 
                 <!-- Stat 2 — Treatment Requests -->
-                <div class="stat-card bg-amber-50/60 rounded-[16px] p-6 shadow-sm border border-amber-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-200/45 rounded-full blur-2xl group-hover:bg-amber-200/60 transition-all"></div>
+                <div class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group hover:shadow-md transition-shadow">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary-container/30 rounded-full blur-2xl group-hover:bg-secondary-container/40 transition-all"></div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
                         <div class="p-3 bg-secondary-container/30 rounded-lg text-secondary">
                             <span class="material-symbols-outlined fill">medical_services</span>
@@ -226,8 +423,8 @@
                 </div>
 
                 <!-- Stat 3 — Orders Completed -->
-                <div class="stat-card bg-emerald-50/60 rounded-[16px] p-6 shadow-sm border border-emerald-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-200/45 rounded-full blur-2xl group-hover:bg-emerald-200/60 transition-all"></div>
+                <div class="bg-surface-container-lowest rounded-[16px] p-6 shadow-sm border border-surface-variant relative overflow-hidden group hover:shadow-md transition-shadow">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-tertiary-fixed/30 rounded-full blur-2xl group-hover:bg-tertiary-fixed/40 transition-all"></div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
                         <div class="p-3 bg-tertiary-container/10 rounded-lg text-tertiary">
                             <span class="material-symbols-outlined fill">check_circle</span>
@@ -244,21 +441,21 @@
                 </div>
 
                 <!-- Stat 4 — Revenue (accent card) -->
-                <div class="stat-card bg-violet-50/55 rounded-[16px] p-6 shadow-sm border border-violet-100 relative overflow-hidden">
-                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-violet-200/35 rounded-full blur-3xl"></div>
-                    <div class="absolute -left-6 -bottom-6 w-28 h-28 bg-violet-100/60 rounded-full blur-2xl"></div>
+                <div class="bg-primary rounded-[16px] p-6 shadow-md relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                    <div class="absolute -left-6 -bottom-6 w-28 h-28 bg-white/5 rounded-full blur-2xl"></div>
                     <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div class="p-3 bg-violet-200/45 rounded-lg text-violet-700">
+                        <div class="p-3 bg-white/15 rounded-lg text-primary-fixed">
                             <span class="material-symbols-outlined fill">payments</span>
                         </div>
-                        <span class="text-xs font-semibold text-violet-700 bg-violet-100 px-2 py-1 rounded-full flex items-center gap-1" data-stat-trend-4>
+                        <span class="text-xs font-semibold text-primary-fixed-dim bg-black/20 px-2 py-1 rounded-full flex items-center gap-1" data-stat-trend-4>
                             <span class="material-symbols-outlined text-[12px]">trending_up</span> +18.2%
                         </span>
                     </div>
                     <div class="relative z-10">
-                        <h3 class="text-violet-700/80 text-sm font-medium mb-1">Monthly Revenue</h3>
-                        <p class="text-3xl font-bold text-violet-900 font-headline" data-stat="revenue">--</p>
-                        <p class="text-xs text-violet-700/70 mt-1">vs last month</p>
+                        <h3 class="text-primary-fixed/70 text-sm font-medium mb-1">Monthly Revenue</h3>
+                        <p class="text-3xl font-bold text-on-primary font-headline" data-stat="revenue">--</p>
+                        <p class="text-xs text-primary-fixed/60 mt-1">vs last month</p>
                     </div>
                 </div>
             </div>
@@ -398,6 +595,44 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="../api.js"></script>
     <script src="./companydashboard.js"></script>
+
+    <!-- ── Medicine Bottle live animation ── -->
+    <script>
+    (function () {
+        /* ── RAF walk ── */
+        var bottle  = document.getElementById('medBottle');
+        var wrap    = bottle && bottle.closest('.med-wrap');
+        if (!bottle || !wrap) return;
+
+        var x        = -80;
+        var speed    = 90;          // px / second
+        var lastTime = null;
+
+        function loop(ts) {
+            if (lastTime === null) lastTime = ts;
+            var dt   = Math.min((ts - lastTime) / 1000, 0.05);
+            lastTime = ts;
+            x += speed * dt;
+            if (x > wrap.offsetWidth + 80) x = -80;
+            bottle.style.transform = 'translateX(' + x + 'px)';
+            requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
+
+        /* ── Warning state: watch inventory alerts grid ── */
+        var grid = document.querySelector('[data-alerts-grid]');
+        if (grid) {
+            var obs = new MutationObserver(function () {
+                var html = grid.innerHTML || '';
+                var hasAlert = html.includes('bg-error-container') ||
+                               html.includes('bg-tertiary-fixed')  ||
+                               html.includes('bg-amber-');
+                bottle.classList.toggle('med-bottle--warning', hasAlert);
+            });
+            obs.observe(grid, { childList: true, subtree: true, characterData: true });
+        }
+    })();
+    </script>
 </body>
 
 </html>

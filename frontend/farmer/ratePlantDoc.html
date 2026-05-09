@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PlantDoc | Experience Feedback</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#3e4a3f",
+                        "primary": "#006a39",
+                        "tertiary-container": "#c24d5e",
+                        "surface-container-low": "#f2f4f5",
+                        "tertiary-fixed-dim": "#ffb2b8",
+                        "on-surface": "#191c1d",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#ffdadb",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#bdcabc",
+                        "tertiary": "#a23546",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#c6e4f4",
+                        "primary-container": "#008649",
+                        "on-secondary-fixed-variant": "#2e4b57",
+                        "on-secondary-container": "#4a6774",
+                        "inverse-on-surface": "#eff1f2",
+                        "primary-fixed": "#82faab",
+                        "secondary": "#466270",
+                        "secondary-fixed-dim": "#adcbda",
+                        "on-primary-fixed-variant": "#00522b",
+                        "primary-fixed-dim": "#64dd91",
+                        "on-primary-fixed": "#00210e",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e1e3e4",
+                        "outline": "#6d7a6f",
+                        "surface-tint": "#006d3a",
+                        "secondary-fixed": "#c9e7f7",
+                        "surface-container-high": "#e6e8e9",
+                        "on-tertiary-fixed-variant": "#851f33",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d8dadb",
+                        "surface-bright": "#f8fafb",
+                        "surface": "#f8fafb",
+                        "on-secondary-fixed": "#001f2a",
+                        "on-background": "#191c1d",
+                        "background": "#f8fafb",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-container": "#eceeef",
+                        "on-tertiary-fixed": "#40000f",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary-container": "#f6fff4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#64dd91",
+                        "inverse-surface": "#2e3132"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "display": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at top left, #f6fff4 0%, #ffffff 100%);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant shadow-sm px-6 h-20 flex justify-between items-center max-w-full mx-auto">
+<div class="flex items-center gap-8">
+<a href="/frontend/farmer/farmerdashboard.html" class="flex items-center gap-3">
+<div class="relative">
+<div class="absolute -inset-2 rounded-2xl bg-primary/15 blur-lg"></div>
+<img id="brand-logo" alt="PlantDoc" class="relative w-12 h-12 rounded-2xl object-contain bg-white/70 border border-outline-variant/60 shadow-sm" src="/frontend/logo dark.png"/>
+</div>
+<span id="brand-name" class="text-3xl font-display font-black text-primary tracking-tight drop-shadow-sm">PlantDoc</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-20">
+<!-- Hero Section -->
+<section class="relative hero-gradient py-20 px-6 overflow-hidden">
+<div class="max-w-4xl mx-auto text-center relative z-10">
+<h1 class="text-4xl md:text-5xl font-display font-black text-primary mb-6 tracking-tight">How was your experience with PlantDoc?</h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+                    Your feedback helps us grow. Join thousands of farmers in building a smarter, sustainable future for agriculture.
+                </p>
+</div>
+<!-- Floating Botanical Elements -->
+<div class="absolute top-10 -left-10 opacity-10 rotate-12 scale-150 pointer-events-none">
+<span class="material-symbols-outlined text-primary text-[120px]" style="font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<div class="absolute bottom-10 -right-10 opacity-10 -rotate-12 scale-150 pointer-events-none">
+<span class="material-symbols-outlined text-primary text-[120px]" style="font-variation-settings: 'FILL' 1;">immunology</span>
+</div>
+</section>
+<div class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Main Feedback Form -->
+<div class="lg:col-span-8 space-y-12">
+<!-- Overall Satisfaction -->
+<section class="glass-card rounded-xl p-8 text-center shadow-sm">
+<h3 class="text-xl font-bold text-on-surface mb-6">Overall Satisfaction</h3>
+<div class="flex flex-col items-center gap-4">
+<div id="overall-emoji" class="text-6xl mb-2">🙂</div>
+<div id="overall-stars" class="flex gap-2">
+<button type="button" class="pd-star" data-value="1"><span class="material-symbols-outlined text-4xl text-outline">star</span></button>
+<button type="button" class="pd-star" data-value="2"><span class="material-symbols-outlined text-4xl text-outline">star</span></button>
+<button type="button" class="pd-star" data-value="3"><span class="material-symbols-outlined text-4xl text-outline">star</span></button>
+<button type="button" class="pd-star" data-value="4"><span class="material-symbols-outlined text-4xl text-outline">star</span></button>
+<button type="button" class="pd-star" data-value="5"><span class="material-symbols-outlined text-4xl text-outline">star</span></button>
+</div>
+<p id="overall-hint" class="text-sm font-medium text-on-surface-variant">Tap a star to rate</p>
+</div>
+</section>
+<!-- Experience Categories Grid -->
+<section>
+<h3 class="text-2xl font-bold text-on-surface mb-8">Detailed Performance Ratings</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- AI Card -->
+<div class="glass-card p-6 rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300 group" data-category="ai_diagnosis_accuracy">
+<div class="flex items-start justify-between mb-4">
+<div class="bg-primary-container p-3 rounded-lg text-on-primary-container">
+<span class="material-symbols-outlined">biotech</span>
+</div>
+<div class="flex gap-1 pd-cat-stars"></div>
+</div>
+<h4 class="font-bold text-lg mb-1">AI Diagnosis Accuracy</h4>
+<p class="text-sm text-on-surface-variant">How accurate were our plant health insights?</p>
+</div>
+<!-- Expert Support -->
+<div class="glass-card p-6 rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300 group" data-category="expert_support">
+<div class="flex items-start justify-between mb-4">
+<div class="bg-secondary-container p-3 rounded-lg text-on-secondary-container">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<div class="flex gap-1 pd-cat-stars"></div>
+</div>
+<h4 class="font-bold text-lg mb-1">Expert Support</h4>
+<p class="text-sm text-on-surface-variant">Did our human agronomists help resolve your issues?</p>
+</div>
+<!-- Treatment Effectiveness -->
+<div class="glass-card p-6 rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300 group" data-category="treatment_effectiveness">
+<div class="flex items-start justify-between mb-4">
+<div class="bg-tertiary-fixed p-3 rounded-lg text-on-tertiary-fixed-variant">
+<span class="material-symbols-outlined">healing</span>
+</div>
+<div class="flex gap-1 pd-cat-stars"></div>
+</div>
+<h4 class="font-bold text-lg mb-1">Treatment Effectiveness</h4>
+<p class="text-sm text-on-surface-variant">The success rate of our recommended remedies.</p>
+</div>
+<!-- Speed -->
+<div class="glass-card p-6 rounded-xl border border-outline-variant hover:shadow-md transition-all duration-300 group" data-category="speed_performance">
+<div class="flex items-start justify-between mb-4">
+<div class="bg-surface-container-high p-3 rounded-lg text-on-surface-variant">
+<span class="material-symbols-outlined">speed</span>
+</div>
+<div class="flex gap-1 pd-cat-stars"></div>
+</div>
+<h4 class="font-bold text-lg mb-1">Speed &amp; Performance</h4>
+<p class="text-sm text-on-surface-variant">App responsiveness and diagnosis delivery time.</p>
+</div>
+</div>
+</section>
+<!-- Detailed Feedback Area -->
+<section class="space-y-6">
+<h3 class="text-2xl font-bold text-on-surface">Tell us more about your visit</h3>
+<div id="tag-chips" class="flex flex-wrap gap-3">
+<button type="button" class="pd-chip px-4 py-2 rounded-full border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-200" data-tag="Easy to use">Easy to use</button>
+<button type="button" class="pd-chip px-4 py-2 rounded-full border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-200" data-tag="Fast diagnosis">Fast diagnosis</button>
+<button type="button" class="pd-chip px-4 py-2 rounded-full border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-200" data-tag="Helpful experts">Helpful experts</button>
+<button type="button" class="pd-chip px-4 py-2 rounded-full border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-200" data-tag="Accurate results">Accurate results</button>
+<button type="button" class="pd-chip px-4 py-2 rounded-full border border-outline text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200" data-tag="Slow delivery">Slow delivery</button>
+<button type="button" class="pd-chip px-4 py-2 rounded-full border border-outline text-on-surface-variant font-medium hover:bg-surface-variant transition-all duration-200" data-tag="Needs improvement">Needs improvement</button>
+<button type="button" class="pd-chip px-4 py-2 rounded-full border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-200" data-tag="Friendly interface">Friendly interface</button>
+</div>
+<div class="relative">
+<textarea id="feedback-comment" maxlength="500" class="w-full h-48 glass-card rounded-xl border border-outline-variant p-6 focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-on-surface placeholder:text-outline" placeholder="Share your thoughts or suggestions here..."></textarea>
+<div id="comment-counter" class="absolute bottom-4 right-4 text-xs font-medium text-outline">0 / 500</div>
+</div>
+</section>
+<!-- Impact Question -->
+<section class="glass-card p-8 rounded-xl border border-outline-variant">
+<h3 class="text-lg font-bold text-on-surface mb-6">Did PlantDoc help improve your crop health?</h3>
+<div class="flex flex-col md:flex-row gap-4">
+<button type="button" class="pd-impact flex-1 py-3 px-6 rounded-lg bg-surface-container-high text-on-surface-variant font-bold transition-all hover:bg-surface-container-highest active:scale-[0.98]" data-impact="significantly">Yes, significantly</button>
+<button type="button" class="pd-impact flex-1 py-3 px-6 rounded-lg bg-surface-container-high text-on-surface-variant font-bold transition-all hover:bg-surface-container-highest active:scale-[0.98]" data-impact="a_little">A little</button>
+<button type="button" class="pd-impact flex-1 py-3 px-6 rounded-lg bg-surface-container-high text-on-surface-variant font-bold transition-all hover:bg-surface-container-highest active:scale-[0.98]" data-impact="not_really">Not really</button>
+</div>
+</section>
+<!-- Submit Button -->
+<div class="flex justify-center pt-8">
+<div class="flex items-center gap-3">
+<button id="submit-feedback" type="button" class="group relative inline-flex items-center justify-center px-10 py-4 font-bold text-white transition-all duration-300 bg-primary-container rounded-xl hover:bg-primary focus:outline-none shadow-xl shadow-primary-container/20 overflow-hidden">
+<span class="relative z-10">Submit Feedback</span>
+<div class="absolute inset-0 bg-gradient-to-r from-primary to-primary-container opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</button>
+<img src="/frontend/farmer/hand.png" alt="Plant care" class="w-12 h-12 object-contain drop-shadow-sm select-none pointer-events-none" />
+</div>
+</div>
+</div>
+<!-- Trust Sidebar -->
+<aside class="lg:col-span-4 space-y-6">
+<div class="glass-card p-8 rounded-xl border border-outline-variant sticky top-24 relative z-20 bg-white/80">
+<h3 class="text-xl font-bold text-on-surface mb-6">Community Impact</h3>
+<div class="space-y-8">
+<div class="flex items-center gap-4">
+<div class="bg-primary-fixed p-3 rounded-full text-on-primary-fixed">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div>
+<div class="text-2xl font-black text-primary">4.8/5</div>
+<div class="text-sm font-medium text-on-surface-variant">Average Satisfaction</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-secondary-fixed p-3 rounded-full text-on-secondary-fixed">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">groups</span>
+</div>
+<div>
+<div class="text-2xl font-black text-primary">15k+</div>
+<div class="text-sm font-medium text-on-surface-variant">Farmer Reviews</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-tertiary-fixed p-3 rounded-full text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">volunteer_activism</span>
+</div>
+<div>
+<div class="text-2xl font-black text-primary">94%</div>
+<div class="text-sm font-medium text-on-surface-variant">Crop Recovery Rate</div>
+</div>
+</div>
+</div>
+<div class="mt-12 p-6 rounded-xl bg-primary-container/10 border border-primary-container/20">
+<p class="text-sm italic text-on-surface-variant leading-relaxed">
+                            "PlantDoc saved my entire potato harvest this season. The AI diagnosis was spot on within seconds."
+                        </p>
+<div class="mt-4 flex items-center gap-3">
+<img alt="Featured Reviewer" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXtfkifVY7c9E798ifB4FU9FR7hlmdYuMEsGS85HfOArf4D50_MQvQOnmP9FP2CfNe_FsvF0uPAuLIXHYg_HHWULXC3JwPVyTG_GZ0Kj_RYk1fH0UV9ly_QE-C2qnLf5WSgkUYBWQymtWFWYQ656t0IwJY-Ci0wJCZP3tcY-dgYJSDKy9bEiRVjkP9PCpwurdbgrTwF5CQ3Qvzi1jDeruQcJOTQNR0XU0dYF7Csd3w78zuTiK1QvK4dcyfHtVTzCD3zGqw6nRqwAs"/>
+<span class="text-xs font-bold text-primary">Thomas R., Organic Farmer</span>
+</div>
+</div>
+</div>
+<!-- Supporting Visual Card -->
+<div class="relative rounded-xl overflow-hidden h-64 group z-0">
+<img alt="Healthy green plants" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A macro close-up of vibrant, dew-covered green leaves in a lush garden during the golden hour. The soft morning sunlight creates a warm, hopeful atmosphere with beautiful bokeh in the background. The scene is clean and high-definition, reflecting the growth and health themes of a sustainable agrotech platform. The color palette emphasizes fresh forest greens and soft sunny yellows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFWpfTD4xP7X1LYoIdZstsC_E0zImdI8BLu-xDMB82TQS_btWCKlXR3_77a_n0goEx2NozI2OXE9uja6YqS2i9QxHLmrdErADKJa7KUhvI0grKpFZ9SjsECT0xESA4dAn9bucl6VCby5lAncLFUzkHL6G_H-pSC6hMqSKLttV0ihhGmULZQdL2zOzMfhw55XFIggCvZhy1dJvrC3lYJxodhE2snUaqAtYKWx7lKy_wQE4Kjg_d5mQv5V77kWe_utiyIlKu6gcBnic"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+<p class="text-white font-bold text-lg">Growing Together Since 2026</p>
+</div>
+</div>
+</aside>
+</div>
+</main>
+
+
+
+
+
+<script src="../api.js"></script>
+<script src="./ratePlantDoc.js"></script>
+<script>
+  // Make this page farmer-only.
+  try { requireAuth('farmer'); } catch (_) { /* no-op */ }
+
+  // Dynamic brand name + logo.
+  try {
+    const brand = getBrandMeta?.();
+    if (brand?.name) {
+      const nameEl = document.getElementById('brand-name');
+      if (nameEl) nameEl.textContent = brand.name;
+    }
+    const logoEl = document.getElementById('brand-logo');
+    if (logoEl && (brand?.logoDark || brand?.logoLight)) {
+      logoEl.src = brand.logoDark || brand.logoLight;
+      logoEl.alt = brand.name || 'PlantDoc';
+    }
+  } catch (_) {}
+</script>
+</body></html>

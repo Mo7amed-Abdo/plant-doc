@@ -2,8 +2,32 @@
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('delivery')) return;
   populateSidebarUser(); setupLogout();
-  await Promise.all([loadStats(), loadRecentDeliveries(), loadRecentAlerts()]);
+  await Promise.all([
+    loadStats(),
+    loadRecentDeliveries(),
+    loadRecentAlerts(),
+    refreshDeliveryBellBadge(),
+  ]);
 });
+
+async function refreshDeliveryBellBadge() {
+  const badge = document.querySelector('[data-delivery-notif-bell-badge]');
+  if (!badge) return;
+
+  try {
+    const res = await api.get('/delivery/notifications?is_read=false&limit=1');
+    const total = Number(res?.meta?.total ?? 0);
+
+    if (total > 0) {
+      badge.textContent = total > 99 ? '99+' : String(total);
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  } catch (e) {
+    badge.classList.add('hidden');
+  }
+}
 
 async function loadStats() {
   try {

@@ -42,11 +42,12 @@ async function loadListings(resetPage = false) {
   if (!grid) { console.warn('[products] [data-product-grid] not found'); return; }
 
   grid.innerHTML = Array(PAGE_SIZE).fill(0).map(() => `
-    <div class="bg-surface-container-lowest rounded-[16px] border border-surface-variant
-                shadow-sm p-5 animate-pulse">
-      <div class="w-full h-32 rounded-xl bg-surface-container mb-4"></div>
-      <div class="h-4 bg-surface-container rounded w-3/4 mb-2"></div>
-      <div class="h-3 bg-surface-container rounded w-1/2"></div>
+    <div class="bg-surface-container-lowest/80 backdrop-blur-xl rounded-[20px]
+                border border-surface-variant/80 ring-1 ring-green-500/5
+                shadow-sm p-5 animate-pulse overflow-hidden">
+      <div class="w-full h-36 rounded-2xl bg-gradient-to-br from-surface-container to-surface-variant/60 mb-4"></div>
+      <div class="h-4 bg-surface-container rounded-full w-3/4 mb-2"></div>
+      <div class="h-3 bg-surface-container rounded-full w-1/2"></div>
     </div>`).join('');
 
   try {
@@ -135,25 +136,30 @@ function productCard(listing) {
   };
 
   const activeBadge = listing.is_active
-    ? '<span class="text-xs font-semibold text-primary bg-primary-fixed/30 px-2 py-0.5 rounded-full">Active</span>'
-    : '<span class="text-xs font-semibold text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded-full">Paused</span>';
+    ? '<span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary px-2.5 py-1 rounded-full bg-primary-fixed/30 border border-primary-fixed/30 shadow-sm">Active</span>'
+    : '<span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-on-surface-variant px-2.5 py-1 rounded-full bg-surface-variant/80 border border-outline-variant/60">Paused</span>';
 
   return `
-    <div class="bg-surface-container-lowest rounded-[16px] border border-surface-variant
-                shadow-sm hover:shadow-md transition-all flex flex-col group overflow-hidden">
-      <div class="relative h-36 bg-surface-container flex items-center justify-center overflow-hidden shrink-0">
+    <div class="bg-surface-container-lowest/85 backdrop-blur-xl rounded-[20px]
+                border border-surface-variant/80 ring-1 ring-green-500/5
+                shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300
+                flex flex-col group overflow-hidden">
+      <div class="relative h-36 bg-gradient-to-br from-surface-container-lowest via-surface-container to-surface-variant/60
+                  flex items-center justify-center overflow-hidden shrink-0">
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                    bg-gradient-to-tr from-primary/0 via-primary/0 to-primary/10"></div>
         ${imageMarkup}
         <span class="absolute top-3 right-3 w-2.5 h-2.5 rounded-full ${stockMeta.dot}
-                     ring-2 ring-surface-container-lowest"></span>
+                     ring-2 ring-surface-container-lowest shadow-sm"></span>
       </div>
 
       <div class="p-4 flex flex-col flex-1 gap-3">
-        <div class="flex items-start justify-between gap-2">
+        <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
-            <h3 class="font-bold text-on-surface text-sm leading-tight truncate">
+            <h3 class="font-semibold text-on-surface text-sm leading-snug truncate">
               ${_esc(product.name || 'Unnamed Product')}
             </h3>
-            <p class="text-xs text-on-surface-variant capitalize mt-0.5">
+            <p class="text-xs text-on-surface-variant/80 capitalize mt-0.5">
               ${_esc(product.category || '-')}
             </p>
           </div>
@@ -161,28 +167,33 @@ function productCard(listing) {
         </div>
 
         <div class="flex items-center justify-between">
-          <span class="text-xl font-bold text-on-surface">$${(listing.price || 0).toFixed(2)}</span>
-          <span class="text-sm text-on-surface-variant">${listing.stock_quantity} ${product.unit ? _esc(product.unit) : 'units'}</span>
+          <span class="text-[22px] font-extrabold tracking-tight text-on-surface">$${(listing.price || 0).toFixed(2)}</span>
+          <span class="text-xs font-medium text-on-surface-variant/80">${listing.stock_quantity} ${product.unit ? _esc(product.unit) : 'units'}</span>
         </div>
 
-        <span class="inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full
-                     text-xs font-semibold ${stockMeta.cls}">
+        <span class="inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full
+                     text-xs font-semibold border border-outline-variant/50 ${stockMeta.cls}">
+          <span class="w-1.5 h-1.5 rounded-full ${stockMeta.dot}"></span>
           ${stockMeta.label}
         </span>
 
-        <div class="flex gap-2 mt-auto pt-1">
+        <div class="flex gap-2 mt-auto pt-2">
           <button data-edit-listing="${listing._id}"
                   data-listing-price="${listing.price}"
                   data-listing-stock="${listing.stock_quantity}"
-                  class="flex-1 py-2 border border-outline-variant rounded-xl text-xs font-semibold
-                         text-on-surface hover:bg-surface-container flex items-center justify-center
-                         gap-1 transition-colors active:scale-[0.97]">
+                  class="flex-1 py-2.5 border border-outline-variant/70 rounded-xl text-xs font-semibold
+                         text-on-surface bg-surface-container-lowest/60 hover:bg-surface-container
+                         flex items-center justify-center gap-1.5
+                         transition-all duration-200 active:scale-[0.97]
+                         focus:outline-none focus:ring-2 focus:ring-primary/25">
             <span class="material-symbols-outlined text-[14px]">edit</span>Edit
           </button>
           <button data-toggle-listing="${listing._id}" data-active="${listing.is_active}"
-                  class="flex-1 py-2 border border-outline-variant rounded-xl text-xs font-semibold
-                         ${listing.is_active ? 'text-error hover:bg-error-container' : 'text-primary hover:bg-primary-fixed/20'}
-                         flex items-center justify-center gap-1 transition-colors active:scale-[0.97]">
+                  class="flex-1 py-2.5 border border-outline-variant/70 rounded-xl text-xs font-semibold
+                         ${listing.is_active ? 'text-error bg-error-container/40 hover:bg-error-container/60' : 'text-primary bg-primary-fixed/20 hover:bg-primary-fixed/30'}
+                         flex items-center justify-center gap-1.5
+                         transition-all duration-200 active:scale-[0.97]
+                         focus:outline-none focus:ring-2 focus:ring-primary/25">
             <span class="material-symbols-outlined text-[14px]">${listing.is_active ? 'pause' : 'play_arrow'}</span>
             ${listing.is_active ? 'Pause' : 'Resume'}
           </button>

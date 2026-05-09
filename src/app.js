@@ -81,6 +81,7 @@ app.use('/api/cart',               require('./routes/cart.routes'));
 app.use('/api/orders',             require('./routes/order.routes'));
 app.use('/api/notifications',      require('./routes/notification.routes'));
 app.use('/api/delivery',           require('./routes/delivery.company.routes'));
+app.use('/api/feedback',           require('./routes/feedback.routes'));
 
 // Ratings are nested under orders: /api/orders/:id/ratings
 app.use('/api/orders/:id/ratings', require('./routes/rating.routes'));

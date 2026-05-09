@@ -26,7 +26,7 @@ async function loadPendingCases() {
   const grid = document.querySelector('[data-cases-grid]');
   if (!grid) return;
 
-  grid.innerHTML = skeletonCards(6);
+  grid.innerHTML = pendingCaseSkeleton(6);
 
   try {
     const params = new URLSearchParams({
@@ -93,39 +93,66 @@ function renderCases() {
   }
 }
 
+function pendingCaseSkeleton(count) {
+  return Array(count).fill(`
+    <article class="pc-card pc-card--pending bg-surface-container-lowest/85 backdrop-blur-xl rounded-[22px]
+                     border border-surface-variant/80 ring-1 ring-green-500/5 shadow-sm overflow-hidden flex flex-col">
+      <div class="relative h-52 pc-image bg-surface-container">
+        <div class="absolute inset-0 pc-skeleton"></div>
+      </div>
+      <div class="p-5 flex-1 flex flex-col gap-4">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <div class="h-4 rounded-full bg-surface-container pc-skeleton w-3/4 mb-2"></div>
+            <div class="h-3 rounded-full bg-surface-container pc-skeleton w-1/2"></div>
+          </div>
+          <div class="h-7 w-20 rounded-full bg-surface-container pc-skeleton"></div>
+        </div>
+        <div class="h-10 rounded-2xl bg-surface-container pc-skeleton"></div>
+        <div class="mt-auto flex gap-2 pt-2">
+          <div class="flex-1 h-11 rounded-xl bg-surface-container pc-skeleton"></div>
+          <div class="flex-1 h-11 rounded-xl bg-surface-container pc-skeleton"></div>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
 function caseCard(caseItem) {
-  return `<article class="bg-surface-container-lowest rounded-[18px] border border-surface-variant shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all">
-    <div class="relative h-52 bg-surface-container">
+  return `<article class="pc-card pc-card--pending bg-surface-container-lowest/85 backdrop-blur-xl rounded-[22px]
+                     border border-surface-variant/80 ring-1 ring-green-500/5 shadow-sm
+                     overflow-hidden flex flex-col">
+    <div class="pc-image relative h-52 bg-surface-container overflow-hidden">
       ${renderCaseImage(caseItem)}
-      <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 via-black/10 to-transparent">
+      <div class="absolute inset-x-0 bottom-0 p-4 relative z-10">
         <div class="flex items-end justify-between gap-3">
           <div>
             <p class="text-white/80 text-xs uppercase tracking-[0.18em] font-semibold">${escapeHtml(caseItem.cropType || 'Unknown crop')}</p>
-            <h3 class="text-white font-bold text-lg">${escapeHtml(caseItem.diseaseName || 'Unknown disease')}</h3>
+            <h3 class="text-white font-bold text-lg leading-snug">${escapeHtml(caseItem.diseaseName || 'Unknown disease')}</h3>
           </div>
           ${severityBadge(caseItem.severity)}
         </div>
       </div>
     </div>
     <div class="p-5 flex-1 flex flex-col gap-4">
-      <div class="flex items-center justify-between gap-3">
+      <div class="flex items-start justify-between gap-4">
         <div>
-          <p class="text-sm text-on-surface-variant">${escapeHtml(caseItem.location || 'Unknown location')}</p>
-          <p class="text-sm text-on-surface-variant">Submitted ${timeAgo(caseItem.createdAt)}</p>
+          <p class="text-sm font-medium text-on-surface">${escapeHtml(caseItem.location || 'Unknown location')}</p>
+          <p class="text-xs text-on-surface-variant mt-0.5">Submitted ${timeAgo(caseItem.createdAt)}</p>
         </div>
-        <div class="flex flex-col items-end gap-1">
+        <div class="flex flex-col items-end gap-1.5 pc-chip-row">
           ${priorityBadge(caseItem.priority)}
           <span class="text-xs text-on-surface-variant font-medium">${Number(caseItem.confidence || 0).toFixed(0)}% confidence</span>
         </div>
       </div>
-      ${caseItem.symptoms?.length ? `<div class="flex flex-wrap gap-1.5">${caseItem.symptoms.slice(0, 3).map((symptom) => `<span class="text-xs px-2 py-1 bg-surface-container rounded-full text-on-surface-variant">${escapeHtml(symptom)}</span>`).join('')}</div>` : ''}
-      ${caseItem.farmerMessage ? `<p class="text-sm text-on-surface-variant bg-surface-container rounded-xl p-3 italic">"${escapeHtml(caseItem.farmerMessage)}"</p>` : ''}
-      <div class="mt-auto flex gap-2">
-        <button data-view-case="${caseItem.id}" class="flex-1 py-2.5 border border-outline-variant rounded-xl text-sm font-medium text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-1">
+      ${caseItem.symptoms?.length ? `<div class="flex flex-wrap gap-2">${caseItem.symptoms.slice(0, 3).map((symptom) => `<span class="text-xs px-2.5 py-1.5 bg-surface-container/70 border border-outline-variant/50 rounded-full text-on-surface-variant font-medium">${escapeHtml(symptom)}</span>`).join('')}</div>` : ''}
+      ${caseItem.farmerMessage ? `<p class="text-sm text-on-surface-variant bg-surface-container/70 border border-outline-variant/40 rounded-2xl p-3 italic">"${escapeHtml(caseItem.farmerMessage)}"</p>` : ''}
+      <div class="mt-auto flex gap-2 pt-1">
+        <button data-view-case="${caseItem.id}" class="pc-btn flex-1 py-2.5 border border-outline-variant/70 rounded-xl text-sm font-semibold text-on-surface bg-surface-container-lowest/60 hover:bg-surface-container transition-colors flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-primary/25">
           <span class="material-symbols-outlined text-[16px]">visibility</span>
           Details
         </button>
-        <button data-assign="${caseItem.id}" class="flex-1 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-1 active:scale-[0.98]">
+        <button data-assign="${caseItem.id}" class="pc-btn flex-1 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:translate-y-[-1px] hover:shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/25">
           <span class="material-symbols-outlined text-[16px]">assignment_ind</span>
           Pick Up Case
         </button>
@@ -143,7 +170,7 @@ function renderCaseImage(caseItem) {
     </div>`;
   }
 
-  return `<img src="${caseItem.imageUrl}" alt="${escapeHtml(caseItem.cropType || 'Plant case')}" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+  return `<img src="${caseItem.imageUrl}" alt="${escapeHtml(caseItem.cropType || 'Plant case')}" class="w-full h-full object-cover pc-img-zoom" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
     <div class="hidden absolute inset-0 items-center justify-center text-on-surface-variant">
       <div class="w-20 h-20 rounded-3xl bg-surface-container-high flex items-center justify-center">
         <span class="material-symbols-outlined text-4xl">image</span>

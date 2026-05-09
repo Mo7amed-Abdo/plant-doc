@@ -17,6 +17,14 @@ router.post('/register', uploadOptional('avatar'), authController.register);
  */
 router.post('/login', authController.login);
 
+// Password reset (dev: returns code in response)
+router.post('/password-reset/request', authController.passwordResetRequest);
+router.post('/password-reset/confirm', authController.passwordResetConfirm);
+
+// Google Sign-In
+router.post('/google', authController.google);
+router.get('/google/client-id', authController.googleClientId);
+
 /**
  * POST /api/auth/change-password
  * Authenticated — all roles.
