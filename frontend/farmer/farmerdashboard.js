@@ -65,7 +65,7 @@ function enableGuestLockdown() {
 
   document.querySelectorAll('a[href$=\".html\"]').forEach((a) => {
     const href = (a.getAttribute('href') || '').toLowerCase();
-    if (href.includes('login.html') || href.includes('register.html') || href.includes('landing.html')) return;
+    if (href.includes('login.html') || href.includes('register.html') || href.includes('index.html')) return;
     a.addEventListener('click', block);
     a.classList.add('opacity-80');
   });

@@ -89,8 +89,8 @@ app.use('/api/orders/:id/ratings', require('./routes/rating.routes'));
 // ─── Frontend Static Files ───────────────────────────────────────────────────
 app.use('/frontend', express.static(path.join(__dirname, '..', 'frontend')));
 
-// Redirect root to login
-app.get('/', (req, res) => res.redirect('/frontend/landing.html'));
+// Redirect root to frontend entrypoint
+app.get('/', (req, res) => res.redirect('/frontend/index.html'));
 app.get('/expert/profile', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertProfile.html')));
 app.get('/expert/dashboard', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertDashboard.html')));
 app.get('/expert/pending-cases', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'expert', 'expertPendingcases.html')));
